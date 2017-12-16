@@ -1,0 +1,37 @@
+Edit the Makefile to set the installation directory/ies and type
+
+	make 
+
+(or make install) to perform the installation. It is assumed that the
+X11 script mkdirhier is in your search path.
+
+The MenuButton class (used by FileNominator) makes use of a standard
+X11 bitmap, menu10, from <root of X tree>/include/X11/bitmaps.
+Possible default locations are /usr/include/X11/bitmaps and
+/usr/local/X11/include/X11/bitmaps. If these are not appropriate for
+your system then modify the "option add" statement at the bottom of
+MenuButton.tcl. The bitmap is included in the demo directory so that
+wigwam.tcl demo can run even if menu10 is missing from your system.
+
+The software can be tried out prior to installation by adding the lib
+subdirectory to auto_path in itcl_wish and entering some of the
+examples from the man page in the man subdirectory. Alternatively, cd
+to the demo directory and try out the scripts there.
+
+If you want wigwam to support widgets from other libraries, e.g. BLT,
+all that should be necessary is to create files in lib (or other
+directory that will be added to auto_load path) that are similar to
+itcl_button.tcl and run itcl_mkindex in the directory, e.g. for
+blt_barchart,
+
+    # kludge to fool itcl_mkindex \
+    itcl_class itcl_blt_barchart
+    
+    ItclClassFromWidget blt_barchart
+
+
+Jim
+---
+J.K.Wight@newcastle.ac.uk
+Department of Computing Science, University of Newcastle,  Tel: +44 91 222 8238
+Newcastle upon Tyne, NE1 7RU, United Kingdom.              Fax: +44 91 222 8232

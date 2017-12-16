@@ -1,0 +1,215 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: ButtonsBox.itcl,v 1.1.5.1 1994/06/05 17:30:55 mark Exp $
+#
+# itcl_class: ButtonsBox
+#---------------------------------------------------------------
+# Description : Box with buttons :-) 
+#	Should be used in all dialog-style shells
+#
+# TCL/TK extensions required: itcl 
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-buttons ....... list of buttons descriptions
+#                    ... Each element is {name label action unmap-flag}
+#	-default ....... number of default button
+#
+# METHODS:
+#	none
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : 10 Mar, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:30:55 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget 
+
+itcl_class ButtonsBox {
+    inherit Widget
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new ButtonsBox
+    #---------------------------------------------------------------
+    constructor {config} {
+	Widget::constructor frame \
+	    -relief groove  -border 2 
+	
+	#bind [winfo parent $this] <Enter> "+focus $this"
+	bind $this <Enter> "+focus $this"
+
+	_create_buttons
+	::pack $this -side bottom -fill x -ipadx 3 -ipady 3
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _create_buttons - creates buttons according to list
+    #				sets bindings
+    #---------------------------------------------------------------
+    method _create_buttons {} {
+        set max_position [llength $buttons]
+	foreach b $buttons {
+	    set name    [lindex $b 0]
+	    set label   [lindex $b 1]
+	    set action  [lindex $b 2]
+	    set destroy_flag  [lindex $b 3]
+	    set side [lindex $b 4]
+	    if { "$side" == "" } { set side left}
+	    
+	    # Each button is encapsulated in frame, and the frame makes
+	    # visual cue about the active button
+	    frame $this.$name -relief flat -border 2
+	    
+	    # Actually padding should be calculated in constructor from
+	    # parent size and buttons length, butr for now ...
+	    ::pack $this.$name -side $side -padx 10 -pady 3 -ipadx 3 -ipady 2
+	    
+	    button $this.$name.button \
+		-text "$label" \
+		-command "$this _run_action \{$action\} $this.$name.button $destroy_flag" 
+	    ::pack $this.$name.button -side top \
+		-expand yes -pady 3 -padx 3 -ipadx 2 -ipady 2
+	}
+
+	_fix_current 
+	_bind [winfo parent $this]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _run_action - start action from the given button
+    # 	should be method not proc, because eval may use members
+    #---------------------------------------------------------------
+    method _run_action {action widget destroy_flag} {
+	if { "$action" != "" } {
+	    eval $action $this $widget
+	}
+	if {$destroy_flag} {
+	    destroy [winfo toplevel $this]
+	}
+    }
+    
+    #------------------------------------------------------------------------
+    # METHOD: _fix_current - sets all variables to conform to current_position
+    #-------------------------------------------------------------------------
+    method _fix_current {} {
+	set current_name   [lindex [lindex $buttons $current_position] 0]
+	set current_frame  $this.$current_name
+	set current_button $current_frame.button
+	$current_frame     config -relief sunken
+    }
+    
+    #------------------------------------------------------------------------
+    # METHOD: _change_current_button - forwards current button number
+    #-------------------------------------------------------------------------
+    method _change_current_button { {step 1} } {
+	set new [expr $current_position + $step ]
+	if {$new>=$max_position} { 
+	    set new 0 
+	}
+	if {$new < 0 } { 
+	    set new [expr $max_position-1] 
+	}
+	
+	$current_frame   config -relief flat
+	set current_position $new
+	_fix_current
+    }
+
+    #------------------------------------------------------------------------
+    # METHOD: _activate_current_button - shows "button activated" and invokes 
+    #					 action
+    #-------------------------------------------------------------------------
+    method _activate_current_button {} {
+	set _button $current_button
+	$_button activate
+	update idletasks
+	after $delay_invoke "\
+		$_button deactivate;\
+		update idletasks;\
+		$_button invoke"
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _bind - walk a widget tree (from $root) and set binding
+    #---------------------------------------------------------------
+    method _bind {root} {
+	_bind_widget $root 
+	foreach i [winfo children $root] {
+	    if { [winfo class $i] != "Toplevel" } {
+		_bind $i
+	    }
+	}
+    }
+
+    #-----------------------------------------------------------------
+    # METHOD: _bind_widget - set arrows bindings for the given widget
+    #-----------------------------------------------------------------
+    method _bind_widget {w} {
+	bind $w <Return> "$this _activate_current_button"
+	bind $w <Right>  "$this _change_current_button  1"
+	bind $w <Left>   "$this _change_current_button -1"
+    }
+    
+
+    #---------------------------------------------------------------
+    # PROC: binfo - prints button info beeing invoked from a button
+    # 	Used for debug purposes, may be included in "-buttons" table
+    #---------------------------------------------------------------
+    proc binfo { t w }  {puts "[$t info class]::$t , button $w"}
+
+    #
+    # PUBLIC DATA
+    #
+    public buttons { 
+	{dismiss Dismiss "" 1} 
+    }
+
+    public default 0 {
+	set current_position $default
+	if {[exists]} {
+	    _fix_current
+	}
+    }
+
+    #
+    # COMMON DATA
+    #	delay_invoke ....... delay (in uSec) after visual "button activated"
+    #			     cue and real invocation
+    # 
+    common delay_invoke 100
+
+    #
+    # PROTECTED DATA
+    #	max_position .............. actually number_of_buttons-1
+    #	current_position .......... position of the recently active button
+    #	current_name .............. frame name of the recently active button
+    #	current_button ............ widget name of the recently active button
+    #
+    protected max_position 0
+    protected current_position 0
+    protected current_name
+    protected current_frame
+    protected current_button
+}
+
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: ButtonsBox.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:30:55  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:30:54  mark
+# Initial revision
+#
+#
+#

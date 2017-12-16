@@ -1,0 +1,34 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: DataEntry.test,v 1.1.5.1 1994/06/05 17:34:54 mark Exp $
+#
+# DataEntry.test
+#--------------------------------------------------------------
+# Description: Test for DataEntry
+#--------------------------------------------------------------
+#
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+    catch {source ../Gray14.tcl}
+}
+
+label .l1 -text "Following is a label Data Entry, without filling:" \
+    -bg white -bd 3 -relief groove
+pack .l1  -fill x
+DataEntry .a -label LabelEntry
+pack .a 
+
+label .l2 -text "Following is a command Data Entry, with x filling" \
+    -bg white -bd 3 -relief groove
+pack .l2 -fill x 
+DataEntry .b -command puts  -label CommandEntry 
+pack .b -fill x -expand yes
+
+label .l3 -text "Following is a list Data Entry, both fill, fraction=0.2" \
+    -bg white -bd 3 -relief groove
+pack .l3 -fill x 
+DataEntry .c -fraction 0.2
+pack .c -fill both -expand yes
+
+wm maxsize . 700 700
+ButtonsBox .but

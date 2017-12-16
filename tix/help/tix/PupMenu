@@ -1,0 +1,53 @@
+NAME
+       tixCreatePopupMenu  -  Convenience function for creating a
+       popup menu in TK.
+
+SYNOPSIS
+       tixCreatePopupMenu pathName title mkmenu_proc?
+
+       tixPupBindParents pathName parent1 parent2 ...
+
+DESCRIPTION
+       tixCreatePopupMenu creates a popup menu  in  TK.  You  can
+       bind  this  popup  menu to other windows using the command
+       tixPupBindParents.  When the right mouse button is pressed
+       down in these windows, the popup menu will be poped up.
+
+       The argument pathName specifies the name popup menu.
+
+       The  argument title specifies the title of the popup menu.
+
+       The argument mkmenu_proc specifies a commands that creates
+       the  menu  hierachy of the popup menu. It should be in the
+       form:
+
+       proc MkMenu_Proc {w} {...}
+
+       The argemtnu w in MkMenu_Proc specifies the  name  of  the
+       root menu shell in the menu hierachy. All sub-menus in the
+       popup menu must be descendants  of  this  menu  shell.  An
+       example of MkMenu_Proc:
+
+       proc MkMenu_Proc {w} {
+           menu $w
+           $w add command -label Shell
+           $w add command -label Calculator
+           $w add command -label XTerm
+           $w add command -label "Manual Pages"
+           $w add command -label "Release Notes"
+
+       }
+
+       The  arguments parent1 parent2 ... for the command tixPup-
+       BindParents specifies the windows to be bound to the popup
+       menu.
+
+FILES
+       The file /usr/local/tcl/Tix3.6/demos/popup.tcl demostrates
+       the use of popup menus.
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       Popup menu, TIX

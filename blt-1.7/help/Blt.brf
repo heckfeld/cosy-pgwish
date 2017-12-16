@@ -1,0 +1,14 @@
+blt/control/bell	ring the bell
+blt/control/bgexec	Run Unix commands in the background
+blt/control/bitmap	Define bitmap from data
+blt/control/busy	Block pointer and keyboard events from a window sub-tree
+blt/control/cutbuffer	manipulate X cut buffer properties
+blt/control/debug	print Tcl commands before execution
+blt/control/dragdrop	facilities for handling drag&drop data transfers
+blt/control/win	Perform assorted window operations
+blt/intro/overview	Introduction to the BLT library
+blt/widgets/barchart	Create and manipulate barchart widgets
+blt/widgets/graph	Create and manipulate graph widgets
+blt/widgets/htext	Create and manipulate hypertext widgets
+blt/widgets/table	Geometry manager that arranges windows in a table
+blt/widgets/watch	call Tcl procedures before and after each command

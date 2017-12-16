@@ -1,0 +1,11 @@
+Better handling of binary data.  Possibilities:
+  o Buffer command to hold the data
+  o vprintf style command for parsing the data.
+Better C langauge API
+Change dp_RPC semantics to correctly handled multiple RPC's on
+  the same socket.
+     Case 1) A RPC B; B RPC A; A RPC B
+     Case 2) A RPC B; B RDO A; A RPC B
+  In case 1, the order of replies on the socekt is fixed (a stack will
+  work).  In case 2, the order is unpredictable.  So we need sequence
+  numbers on the RPCs.

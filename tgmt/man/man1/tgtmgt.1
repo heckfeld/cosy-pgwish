@@ -1,0 +1,93 @@
+'\" te
+.TH tgtmgt "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgtmgt
+\- auf Anfrage
+wird eine physikalische Adresse zu einem logischen Namen oder der zu einer Majornummer geh\(:orende Treibername bestimmt
+.sp
+.SH SYNOPSIS
+.br
+.B tgtmgt Parameter
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgtmgt 
+bearbeitet als 
+.I Parameter 
+zum einen 
+den logischen Namen eines Ger\(:ates in der Form 'Gruppe.Ger\(:at.Parameter'.
+.br
+Falls dieses Ger\(:at in der Datenbank
+.B $TMDB/$Gruppe
+enthalten ist, wird die darin enthaltene zugeh\(:orige physikalische Adresse zur\(:uckgegeben.
+.br
+In der Adresse sind folgende Informationen enthalten :
+.br
+.in 8
+- die Nodeadresse der Karte
+.br
+- die Majornumber
+.br
+- das FBi
+.br
+- die Stationsnummer
+.br
+- die Baseadresse im PDV-Crate
+.br
+- die Subadresse
+.br
+- die Maske
+.br
+- der Treibername
+.br
+.in 5
+Die einzelnen Adre\[ss]komponenten sind durch Punkte voneinander getrennt.
+.sp
+Wird als 
+.I Parameter
+eine Zahl \(:ubergeben, wird diese als Majornummer interpretiert 
+und der zugeh\(:orige Treibername wird ausgegeben.
+.sp
+Die Ausgabe erfolgt auf den Stdoutput.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbanken m\(:ussen sich in dem Directory
+.B $TMDB
+befinden.
+Ist die Variable TMDB nicht initialisiert, wird sie auf $PWD gesetzt.
+.sp
+.SH R\(:UCKGABEWERT
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH FEHLER
+.sp
+- der logische Ger\(:atename ist nicht in der Datenbank enthalten
+.br
+- die Majornummer existiert nicht
+.br
+- Fehler beim Zugriff auf die Datenbank
+.sp
+.SH SIEHE AUCH
+.sp
+.SH WARNUNGEN 
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.          
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1192

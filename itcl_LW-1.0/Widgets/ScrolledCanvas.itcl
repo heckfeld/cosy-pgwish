@@ -1,0 +1,193 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: ScrolledCanvas.itcl,v 1.1.5.1 1994/06/05 17:32:19 mark Exp $
+#
+# itcl_class: ScrolledCanvas
+#---------------------------------------------------------------
+# Description: Canvas with scroll bars
+#	Changes scrollregion in canvas for each window configure
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	none
+#
+# METHODS:
+#	get_canvas ...... returns internal canvas widget
+#	enclosed ........ (virtual) action for rubber banding
+#	adjust .......... adjusts canvases to current window size
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 30, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:32:19 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget
+
+itcl_class ScrolledCanvas {
+    inherit Widget
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new ScrolledCanvas
+    #---------------------------------------------------------------
+    constructor {config } {
+ 	Widget::constructor frame -bd 2 -relief groove 
+
+ 	set c $this.c
+	set sy $this.yscroll
+	set fr $this.fr
+	set sx   $fr.xscroll
+	set rect $fr.rect
+
+	frame $fr   -relief flat -bd 0
+	frame $rect -relief flat -bd 0
+	canvas $c -border 2 -yscroll "$sy set" -xscroll "$sx set" 
+
+ 	scrollbar $sy -relief sunken -command "$c yview"
+ 	scrollbar $sx -relief sunken -command "$c xview" -orient horizontal
+	
+	$rect configure \
+	    -height [lindex [$sx configure -width] 4] \
+	    -width  [expr [lindex [$sx conf -width] 4] + 2 ]
+	_set_binding
+	
+	$c yview 0
+	$c xview 0
+
+	_pack_them
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: get_canvas - returns internal canvas widget
+    #---------------------------------------------------------------
+    method get_canvas {} {
+	return $c
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _pack_them - packs items
+    #---------------------------------------------------------------
+    method _pack_them { } {
+	::pack forget $sx $rect $fr $sy $c
+	::pack $sx   -in $fr -side left -fill x -exp yes
+	::pack $rect -in $fr -side right 
+
+	#set x_scroll [expr [lindex [$sx get] 0] >= [lindex [$sx get] 1]]
+	#set y_scroll [expr [lindex [$sy get] 0] >= [lindex [$sy get] 1]]
+	set x_scroll 1
+	set y_scroll 1
+	if $x_scroll {
+	    ::pack $fr -side bottom -fill x -expand y
+	}
+	if $y_scroll {
+	    ::pack $sy -side right  -fill y -expand y
+	}
+
+ 	::pack $c -side top -fill both -expand yes
+    }
+	
+    #---------------------------------------------------------------
+    # METHOD: _set_binding - binding for rubber banding and configures
+    #---------------------------------------------------------------
+    method _set_binding {} {
+	bind $this <Configure> "[bind $this <Configure> ] ; $this adjust"
+	global SC::in_progress
+	set SC::in_progress 0
+
+	bind $c  <ButtonPress-1> {
+	    set c %W
+	    set x [$c canvasx %x]
+	    set y [$c canvasy %y]
+	    set SC::start_x $x
+	    set SC::start_y $y
+	    set SC::in_progress 1
+
+	    $c create rectangle $x $y $x $y -outline red -tags band
+	}
+	bind $c <B1-Motion> {
+	    set c %W
+	    set x [$c canvasx %x]
+	    set y [$c canvasy %y]
+	    $c coords band ${SC::start_x} ${SC::start_y} $x $y
+	}
+	bind $c  <ButtonRelease-1>  {
+	    if { ${SC::in_progress} != 1 } {
+		return 
+	    }
+	    set SC::in_progress 0
+
+	    set c %W
+	    set coords [$c coords band]
+	    $c delete band
+	    
+	    [Widget :: FindParent $c] enclosed [eval $c find enclosed $coords]
+	}
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: enclosed - (virtual) action for rubber banding
+    #---------------------------------------------------------------
+    method enclosed {{list ""}} {
+	# nothing to do
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: adjust - adjusts canvases to current window size
+    #---------------------------------------------------------------
+    method adjust {} {
+	if $adjusting return
+	set adjusting 1
+
+	set scroll_w [winfo height $sx]
+	set width  [expr [winfo width $this]  - $scroll_w ]
+	set height [expr [winfo height $this] - $scroll_w ]
+	
+	$c configure -width  $width
+	$c configure -height $height
+	set bbox  [$c bbox all]
+	if { "$bbox" != "" } {
+	    $c configure -scrollregion "0 0 [lindex $bbox 2] [lindex $bbox 3]"
+	}
+
+	_pack_them
+	set adjusting 0
+    }
+
+    #
+    # PROTECTED DATA
+    #	adjusting ....... internal flag. If yes, we are in adjusting process
+    #	c ............... widget name of internale canvas
+    #	sy .............. widget name of x-scrollbar
+    #	sx .............. widget name of y-scrollbar
+    #	fr .............. frame name for x-scrollbar & rectangle 
+    #	rect ............ little rectangle to make scrollbars look MOTIF-like
+    #
+    protected adjusting 0
+    protected c
+    protected sy ""
+    protected fr ""
+    protected sx   ""
+    protected rect ""
+
+}
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: ScrolledCanvas.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:32:19  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:32:19  mark
+# Initial revision
+#
+#
+#

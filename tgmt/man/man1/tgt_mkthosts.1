@@ -1,0 +1,115 @@
+'\" te
+.TH tgt_mkthosts "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgt_mkthosts
+\- Ver\(:andern der Datenbank, die Informationen zu allen Targets enth\(:alt
+.sp
+.SH SYNOPSIS
+.br
+.B tgt_mkthosts -[i|f file|d|l [-s file]|a|e]
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgt_mkthosts 
+greift auf die Datenbank 
+.B $TMDB/
+.B thosts
+zu.
+.sp
+Zu jedem Target sind in der Datenbank
+.br
+.in 8
+- der Targetname
+.br
+- die Internetadresse (4 dezimale Zahlen durch Punkte getrennt)
+.br
+- die Ethernetadresse (hexadezimaler Wert : 0x und 12 Ziffern) und
+.br
+- die zugeh\(:orige Workcell
+.in 5
+.br
+enthalten.
+.sp 2
+Folgende Funktionen k\(:onnen ausgef\(:uhrt werden :
+.sp
+.in 8
+.B -i 
+: Daten werden in die Datenbank eingetragen. Sie werden interaktiv vom Stdinput eingelesen.
+.br
+.B -f file
+: Die in 
+.B file
+enthaltenen Daten werden in die Datenbank eingetragen (Reihenfolge : Targetname, Internetadresse,
+Ethernetadresse und Workcell, 
+alle Angaben in einer Zeile und durch ein Blank getrennt). Es duerfen auch Leerzeilen und Kommentare (beginnend mit #) benutzt werden.
+Ist kein
+.B file 
+angegeben, werden die Daten vom Stdinput gelesen.
+.br
+.B -d 
+: Daten zum eingegebenen Target werden gel\(:oscht
+.br
+.B -l 
+: Eintrag zum eingegebenen Target wird ausgegeben. Ist \fB-s file\fR angegeben, wird der Eintrag an \fBfile\fR angeh\(:angt.
+.br
+.B -a 
+: der Inhalt der Datenbank wird ausgegeben        
+.br
+.B -e
+: die Ethernetadresse wird ver\(:andert
+.in 5
+.sp
+Bei den Optionen
+.B -d
+und
+.B -l
+mu\[ss] der Benutzer den Targetnamen interaktiv eingeben.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbank mu\[ss] sich in dem Directory 
+.B $TMDB
+befinden.
+Ist die Variable TMDB nicht initialisiert, wird sie auf $PWD gesetzt.
+.sp
+.SH R\(:UCKGABEWERT
+.br
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH FEHLER
+.sp
+- es wird kein oder ein falsches Argument \(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.sp
+.SH SIEHE AUCH
+thosts(1)
+.sp
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberpr\(:uft nicht, ob das eingegebene Target schon in der Datenbank enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1192
+
+Dirk R\(:utten,
+<dirk@cecs.cc.kfa-juelich.de>
+1394

@@ -1,0 +1,55 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# ScrolledCanvas test
+#
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+wm geom . 500x100+20+20
+#option add *LogWindow*font fixed
+
+LogWindow .a -geometry 850x340
+
+DataEntry .e -label "Add Message: " -fraction 0.4
+pack .e -fill both -exp yes
+
+proc _raise {w args} { $w raise}
+
+ButtonsBox .b \
+    -buttons { 
+	{close  Close {} 1} 
+	{hide   Hide ".a hide" 0}
+	{show   Show "_raise .a" 0}
+	{add    Add  mess 0}
+    } \
+    -default 3
+
+proc mess {args} {
+    .a message [.e get] info test
+}
+
+pack .b
+
+.a message Hello error MMG
+.a message "Just a warn"
+.a message "What can I do" fatal internal 
+.a message "What can I do, this is a very very long message. Even a description" fatal internal 
+.a message "Error" error MMG
+.a message Warning warning MMG
+.a message Info info MMG
+.a message "Program started Info" info MMG
+
+list {
+    # to add color feature , add to ListBox to public list, 
+    # and take care of bg/fg excange on activate/deactivate
+
+    # Set colors for LogWindow - should be removed
+    case $item in {
+	f-* {$this.list tag config $tag -background red}
+	e-* {$this.list tag config $tag -background orange}
+	w-* {$this.list tag config $tag -background yellow}
+	i-* {$this.list tag config $tag -background green}
+    }
+}

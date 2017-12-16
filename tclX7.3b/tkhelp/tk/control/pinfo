@@ -1,0 +1,114 @@
+NAME
+       pinfo - manipulate pixmaps
+
+SYNOPSIS
+       pinfo command ?arg? ?arg?
+
+
+DESCRIPTION
+       The  pinfo  command  is used to manipulate pixmaps via the
+       tcl language. It can take any of  a  number  of  different
+       forms, depending on the command argument.  The legal forms
+       are:
+
+       pinfo cache name status
+              If no pixmap name is specified, a list of all  cur-
+              rently cached pixmaps is returned. If a pixmap name
+              is given,  the  cache  status  of  this  pixmap  is
+              returned,   and  if  a  status  is  specified,  the
+              pixmap's cache status is set to this boolean value.
+              Caching  means  that the pixmap is not removed when
+              it is no longer used. Instead, it remains in the Tk
+              hash  table  for later use. This can reduce loading
+              time when big pixmaps are often displayed/hidden.
+
+       pinfo cacheconfig option value
+              This command allows the manipulation of the  pixmap
+              caching  mechanism. The only option that is allowed
+              is -defaultstatus. If no new  value  is  specified,
+              the  current default cache status is returned. Oth-
+              erwise, the default cache  status  is  set  to  the
+              given boolean value. This status indicates which is
+              the default cache status for loaded pixmaps.
+
+       pinfo clipmaskdata name
+              This command  returns  the  clipmask  data  of  the
+              pixmap  with  the  name  name.  The  format  of the
+              returned data is a list. The first element  of  the
+              list  is  a  string with three elements: the width,
+              the height and the depth of the bitmap.  The second
+              element  of the list contains the data defining the
+              bitmap in standard X11 bitmap format. If no  pixmap
+              exists   with  the  name  name  then  an  error  is
+              returned. If the pixmap  has  no  clip  mask,  then
+              "none" is returned.
+
+       pinfo data name format
+              This  command  returns  the data of the pixmap with
+              the name name. The format of the returned data is a
+              list.  The  first  element  of the list is a string
+              with four elements: the width, the height  and  the
+              depth of the pixmap. The fourth element is the for-
+              mat of the pixmap data. A pixmap with  a  depth  of
+              more  than 1 has the depth value 0. The second ele-
+              ment of the list contains  the  data  defining  the
+              pixmap.  The type of the data can be specified with
+              the format option. Currently only bitmap  and  xpm3
+              are supported.
+
+       pinfo define name dataList
+              This  command  defines  a  new pixmap with the name
+              name.  The format of the list containing  the  data
+              for  the pixmap is the same as returned by the com-
+              mand pinfo data. If the data string is empty  (i.e.
+              {{20  30  8 xpm3} {}}), an empty pixmap is created.
+              The command returns a decimal string giving the X11
+              pixmap ID of the newly created pixmap.
+
+       pinfo depth name
+              Returns  a  decimal  string giving the depth of the
+              pixmap with the name name.   If  no  pixmap  exists
+              with the name name, then "0" is returned.
+
+       pinfo formats ?specifier?
+              Returns  a list of the supported pixmap formats. If
+              specifier is empty all  formats  are  returned.  If
+              specifier  is  set to all, all formats that support
+              the complete functionality are returned. The speci-
+              fiers  get,  put, toascii and topixmap restrict the
+              returned list to those formats supporting the given
+              functionality.
+
+       pinfo get name
+              Returns  a  decimal string giving the X11 pixmap ID
+              of the pixmap with the  name  name.   This  command
+              loads a pixmap if the user has specified a filename
+              to load. If no pixmap exists with the name name and
+              no pixmap can be loaded, then "none" is returned.
+
+       pinfo height name
+              Returns  a  decimal string giving the height of the
+              pixmap with the name name.   If  no  pixmap  exists
+              with the name name then "0" is returned.
+
+       pinfo names
+              Returns a list of all known pixmap names.
+
+       pinfo save name fileName format
+              Saves  the  given  pixmap into the file named file-
+              Name.  The output format,  specified  with  format,
+              can  be  bitmap, xpm3, or annother supported pixmap
+              format.
+
+       pinfo undefine name
+              Undefines the pixmap with the name name.  To  unde-
+              fine  means  that it is removed from the name list.
+              The pixmap is not freed.
+       pinfo width name
+              Returns a decimal string giving the  width  of  the
+              pixmap  with  the  name  name.  If no pixmap exists
+              with the name name, then "0" is returned.
+
+
+KEYWORDS
+       pinfo, Xpm3

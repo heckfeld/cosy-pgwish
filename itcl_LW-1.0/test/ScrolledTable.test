@@ -1,0 +1,27 @@
+# -*-TCL-*-  TCL mode for Emacs
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+
+button .e -text Exit -command exit
+pack .e
+
+ScrolledTable .c -columns 8 -x_step 80 -y_step 90
+set c [.c get_canvas]
+#$c conf 
+
+set num 30
+puts "Creating $num objects..."
+
+pack .c -fill both -exp yes
+puts [time {
+for { set i 0 } { $i<$num} {incr i} {
+    lappend list [Icon $c.p$i]
+}
+.c place_children $list
+}]
+
+wm max . 1000 900
+wm geom . 300x300
+

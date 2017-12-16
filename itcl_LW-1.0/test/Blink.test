@@ -1,0 +1,29 @@
+# -*-TCL-*-  TCL mode for Emacs
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+
+#
+# Sheduler test
+#	
+catch {destroy .a}
+button .a  -text "push" -fg white ; pack app . .a {fill expand}
+button .e -text Exit -command exit ; pack .e
+
+set c 0
+catch { s delete} 
+Scheduler s -count -1  -interval 500 -command {.a conf -text "push [incr c]"} 
+s start
+
+#
+# Blink Test
+#
+catch {a delete}
+set Widget .a
+set Type -bg
+Blink a -command { 
+    {global Widget Type;$Widget conf $Type Green; update} 
+    {global Widget Type;$Widget conf $Type white; update}
+    {global Widget Type;$Widget conf $Type yellow; update}
+} -count 2 -end { global Widget Type;$Widget conf $Type red; update} -interval 500
+a start

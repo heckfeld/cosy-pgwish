@@ -1,0 +1,11 @@
+# -*-TCL-*-  TCL mode for Emacs
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+proc action {args} {puts "got: $args" }
+
+ScrolledList .a -list [glob *]  -action action
+pack .a 
+button .e -text Exit -command exit
+pack .e

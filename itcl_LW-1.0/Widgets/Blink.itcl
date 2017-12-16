@@ -1,0 +1,135 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Blink.itcl,v 1.1.5.1 1994/06/05 17:30:51 mark Exp $
+#
+# itcl_class: Blink
+#---------------------------------------------------------------
+# Description : Scheduler command series 
+#	The main difference is that Blink permits a few commands, 
+#	each one to be executed after a scheduled time.
+#
+# TCL/TK extensions required: itcl 
+# INHERITS FROM             : Scheduler
+#
+# PUBLIC ATTRIBUTES:
+#	-count ........ number of loops (-1 means infinite)
+#	-command ...... command list to be [re]scheduled
+#	-end .......... command to be run on the end of process
+#
+# METHODS:
+# 	start ......... start execution
+#	stop .......... stop execution
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin ($Locker:  $)
+# Creation date : Jan 10, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:30:51 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# force auto-loading of base classes
+Scheduler
+
+itcl_class Blink {
+    inherit Scheduler
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Blink
+    #---------------------------------------------------------------
+    constructor {config} {
+	set counter [Counter $this::counter -value $count]
+    }
+    
+    #---------------------------------------------------------------
+    # DESTRUCTOR - Destroys Blink
+    #---------------------------------------------------------------
+    destructor {
+	$counter delete
+    } 
+    
+    #---------------------------------------------------------------
+    # METHOD: start - start execution
+    #---------------------------------------------------------------
+    method start {} {
+	$counter reset
+	
+	set active 1
+	set position 0
+	_runCurrentCommand
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: stop - execution
+    #---------------------------------------------------------------
+    method stop {} {
+	set active 0
+	if { "$end" != "" } {
+	    eval $end
+	}
+	Scheduler::stop
+	return
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _runCurrentCommand - call Scheduler to perform command
+    #---------------------------------------------------------------
+    method _runCurrentCommand {} {
+	if {[$counter value] <= 0} { 
+	    stop
+	    config -Scheduler::count 1 -Scheduler::command $end
+	    Scheduler::start
+	    return
+	}
+	set current [lindex $command $position]
+	if { $current != "" } { 	
+	    set current "$this _catch {$current}"
+	}
+	# run Scheduler with count == 1 , command==currentCommandToRun
+	config -Scheduler::count 1 -Scheduler::command $current
+	Scheduler::start
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _catch - checks state and if active run current command
+    #---------------------------------------------------------------
+    method _catch {comm} {
+	if { $active == 0 } {
+	    return 
+	}
+	eval $comm
+
+	if { [incr position] >= [llength $command] } {
+	    set position 0
+	    if { [$counter value] != -1 } {
+		$counter --
+	    }
+	}
+	_runCurrentCommand
+    }
+    
+    #
+    # PUBLIC DATA
+    #
+    public count 1 {
+	if { $counter != "" } {
+	    $counter config -value $count
+	}
+    }
+    public command {} 
+    public end {}
+    
+    #
+    # PROTECTED DATA
+    #	current ......... command to be executed
+    #	postion ......... current position in command list
+    #	active .......... current state of the Blink object
+    #	counter ......... Counter object used to count reruns
+    #
+    protected current {}
+    protected position 0
+    protected active 0
+    protected counter {}
+}

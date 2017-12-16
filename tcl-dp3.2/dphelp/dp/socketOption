@@ -1,0 +1,69 @@
+NAME
+       dp_socketOption - Change the options on a socket
+
+       dp_socketOption sockId option ?arg?
+
+              The  dp_socketOption command provides access to the
+              setsockopt(2) and getsockopt(2) system  calls.   If
+              the  optional arg is provided, the option is set on
+              the socket sockId.  Otherwise, the current value of
+              option  associated  with  sockId is returned.  Cur-
+              rently, 3 socket options can be adjusted:
+
+              dp_socketOption sockId sendBuffer ?bytes?
+                     Sets/gets the size of the  send  buffer  for
+                     sockId.   The  send  buffer is the number of
+                     bytes that can be  buffered  in  the  system
+                     before  a  send/recv or read/write call will
+                     block.  The default value is machine  depen-
+                     dent.
+
+
+              dp_socketOption sockId recvBuffer ?bytes?
+                     Sets/gets the size of the receive buffer for
+                     sockId.  The receive buffer is the number of
+                     bytes  that  can  be  buffered in the system
+                     before data will cease  to  flow  on  a  tcp
+                     socket,  or be dropped on a udp socket.  The
+                     default value is machine dependent.
+
+
+              dp_socketOption sockId noblock ?yes|no?
+                     Sets/gets the non blocking i/o mode for  the
+                     connection  associated  with  sockId.   This
+                     option will change the behavior  of  various
+                     transmission   routines   as   described  in
+                     dp_connect(n).  The default value is "no."
+
+
+              dp_socketOption sockId autoClose ?yes|no?
+                     Sets/gets the autoClose flag for the connec-
+                     tion  associated  with sockId.  If the auto-
+                     Close  flag  is  "yes",  then   any   errors
+                     detected  in transmission will automatically
+                     close the file.  This case typically arrives
+                     when  the connection is closed unexpectedly.
+                     Users can attach callbacks to the closing of
+                     the file using the dp_atclose facility.  The
+                     default value is "yes."
+
+
+              dp_socketOption sockId keepAlive ?yes|no?
+                     Sets/gets the "Keep Alive" flag for the  tcp
+                     connection  associated  with sockId.  If the
+                     "Keep Alive" flag is on,  the  system  sends
+                     periodic  transmission  of messages on a tcp
+                     socket.  Should  the connected   party  fail
+                     to respond to these messages, the connection
+                     is considered  broken  and  will  be  closed
+                     automatically.  The default value is "no."
+
+
+SEE ALSO
+       setsockopt(2), getsockopt(2),  dp_connect(n)
+
+
+AUTHOR
+       Brian Smith (bsmith@cs.berkeley.edu)
+       Steve Yen (syen@cs.berkeley.edu)
+       Stephen Tu (tus@roger-rabbit.cs.berkeley.edu)

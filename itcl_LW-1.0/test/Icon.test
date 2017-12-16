@@ -1,0 +1,132 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Icon.test,v 1.1.5.1 1994/06/05 17:35:04 mark Exp $
+#
+# Icon.test
+#--------------------------------------------------------------
+# Description: Test for Icon & blt_table
+#
+# Author        : Mark Sterin ($Locker:  $)
+# Creation date : mar 17,1994
+#
+# Last check-in date: $Date: 1994/06/05 17:35:04 $
+#
+#
+# (c) Lannet Ltd.  1994
+#
+#--------------------------------------------------------------
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+#
+
+pinfo cacheconfig -defaultstatus 1
+
+proc create_icons { class num columns } {
+    puts "Reloading classes ... "
+    blt_busy hold .
+
+    foreach i {widget $class} {
+	catch {itcl_reload $i}
+    }
+    foreach i [winfo child .] {
+	catch {destroy $i}
+    }
+    # synchronize objects & windows !!!
+    update
+
+    catch { destroy .c}
+
+
+    #foreach i [glob /yang/mark/FROM_INTERNET/AIcons/cl-32/*.xpm] {
+    #	lappend pixmaps @$i 
+    #}
+    set pixmaps "stop.xpm no_entry.xpm question.xpm tick.xpm \
+		hourglass.xpm exclaim.xpm error warning info question"
+    set npixmaps [llength $pixmaps]
+
+    # for permitting "Group Select" operation 
+    scrollbar .scroll -command ".c yview" -relief raised
+    
+    canvas .c \
+	-yscroll ".scroll set" \
+	-confine false \
+	-scrollregion { 0 0 700 500 } \
+	-scrollincrement 39
+
+    label .c.tit -text "Table of icons, B3 for D&D" \
+	-font -*-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-* \
+	-relief groove 
+    button .c.b -text Dismiss -command exit
+    
+    puts "Creating $num objects ..."
+puts [time {
+    for { set i 0 } { $i < $num } { incr i }  {
+	set pic [lindex $pixmaps [expr $i%$npixmaps]]
+	set parts [split $pic /. ]
+	set txt [lindex $parts [expr [llength $parts] -2]]
+	if {"$txt" == "" } { set txt noname}
+	$class .c.p$i -text "$txt" -bitmap $pic
+	}
+}]
+
+    puts "Placing objects ... "
+    puts [time {  tab_icons $num $columns }]
+#    pack .c -fill both -expand yes
+    blt_table . .c       0,0 -fill both 
+    blt_table . .scroll  0,1 -fill y
+
+    blt_busy release .
+}   
+ 
+proc tab_icons { num columns } {
+    set rows [expr ($num+1)/$columns]
+    puts "   Creating table $columns x $rows..."
+    
+    blt_table .c .c.b 0,0 \
+	-columnspan $columns -anchor center \
+	-fill both -ipadx 4 -ipady 4 -padx 10 -pady 6
+    
+    blt_table .c .c.tit 1,0 -columnspan $columns \
+	-anc center -fill x -pady 2 -ipady 2 -padx 4
+    
+    for { set i 0 } { $i < $num } { incr i } { 
+	blt_table .c .c.p$i [expr $i/$columns+2],[expr $i%$columns]  \
+	    -fill both -padx 8 -pady 5
+    }
+    
+    for { set i 0 } { $i < $columns } { incr i } { 
+	blt_table column .c configure $i -resize none
+    }
+    for { set i 0 } { $i < $rows } { incr i } { 
+	blt_table row .c configure $i -resize none
+    }
+    for { set i 0 } { $i < $columns } { incr i } { 
+	blt_table column .c configure $i -resize none
+    }
+    
+}
+
+wm min . 300 300 
+wm geom . +0+0
+if { !$tcl_interactive } {
+    create_icons Icon 30 14
+    update; 
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Icon.test,v $
+# Revision 1.1.5.1  1994/06/05  17:35:04  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:35:03  mark
+# Initial revision
+#
+#
+#

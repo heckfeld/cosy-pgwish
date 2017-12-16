@@ -1,0 +1,14 @@
+################################################################################
+#
+#                                   README
+#
+#               /mnt/cc-x4/ccp/database/src/cosmo/calib/calib
+#
+################################################################################
+
+# Zum Compilieren muss die Environment-Variable DATABASE gesetzt sein:
+# DATABASE=/mnt/cc-x4/ccp/database
+
+#
+# Don Feb 20 09:50:34 CET 2003
+#

@@ -1,0 +1,220 @@
+NAME
+       tixSelect - Create and manipulate TIX Select widgets
+
+SYNOPSIS
+       tixSelect pathName ?options?
+
+STANDARD OPTIONS
+       anchor          background     cursor
+       relief          borderWidth    geometry
+
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          allowZero
+       Class:                         AllowZero
+       Command-Line Switch:           -allowzero
+
+              Specifies whether the selection can be empty.  Only
+              values  "true" and "false" will be recognized. When
+              set to subwidget must be selected at any time.
+
+              Note: When the Select widget is first  constructed,
+              the  default  selection  is  always  empty, even if
+              -allowzero is set to
+
+
+
+       Name:                          buttonBg
+       Class:                         Background
+       Command-Line Switch:           -buttonbg
+
+              Specifies the background of all the buttons  inside
+              the Select widget.
+
+       Name:                          command
+       Class:                         Command
+       Command-Line Switch:           -command
+
+              Specifies  the command to be invoked when the value
+              of the Select widget is changed. The  command  will
+              be  invoked  with  two  arguments. The first is the
+              name of the button subwidget that has toggled.  The
+              second is either "on" or this button subwidget.
+
+       Name:                          font
+       Class:                         Font
+       Command-Line Switch:           -font
+
+              Specifies  the  font used by all the buttons inside
+              the Select widget.
+
+       Name:                          foreground
+       Class:                         Foreground
+       Command-Line Switch:           -foreground
+
+              Specifies the foreground of all the buttons  inside
+              the Select widget.
+
+
+       Name:                          orientation
+       Class:                         Orientation
+       Command-Line Switch:           -orientation
+       Alias:                         -orient
+
+              Static  Option.  Specifies  the  orientation of the
+              button subwidgets. Only the values "horizontal" and
+              "vertical" are recognized.
+
+
+       Name:                          padx
+       Class:                         Pad
+       Command-Line Switch:           -padx
+
+              Specifies the horizontal padding between two neigh-
+              boring button subwidgets.
+
+
+       Name:                          padx
+       Class:                         Pad
+       Command-Line Switch:           -padx
+
+              Specifies the vertical padding between  two  neigh-
+              boring button subwidgets.
+
+
+       Name:                          radio
+       Class:                         Radio
+       Command-Line Switch:           -radio
+
+              Specifies whether the Select widget should act as a
+              radio-box.  Only values "true" and "false" will  be
+              recognized.  When set to at most one button subwid-
+              get can be selected at any time.
+
+       Name:                          selectedBg
+       Class:                         SelectedBg
+       Command-Line Switch:           -selectedbg
+
+              Specifies the background color of all the  selected
+              button subwidgets.
+
+       Name:                          state
+       Class:                         State
+       Command-Line Switch:           -state
+
+              Specifies  the  state of all the buttons inside the
+              Select widget.
+
+              Note: Setting this option using the  config  widget
+              command will enable or disable all the buttons sub-
+              widgets. Original states of the individual  buttons
+              are  not  saved. Only the values "normal" and "dis-
+              abled" are recognized.
+
+       Name:                          value
+       Class:                         Value
+       Command-Line Switch:           -value
+
+              Specifies the value of the Select. The value  of  a
+              Select  widget is a list of the names of the button
+              subwidgets that have been selected by the user.
+
+              When you assign the value of a Select widget  using
+              the "config -value" widget command, the TCL command
+              specified by the -command option will be invoked if
+              some  button  subwidgets  are toggled. This feature
+              can be supressed by setting the  first  element  of
+              the new value to be
+
+               .select config -value {-nocallback item1 item4}
+
+
+       Name:                          variable
+       Class:                         Variable
+       Command-Line Switch:           -variable
+
+              Specifies the global variable in which the value of
+              the Select should be stored. The value of a  Select
+              widget is stored as a list of the names of the but-
+              ton subwidgets that have been selected by the user.
+              The  value  of  the  Control  will be automatically
+              updated when this variable is changed.
+
+DESCRIPTION
+       The tixSelect command creates a new window (given  by  the
+       pathName  argument)  and  makes  it  into a Select widget.
+       Additional options, described above, may be  specified  on
+       the  command  line  or in the option database to configure
+       aspects of the Select such as its cursor and relief.
+
+       The Select widget is a versatile container for button sub-
+       widgets.  It can be used to provide radio-box or check-box
+       style of selection options for the user.
+
+WIDGET COMMAND
+       The Select command creates a new Tcl command whose name is
+       the  same  as  the path name of the Select's window.  This
+       command may be used to invoke various  operations  on  the
+       widget.  It has the following general form:
+              pathName option ?arg arg ...?
+
+       PathName  is the name of the command, which is the same as
+       the frame widget's path name.  Option and the args  deter-
+       mine  the  exact  behavior  of the command.  The following
+       commands are possible for Select widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Query or modify the configuration  options  of  the
+              widget.   If no option is specified, returns a list
+              describing all of the available options  for  path-
+              Name  (see  Tk_ConfigureInfo for information on the
+              format of this list).  If option is specified  with
+              no  value, then the command returns a list describ-
+              ing the one named option (this list will be identi-
+              cal  to  the  corresponding  sublist  of  the value
+              returned if no option is  specified).   If  one  or
+              more  option-value  pairs  are  specified, then the
+              command modifies the given widget option(s) to have
+              the  given  value(s);   in  this  case  the command
+              returns an empty string.  Option may  have  any  of
+              the values accepted by the frame command.
+
+       pathName add buttonName ?option value ... ?
+              Add  a  new button subwidget with the name bnutton-
+              Name into the Select widget. Additional  configura-
+              tion options can be given to configure the new but-
+              ton subwidget.
+
+       pathName button bnuttonName ?args?
+              The button command provides a way to access a  but-
+              ton subwidget contained by the Select widget.  When
+              no additional  arguments  are  given  this  command
+              returns  return the complete pathname of the button
+              subwidget with the name  bnuttonName.   When  addi-
+              tional  arguments  are  given,  these arguments are
+              used to invoke the widget  command  of  the  button
+              subwidget.
+
+       pathName invoke bnuttonName
+              Invoke  the button subwidget with the name bnutton-
+              Name.
+
+BINDINGS
+       Select widgets have no default bindings.
+
+EXAMPLE
+       The following example creates a  radio-box  style  iconbar
+       for the user to choose one value among
+
+        tixSelect .s -radio true -allowzero false
+        .s add eat   -bitmap @pixmaps/eat.xpm
+        .s add work  -bitmap @pixmaps/work.xpm
+        .s add sleep -bitmap @pixmaps/eat.xpm
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       TIX, Container Widgets

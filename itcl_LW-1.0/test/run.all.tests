@@ -1,0 +1,15 @@
+#!/bin/sh
+# script for running all tests 
+
+for i in *test
+do
+	echo $i
+	wish -f $i
+done
+
+
+echo menu_bar
+cd ../Widgets 
+MM_MENU_EXAMPLE=1 ; export MM_MENU_EXAMPLE
+wish -f menu_bar.tcl
+

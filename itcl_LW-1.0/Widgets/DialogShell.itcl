@@ -1,0 +1,68 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: DialogShell.itcl,v 1.1.5.1 1994/06/05 17:31:09 mark Exp $
+#
+# itcl_class: DialogShell
+#-----------------------------------------------------------------------
+# Description : Shell with pushbuttons (according to Motif Style Guide)
+#
+# TCL/TK extensions required: itcl 
+# INHERITS FROM             : Shell
+#
+# PUBLIC ATTRIBUTES:
+#	-buttons ......... buttons list in ButtonsBox format
+#
+# METHODS:
+#	none
+#
+#------------------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Apr 20, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:09 $
+#
+# (c) Lannet Ltd.  1994
+#-------------------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Shell
+
+itcl_class DialogShell {
+    inherit Shell
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new DialogShell
+    #---------------------------------------------------------------
+    constructor {config} {
+	Shell::constructor
+	ButtonsBox ${this}.b -buttons $buttons
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public buttons { 
+	{close Close {}              1}
+	{help  Help  {Shell :: Help} 0 right}
+    } {
+	if {[exists]} {
+	    $this.b config -buttons $buttons
+	}
+    }
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: DialogShell.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:31:09  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:08  mark
+# Initial revision
+#
+#
+#

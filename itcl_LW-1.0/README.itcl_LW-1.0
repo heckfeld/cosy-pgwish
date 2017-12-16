@@ -1,0 +1,62 @@
+
+itcl_LW (itcl Lannet Widgets) is a set of itcl widgets. I've written
+them a year ago (today is 11/9/1994) while working at Lannet Ltd.,
+Israel.  Copyright file is attached (see Widgets/Copyright - it is
+basically PD copyrights). The set requires TkPixmap , BLT and itcl
+extensions.
+
+./Widgets directory contains the code itself, and ./test - tests 
+(what a surprise !).  
+
+	cd test ; ./run.all.tests 
+
+may be interesting.  Tests make use of /usr/local/bin/wish.  
+
+Please don't forget to add Widgets directory to auto_path 
+(set auto_path "$auto_path widgets-path/Widgets" ) before using the widgets.
+
+Files are self-documented, no additional documentation (sorry).  All
+widgets are visible to `tkinspect' as a regular tk widget.  There is
+a primitive support for context-sensitive help (see Widget.itcl),
+and a lot of other bells and whistles.  Drag&drop (based on
+blt_drag&drop) is attached to Btn2.
+
+I'd be happy if somebody will be using the widgets.
+
+Good luck,
+
+
+-- Mark Sterin (msterin@bmc.com)
+   BMC Software
+   2101 CityWest Blvd. Houston TX 77042
+   Voice: (713) 918-1525
+   FAX:   (713) 918-1312
+
+
+
+
+Some widgets are as follows: 
+-----------------------------
+Dial.itcl	- gauge-like canvas-based meter with "red" and "yellow" zones
+Icon.itcl	- draggable and selectable icon with pixmap/label
+Copyright	- not a widget :-)
+Object.itcl	- base abstract class for all widgets. mainly provides config
+DataEntry.itcl	- label/entry , draggable, label may be replace with button
+ScrolledTable.itcl - orders childs in scrollable table
+menu_bar.tcl    - a pure tcl support for menu creation (very convenient :-) !
+dd-prot.tcl     - d&d support (from BLT package) 
+Widget.itcl     - abstract base class for all GUI widgets, adds flash, help and more
+StextEd.itcl    - Simple text Editor, may be spawned from button in DataEntry
+Shell.itcl	- base class for Shells. Provides color icon and raise/hide 
+SelectBox.tcl   - Select Box from itcl distribution (with Widget as a base class)
+ScrolledList.itcl - A list with title, automatic scrollbar & drag&drop
+ScrolledCanvas.itcl - Canvas with scrollbars, stretch support and more ..
+Scheduler.itcl    - non-GUI class for scheduling periodic tasks
+Blink.itcl        - non-GUI object for scheduling series of periodic tasks
+Paned.itcl        - horizontal pane
+MainShell.itcl    - Shell with menu bar
+LogWindow.itcl    - auto-raising window for Logging, with <Save> and <Hide>
+Feedback.itcl     - Nice one, try it.
+DialogShell.itcl  - base class for misc. dialog shells.
+Counter.itcl      - non-GUI object
+ButtonsBox.itcl   - a box with buttons and keyboard traversal

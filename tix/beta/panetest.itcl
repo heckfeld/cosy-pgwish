@@ -1,0 +1,14 @@
+     source PanedWin.tcl
+     PanedWindow .pw -width 300 -height 300 -min .15 -number 4 \
+         -handleSide begin
+     # OR
+     # PanedWindow .pw -width 300 -height 300 -fraction ".2 .5 .7" \
+     #     -orientation x
+
+     foreach pane [.pw panes] {
+        button $pane.b -text $pane -command {puts "[.pw fractions]"}
+        pack $pane.b -fill both -expand yes
+     }
+     pack .pw -fill both -expand yes
+     wm minsize . 0 0
+

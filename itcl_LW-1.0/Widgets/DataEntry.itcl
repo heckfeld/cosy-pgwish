@@ -1,0 +1,221 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: DataEntry.itcl,v 1.1.5.2 1994/06/20 11:16:16 mark Exp $
+#
+# itcl_class: DataEntry
+#--------------------------------------------------------------
+# Description: A simple data entry (label+entry in frame) with d&d
+#
+# TCL/TK extensions required: itcl blt
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-label .......... text in label
+#	-value .......... text in entry
+#	-variable ....... (global) variable associated  with entry
+#	-action ......... script to be run on <Return> in entry
+#       -tab_action ..... script to be run on <Tab> in entry
+#	-command ........ script to be run for the entry external editing 
+#	-fraction ....... fraction of lenght taken by label
+#	-anchor ...........  anchor in label	
+#
+# METHODS:
+#	get ................. get curent entry context
+#	get_child ........... get label|entry name 
+#	config_widgets ...... configures all internal widgets 
+#	accept_focus ........ accepts focus & set caret visible
+#	
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 1994
+#
+# Last check-in date: $Date: 1994/06/20 11:16:16 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# force fetching of base class
+Widget
+
+itcl_class DataEntry {
+    inherit Widget
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new DataEntry
+    #---------------------------------------------------------------
+    constructor {config} {
+ 	Widget::constructor frame 
+	set label_w $this.label
+	set entry_w $this.entry
+
+	if { "$command" == "" } {
+		set label_comm label
+	} else {
+		set label_comm button
+	}
+
+	$label_comm $label_w -text "$label " -anchor $anchor 
+	entry $entry_w 
+
+	$this configure \
+	    -width  [expr [winfo reqw $label_w]+[winfo reqw $entry_w]] \
+	    -height [winfo reqh $label_w]
+
+	_place_it
+	
+	# bind <Enter> $entry_w "focus $entry_w"
+
+	# Drag&drop
+	blt_drag&drop source $entry_w config \
+	    -packagecmd "package_text $this" \
+	    -sitecmd "site_text" -button 2
+	blt_drag&drop source $entry_w handler text \
+	    { dd_send_by_handler text }
+
+	blt_drag&drop target $entry_w handler text "
+	    global DragDrop
+	    $this config -value \$DragDrop(text)
+	"
+	
+	#
+	#  Explicitly handle config's that may have been ignored earlier
+	#
+	foreach attr $config {
+	    config -[lindex [split $attr :] 2] [set $attr]
+        }
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: get - return current entry contents
+    #---------------------------------------------------------------
+    method get {} { return [$entry_w get]}
+
+    #---------------------------------------------------------------
+    # METHOD: accept_focus - accepts focus & set caret visible
+    #---------------------------------------------------------------
+    method accept_focus {} { 
+	focus $entry_w
+	tk_entrySeeCaret $entry_w
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: get_child - return name of internal label or entry
+    #---------------------------------------------------------------
+    method get_child {child} { 
+	case $child in {
+	    label  { return $label_w }
+	    entry  { return $entry_w }
+
+	    default {return -code error "Bad child name: $child"}
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: config_widgets - configures all internal widgets 
+    #		according to args
+    #---------------------------------------------------------------
+    method config_widgets { args } {
+	foreach i { $label_w $entry_w $this } {
+	    catch { 
+		eval $i configure $args
+	    }
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _place_it - put entry&label on their places 
+    # 			  according to $fraction
+    #---------------------------------------------------------------
+    method _place_it {} {
+    
+	place $label_w -relx 0   -rely 0  \
+	    -relh 1.0 -relw $fraction
+	place $entry_w -relx $fraction -rely 0  \
+	    -relh 1.0 -relw [expr 1.0 - $fraction]
+    }
+
+    #
+    # PUBLIC DATA
+    #
+
+    public label "Label:" {
+	if { "$label_w" != "" } {
+	    $label_w configure -text $label
+	}
+    }
+    
+    public variable {} {
+	if { "$entry_w" != "" } {
+	    $entry_w configure -textvariable $variable
+	}
+    }
+    
+    public anchor center {
+
+	if { "$label_w" != "" } {
+	    $label_w configure -anchor $anchor
+	}
+    }
+    public value {} {
+	if { "$entry_w" != "" } {
+	    $entry_w delete 0 end
+	    $entry_w insert 0 $value
+	}
+    }
+
+    # <Return> in entry
+    public action {} {
+	if { "$entry_w" != "" } {
+	    bind $entry_w <Return> $action
+	}
+    }
+
+    # <Tab> in entry
+    public tab_action {} {
+	if { "$entry_w" != "" } {
+	    bind $entry_w <Tab> $tab_action
+	}
+    }
+    
+    public command {} {
+	if {[exists]} {
+	    if { "[winfo class $label_w]" != "Button" } {
+		error "DataEntry: cannot change command type on the fly"
+	    }
+	    $label_w config -command $command
+	}
+    }
+    
+    public fraction 0.5 {
+	if { "$label_w" != "" } {
+	    _place_it
+	}
+    }
+
+    #
+    # PROTECTED DATA
+    #	label_w ........ name of the internal label widget
+    #	entry_w ........ name of the internal entry widget
+    #
+    protected label_w ""
+    protected entry_w ""
+}
+
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: DataEntry.itcl,v $
+# Revision 1.1.5.2  1994/06/20  11:16:16  mark
+# Added the right drag&drop handler
+#
+# Revision 1.1.5.1  1994/06/05  17:31:03  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:02  mark
+# Initial revision
+#
+#
+#

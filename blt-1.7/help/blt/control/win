@@ -1,0 +1,41 @@
+NAME
+       blt_win - Perform assorted window operations
+
+SYNOPSIS
+       blt_win raise window
+
+       blt_win lower window
+
+       blt_win map window
+
+       blt_win unmap window
+
+DESCRIPTION
+       This  command  performs  assorted  window operations on Tk
+       windows.  Windows may be raised, lower, map, or  unmapped.
+
+       The blt_win command can take any of the following forms:
+
+       blt_win lower window
+              Lowers  a  window  to  the  bottom  of the X window
+              stack.  Window must be a valid path name  of  a  Tk
+              window.
+
+       blt_win map window
+              Maps  the  window  again.   Window must be the path
+              name of a Tk window.  If window is already  mapped,
+              this  command  has no effect.  This command returns
+              the empty string.
+
+       blt_win raise window
+              Raises the window to the top of the X window stack.
+              Window  must  be  a valid path name of a Tk window.
+              This command returns the empty string.
+
+       blt_win unmap window
+              Unmaps the window. Window must be a valid path name
+              of  a  Tk  window.  This  command returns the empty
+              string.
+
+KEYWORDS
+       window

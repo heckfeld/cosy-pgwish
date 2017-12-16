@@ -1,0 +1,14 @@
+# -*-TCL-*-  TCL mode for Emacs
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+#
+
+MessageList .m 
+pack .m -side top -fill x -expand yes -anchor nw
+foreach i [glob *] {
+	.m config -message $i
+}
+wm maxsize . 600 600
+button .e -text Exit -command exit
+pack .e

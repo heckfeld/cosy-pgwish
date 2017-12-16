@@ -1,0 +1,208 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Paned.itcl,v 1.1.5.1 1994/06/05 17:31:59 mark Exp $
+#
+# itcl_class: Paned
+#--------------------------------------------------------------
+# Description: Horizontal Paned window
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+# 	-fraction ......... part taken by the top pane [default .5]
+#
+# METHODS:
+#	create_panes ...... create & return 2 panes
+#	add_panes ......... register 2 widgets to be panes
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $) , created from 
+#	          "paned" program submitted by Jay Schmidgall, 1994
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:59 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget 
+
+#
+# Class: Paned
+#---------------------------------------------------------------
+# Purpose : class for paned windowing
+#---------------------------------------------------------------
+#
+
+itcl_class Paned {
+    inherit Widget
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new <name>
+    #---------------------------------------------------------------
+    constructor {config} {
+	Widget::constructor frame -bd 3 -relief flat 
+	set top [winfo toplevel $this]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: create_panes - create & return 2 panes
+    #	now we are supporting 2 and only 2 panes. 
+    #	TBD: extension for many panes - THIS METHOD SHOULD BE REPLACED 
+    #---------------------------------------------------------------
+    method create_panes {args} {
+	set p1 [eval _create_pane $args] 
+	set p2 [eval _create_pane $args]
+	_re_place 1
+	return [list $p1 $p2]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: add_panes - register 2 widgets to be panes
+    #---------------------------------------------------------------
+    method add_panes {pane1 pane2} {
+	set p1 $pane1
+	set p2 $pane2
+	_add_pane $p1
+	_add_pane $p2
+	_re_place 1
+	return [list $p1 $p2]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _add_sash - add little button and separator 
+    #---------------------------------------------------------------
+    method _add_sash {} {
+	set sash $this.sash$num
+	set sep $this.sep$num
+
+	# make the separator
+	frame $sep -geometry 1x4 -borderwidth 2 -relief ridge
+
+	# make the button
+	frame $sash \
+	    -geometry 10x10 -borderwidth 2 -relief raised  \
+	    -cursor crosshair \
+	    -class Sash
+	bind $sash <Button-1>           "$this _start_grip  $sash $sep %y"
+	bind $sash <B1-Motion>          "$this _handle_grip $sash $sep %y"
+	bind $sash <B1-ButtonRelease-1> "$this _end_grip    $sash $sep %y $num"
+
+	::raise $sash
+    }
+
+    #-------------------------------------------------------------------------
+    # METHOD: _create_pane - create a single pane , and add sash and separator
+    #-------------------------------------------------------------------------
+    method _create_pane { args } {
+	if { $num > 0 } _add_sash
+	set pane $this.pane$num 
+	eval ::frame $pane -bd 2 -relief groove $args
+	incr num 
+	return $pane
+    }
+
+    #--------------------------------------------------------------------
+    # METHOD: _add_pane - create sash and separator and add the given pane
+    #--------------------------------------------------------------------
+    method _add_pane { pane } {
+	if { $num > 0 } _add_sash
+	incr num 
+	return $pane
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _start_grip - start dragging the sash 
+    #---------------------------------------------------------------
+    method _start_grip {sash sep where} {
+	grab $sash
+	::raise $sep
+	::raise $sash
+	$sash configure -relief sunken
+	set drag_start $where
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _end_grip - stop dragging the sash, reconfigure panes
+    #---------------------------------------------------------------
+    method _end_grip {sash sep where num} {
+	set fraction \
+	    [expr "(($where.0 - $drag_start.0) / [winfo height $top]) + $fraction"]
+	$sash configure -relief raised
+	grab release $sash
+
+	_re_place $num 
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _handle_grip - track dragging the sash
+    #---------------------------------------------------------------
+    method _handle_grip {sash sep where} {
+	set fraction \
+	    [expr "(($where.0 - $drag_start.0) / [winfo height $top]) + $fraction"]
+	place $sep  -in $this -relx 0   -rely $fraction -relwidth 1  -anchor w
+	place $sash -in $this -relx .95 -rely $fraction              -anchor center
+    }
+    
+    #-----------------------------------------------------------------
+    # METHOD: _re_place - change panes placement according to fraction
+    #-----------------------------------------------------------------
+    method _re_place {num} {
+	#	puts stdout "_re_place $num $fraction"
+	#set p1 $this.pane[expr $num-1]
+	#set p2 $this.pane$num
+	set sash $this.sash$num
+	set sep  $this.sep$num
+
+	place $sep  -in $this -relx 0   -rely $fraction -anchor w    -relwidth 1  
+	place $sash -in $this -relx .95 -rely $fraction -anchor center
+
+	place $p1  -in $this -x 0 -y 0 -relwidth 1 -relheight $fraction
+	place $p2  -in $this -x 0 -rely $fraction \
+	    -relwidth 1 -relheight [expr "1.0 - $fraction"]
+	::lower $sep
+	::raise $sash
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public  fraction .5 {
+	if {[exists]} {
+	    _re_place 1
+	}
+    }
+
+    #
+    # PROTECTED DATA
+    #	drag_start ......... Y coord of sash when drag was started
+    #	num ................ number of pane (misc. purposes)
+    #	p1 ................. widget name of the first  (top) pane 
+    #	p2 ................. widget name of the second (bottom) pane 
+    #   top ................ toplevel closest to the pane
+    #
+    protected drag_start 0
+    protected num 0
+    protected top ""
+    
+    # SHOULD BE LIST OF PANES
+    protected p1
+    protected p2
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Paned.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:31:59  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:58  mark
+# Initial revision
+#
+#

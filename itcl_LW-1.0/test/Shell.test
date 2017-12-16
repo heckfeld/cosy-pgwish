@@ -1,0 +1,24 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Shell.test,v 1.1.5.1 1994/06/05 17:35:31 mark Exp $
+#
+# Shell.test
+#--------------------------------------------------------------
+# Description: Test for Shell
+#--------------------------------------------------------------
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+} else {
+    wm withdraw .
+}
+
+DialogShell .s -title Hello
+.s config -title "So What"
+
+if { !$tcl_interactive } {
+     .s raise
+    button .e -text Exit -command exit
+    pack .e
+}

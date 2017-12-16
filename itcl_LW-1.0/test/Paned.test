@@ -1,0 +1,70 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Paned.test,v 1.1.5.1 1994/06/05 17:35:17 mark Exp $
+#
+# Paned.test
+#--------------------------------------------------------------
+# Description: Test for Paned
+#--------------------------------------------------------------
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+#
+wm withdraw .
+
+#
+# Check "create_pane"
+#---------------------
+#
+MainShell .s -geometry 300x350 -maxsize {500 500} -title "Paned test"
+
+Paned .s.a -fraction 0.4
+set n 0
+set pixmaps "hourglass.xpm bomb.xpm no_entry.xpm stop.xpm exit.xpm "
+
+foreach i [.s.a create_panes] {
+    Icon $i.icon -bitmap [lindex $pixmaps $n]
+    incr n
+    pack $i.icon -fill both -expand y  -padx 2 -pady 2
+    $i.icon config_widgets -bg gray -fg white
+
+    label $i.l -text "This is $i.l" -bg lightsteelblue
+    pack $i.l -fill both -expand yes
+}
+
+pack .s.a -fill both -expand yes
+
+.s raise 
+
+#
+# Check "add_pane"
+#-----------------
+#
+
+DialogShell .t -geometry 200x200+0+0
+Paned .t.a
+set l1 [label .t.a.l1 -bitmap stop.xpm]
+set l2 [label .t.a.l2 -bitmap exit.xpm]
+.t.a add_panes $l1 $l2
+
+pack .t.a -fill both -expand yes
+.t raise 
+
+raise .
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Paned.test,v $
+# Revision 1.1.5.1  1994/06/05  17:35:17  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:35:17  mark
+# Initial revision
+#
+#
+#

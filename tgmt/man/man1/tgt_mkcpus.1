@@ -1,0 +1,117 @@
+'\" te
+.TH tgt_mkcpus "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgt_mkcpus
+\- Ver\(:andern der Datenbank, in der Informationen zu CPU-Kartentypen enthalten sind
+.sp
+.SH SYNOPSIS
+.br
+.B tgt_mkcpus -[i|-f file|d|l[ -s <file>]|a]
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgt_mkcpus 
+greift auf die Datenbank
+.B $TMDB/
+.B cpus
+zu.
+.sp
+Folgende Funktionen k\(:onnen ausgef\(:uhrt werden :
+.br
+.in 8
+.B -i 
+: Daten werden in die Datenbank eingetragen. Sie werden interaktiv vom Stdinput eingelesen.
+.br
+.B -f file
+: Die in
+.B file
+enthaltenen Daten werden in die Datenbank eingetragen (Reihenfolge : Kartentyp,
+Ladeadresse, Kernelbinary, Applikationsbinary, alle Angaben in einer Zeile und 
+durch ein Blank getrennt). Es duerfen auch Leerzeilen und Kommentare (beginnend mit #) benutzt werden. Ist kein
+.B file 
+angegeben, werden die Daten vom Stdinput gelesen.
+.br
+.B -d 
+: Daten zur eingegebenen Karte werden aus der Datenbank gel\(:oscht
+.br
+.B -l[ -s file]
+: Eintrag zum eingegebenen CPU-Karte wird ausgegeben. Der Name der
+CPU-Karte mu\[ss] interaktiv eingegeben werden.
+.br
+Ist \fB-s file\fR angegeben, wird der Eintrag an \fBfile\fR angeh\(:angt.
+.br
+.B -a 
+: der gesamte Inhalt der Datenbank wird ausgegben        
+.sp
+Bei den Optionen 
+.B -d
+und
+.B -l
+mu\[ss] der Benutzer den Kartentyp interaktiv eingeben.
+.sp 2
+.in 5
+In der Datenbank 
+sind zu jeder CPU-Karte   
+.br
+.in 8
+- der CPU-Typ (dc, io, ...)
+.br
+- die Ladeadresse f\(:ur den Kernel (hexadezimale Zahl)
+.br
+- der Pfad des Kernelbinaries und
+.br
+- der der Applikation
+.in 5
+.br
+enthalten.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbank mu\[ss] sich in dem Directory
+.B $TMDB
+befinden.
+Ist die Variable TMDB nicht initialisiert, wird sie auf $PWD gesetzt.
+.sp
+.SH R\(:UCKGABEWERT
+.sp
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH FEHLER
+.sp
+- es wird kein oder ein falsches Argument \(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.br
+.sp
+.SH SIEHE AUCH
+cpus(1)
+.sp
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberpr\(:uft nicht, ob die angegebene CPU-Karte schon in
+der Datenbank enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1192
+
+Dirk R\(:utten
+<dirk@cecs.cc.kfa-juelich.de>
+1394

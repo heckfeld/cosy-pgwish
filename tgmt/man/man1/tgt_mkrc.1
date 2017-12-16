@@ -1,0 +1,122 @@
+'\" te
+.TH tgt_mkrc "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgt_mkrc
+\- Ver\(:andern der Datenbank, in der die Beziehung Remote Controller - Field 
+Controller festgehalten ist 
+.sp
+.SH SYNOPSIS
+.br
+.B tgt_mkrc -[i|f file|d|l|a] Gruppe
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgt_mkrc 
+greift auf die Datenbank 
+.B $TGDB/
+.I $Gruppe
+.B _fc
+zu.
+.sp
+In der Datenbank sind
+.br
+.in 8
+- der Targetname des VME-Crates
+.br 
+- die Nodeadresse im VME-Crate (hexadezimale Zahl)
+.br
+- das FBi (dezimale Zahl)
+.br
+- der logische Name des Remote Controllers
+.br
+.in 5
+festgehalten.
+.sp 2
+Folgende Funktionen k\(:onnen ausgef\(:uhrt werden :
+.sp
+.in 8
+.B -i 
+: Daten werden in die Datenbank eingetragen. Sie werden interaktiv vom Stdinput eingelesen.
+.br
+.B -f file
+: Die in 
+.B file
+enthaltenen Daten werden in die Datenbank eingetragen (Reihenfolge : FC, Nodeadresse, FBi und RC,
+alle Angaben in einer Zeile und durch ein Blank getrennt).
+.br
+.B -d 
+: Daten werden gel\(:oscht
+.br
+.B -l 
+: RC zu eingegebenen FC, Nodeadresse und FBi wird ausgegeben
+.br
+.B -a 
+: der Inhalt der Datenbank wird ausgegeben        
+.in 5
+.sp
+Bei den Optionen
+.B -d
+und
+.B -l
+mu\[ss] der Benutzer den Targetnamen, die Nodeadresse im VME-Crate und das FBI interaktiv eingeben.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TGDB
+m\(:ussen gesetzt sein.
+Die Datenbank befindet sich in dem Directory 
+.B $TGDB 
+und der Datenbankname enth\(:alt
+ den Namen der
+Gruppe, zu der der Remote-Controller geh\(:ort (
+.I $Gruppe
+_rc).
+.sp
+.SH R\(:UCKGABEWERT
+.br
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH SEITENEFFEKTE
+Der 
+.B pmf_server 
+wird zu Beginn des Programms gestartet und am Ende gestoppt.
+Falls der Server beim Aufruf von 
+.B tgt_mkrc 
+schon l\(:auft, 
+wird er nicht gestoppt.
+.sp
+.SH FEHLER
+.sp
+- es wird kein oder ein falsches Argument \(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.br
+- der
+.B pmf-server
+kann nicht gestartet oder gestoppt werden
+.sp
+.SH SIEHE AUCH
+.sp
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberpr\(:uft nicht, ob das eingegebene Target schon in der Datenbank 
+enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1192

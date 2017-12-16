@@ -1,0 +1,108 @@
+###############################################################################
+#
+#                                  README
+#                     /home/tine/nepol/nepol_calculation
+#
+#2345678901234567890123456789012345678901234567890123456789012345678901234567890
+#
+# kopiert von /mnt/cc-x/cc-x3/coob/src/nepol/nepol_calculation
+#
+###############################################################################
+#
+# prompt> autoscan
+# prompt> mv configure.scan configure.ac
+# prompt> vi configure.ac
+# ==> ...
+#     AC_INIT(nepol_calculation, 0.0, c.deliege@fz-juelich.de)
+#     AM_INIT_AUTOMAKE([foreign])
+#     ...
+#     # Checks for libraries.
+#     AC_CHECK_LIB([m], [sqrt])
+#     ...
+#     AC_CONFIG_FILES([Makefile])
+#     ...
+#
+# prompt> aclocal
+# prompt> autoconf
+# prompt> autoheader
+# prompt> automake -a
+# prompt> ./configure
+# prompt> make
+#
+# prompt> make distcheck
+#
+###############################################################################
+
+--- Do 1. Okt 10:46:02 CEST 2015
+
+	alle Programme und Libraries sind auf autoconf/automake ungestellt
+
+	mit autoscan wurde initial das autoconf.ac erzeugt
+	das Makefile.am jeweils für Programme und Libraries neu erstellt ( siehe templates )
+
+	nach Änderungen am Makefile.am unbedingt autoreconf -i aufrufen
+	und ./config.status im build-ordner ( ubuntu, plisch, ... )
+
+	Fehler in utils/srecord.c und utils/gentry.c
+		unsigned long -> u_int_32
+		#include <sys/types.h>
+
+--- Fr 2. Okt 09:41:40 CEST 2015
+	sto.c in utils fehlte
+	fehler in boot: vergleich vone hostname == workcell schlägt fehl bei frieda-a und bagira-a
+
+	ordner plisch für PLISCH
+	ordner ubuntu für FRIEDA
+	ordner id91 für  MiniPC id91 mit ubuntu desktop
+
+--- Mi 21. Okt 09:43:29 CEST 2015
+
+	Es fehlt auf den ubuntu rechnern die postgres lib und die header
+	apt-get install postgresql-client libpq-dev
+	apt-get install libpcap-dev
+
+	autoreconf -i kann nur auf frieda gestartet werden (wegen der höheren Versions # 2.69)
+
+	erfolgreich auf id91 kompiliert
+
+--- Mi 21. Okt 17:43:47 CEST 2015
+
+	Einige Regeln für eine erfolgrecihe Umstellung auf autoconf
+
+	- Neuanfang ist immer gut, alle Ordner erstellen, Dateien kopieren
+	  und dann autoscan aufrufen, bei Unterordnern mit configure dort
+	  beginnen und dann immer weiter nach oben
+	- wenn es etwas zu tun gibt, wird immer ein Makefile.am benötigt
+	- nur wenn es etwas zu konfigurieren gibt, braucht man ein
+	  configure.ac
+	- niemals direkt im source tree configure oder make aufrufen,
+	  sondern immer einen build Ordner dafür erstellen
+	  dann braucht es auch kein bin oder lib Ordner
+	- im root Ordner ist immer ein configure.ac und ein Makefile.am
+	- weitere configure.ac werden mit AC_CONFIG_SUBDIRS eingebunden
+	- Ordner ohne configure.ac aber mit Makefile.am werden mit
+	  AC_CONFIG_FILES eingebunden
+	- AC_PROG_LIBTOOL gehört immer dazu. Es erledigt wirklich alles
+	  rund um das komiplieren und linken
+
+--- Samstag 7. Nov 09:40 CEST 2015
+	Checkout mit eclipse auf macbookpro
+
+--- Fr 27. Nov 10:07:43 CET 2015
+
+	auf svn://134.94.224.23/cpc übertragen (svnadmin dump , svnadmin load)
+
+	subversion Revision Number in programs:
+	http://caulfield.info/emmet/2008/05/get-the-subversion-revision-nu.html
+
+	Put the following in configure.ac:
+	define([svnversion], esyscmd([sh -c "svnversion|tr -d '\n'"]))dnl
+	AC_INIT([myprog], [0.1.svnversion], [myprog@example.com])
+
+	Put the following in configure.ac:
+	AC_DEFINE(SVN_REVISION, "svnversion", [SVN Revision])
+
+
+	svn ci -m "Kommentar" erzeugt eine neue Version.
+	svnversion ergibt dann irgendwas mit 8:10
+	erst ein svn update sorgt dann wieder für eine einzelne Zahl svnversion -> 10

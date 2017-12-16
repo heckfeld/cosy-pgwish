@@ -1,0 +1,119 @@
+NAME
+       blt_bitmap - Define bitmap from data
+
+SYNOPSIS
+       blt_bitmap define name dataList
+
+       blt_bitmap exists name
+
+       blt_bitmap bits name
+
+       blt_bitmap data name
+
+       blt_bitmap height name
+
+       blt_bitmap width name
+
+       blt_bitmap compose name text ?options?
+
+DESCRIPTION
+       This command creates an internal bitmap for Tk from a list
+       of data and associates it with a given  name.   It  essen-
+       tially  offers the functionality of Tk_DefineBitmap at the
+       Tcl programming level.
+
+BITMAP COMMANDS
+       The following commands are available for blt_bitmap:
+
+       blt_bitmap define name dataList
+              Associates name with in-memory bitmap data so  that
+              name  can  be  used in later calls to Tk_GetBitmap.
+              The name argument is the name  of  the  bitmap;  it
+              must  not  previously have been defined in either a
+              call to Tk_DefineBitmap or blt_bitmap.   The  argu-
+              ment  dataList  describes the bitmap to be created.
+              It is a list of two elements,  the  dimensions  and
+              source data.  The dimensions are a list of two num-
+              bers which are the width and height of the  bitmap.
+              The  source data is a list of hexadecimal values in
+              a format similar to the X11 or X10  bitmap  format.
+              The  values  may  be optionally separated by commas
+              and do not need to be prefixed with "0x".
+
+       blt_bitmap exists name
+              Returns "1" if a bitmap name exists, otherwise "0".
+
+       blt_bitmap bits name
+              Returns  the  source  data  of the bitmap name. The
+              source data is a list of  the  hexadecimal  values.
+              It  is  an error if name does not represent a valid
+              bitmap.
+
+       blt_bitmap data name
+              Returns a list of both the dimensions of the bitmap
+              name  and  its source data.  It is an error if name
+              does not represent a valid bitmap.
+
+       blt_bitmap height name
+              Returns the height of the bitmap name.   It  is  an
+              error if name does not represent a valid bitmap.
+
+       blt_bitmap width name
+              Returns  the  width  of  the bitmap name.  It is an
+              error if name does not represent a valid bitmap.
+
+       blt_bitmap compose name text ?options?
+              Creates a bitmap name from the text string text.  A
+              bitmap  name  can not already exist.  The following
+              options are available.
+
+              -font fontName
+                     Specifies a font to use  when  drawing  text
+                     into the bitmap.  If this option isn't spec-
+                     ified then fontName defaults to *-Helvetica-
+                     Bold-R-Normal-*-140-*.
+
+              -rotate theta
+                     Specifies  the angle of rotation of the text
+                     in the bitmap.  Theta is a real number  rep-
+                     resenting the angle in degrees.  It defaults
+                     to 0.0 degrees.
+
+EXAMPLES
+       The  following  examples  demonstrate  the  various  forms
+       dataList may take in the blt_bitmap command.
+
+       The elements may or may not be separated by commas.
+
+              blt_bitmap define light_gray { { 4 2 } { 0x08, 0x02 } }
+              blt_bitmap define light_gray { { 4 2 } { 0x08 0x02 } }
+
+       Each  element  is a hexadecimal number which is optionally
+       prefixed by "0x".
+
+              blt_bitmap define light_gray { { 4 2 } { 8 2 } }
+
+       The hex values of data can be represented in either X11 or
+       X10  bitmap format.  In X11 bitmap format, each element is
+       an unsigned character.
+
+              blt_bitmap define face { { 16 16 } {
+                 0x1f, 0xf8, 0xc7, 0xe3, 0xf3, 0xcf, 0xf9, 0x9f,
+                 0xfd, 0xbf, 0xcc, 0x33, 0xfe, 0x7f, 0xfe, 0x7f,
+                 0x7e, 0x7e, 0xfe, 0x7f, 0xec, 0x37, 0xdd, 0xbb,
+                 0x39, 0x9c, 0xf3, 0xcf, 0xc7, 0xe3, 0x1f, 0xf8 }
+              }
+
+       While in X10 format, they instead  represent  short  inte-
+       gers.
+              blt_bitmap define face { 16 16 } {
+                  0xf81f, 0xe3c7, 0xcff3, 0x9ff9, 0xbffd, 0x33cc,
+                  0x7ffe, 0x7ffe, 0x7e7e, 0x7ffe, 0x37ec, 0xbbdd,
+                  0x9c39, 0xcff3, 0xe3c7, 0xf81f
+              }
+
+BUGS
+       There is no way to delete or redefine a bitmap.
+
+KEYWORDS
+       bitmap

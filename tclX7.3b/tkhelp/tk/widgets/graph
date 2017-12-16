@@ -1,0 +1,1373 @@
+NAME
+       blt_graph - Create and manipulate graph widgets
+
+SYNOPSIS
+       blt_graph pathName ?options?
+
+STANDARD OPTIONS
+       background      cursor         foreground
+       borderWidth     font           relief
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       bottomMargin    leftMargin     title
+       bufferElements  plotBackground topMargin
+       halo            plotBorderWidth                width
+       height          plotRelief
+       invertxy        rightMargin
+
+DESCRIPTION
+       The blt_graph command creates a new window (given  by  the
+       pathName  argument)  and  makes  it  into an graph widget.
+       Additional options, described above, may be  specified  on
+       the  command  line  or in the option database to configure
+       aspects of the graph such as its  colors  and  font.   The
+       blt_graph  command  returns its pathName argument.  At the
+       time this command is invoked, there must not exist a  win-
+       dow named pathName, but pathName's parent must exist.
+
+       The  blt_graph widget plots two-variable data in a window.
+       It has of several components; coordinate axes, crosshairs,
+       a legend, and a collection of elements and tags.
+
+   COORDINATE AXES
+       The graph widget has four axes, two standard (x and y) and
+       two alternate (x2 and y2).  Graph elements  and  tags  are
+       mapped  onto  one  x-axis and y-axis (by default, they are
+       mapped onto the standard axes).
+
+       Each axis consists of the axis line and  major  and  minor
+       ticks  placed  at  set  intervals.  At major ticks, labels
+       (text strings) representing the coordinate  value  of  the
+       tick  are  drawn.   By default, the tick labels are simply
+       numeric strings.  However, a Tcl procedure can be supplied
+       to individually format each tick label.
+
+       The  scale of the axis is determined its minimum and maxi-
+       mum limits.  By default, each axis  is  auto-scaled  using
+       the data limits.  However either limit can be set to manu-
+       ally scale the graph.
+
+   CROSSHAIRS
+       Crosshairs  are  a  set  of  two   lines   (vertical   and
+       horizontal) which intersect on the graph.  They are imple-
+       mented using  XOR  drawing  primitives,  so  they  do  not
+       require  the  graph  to  be redrawn when they are moved or
+       redisplayed.
+
+   ELEMENTS
+       A graph element is a set of data points and  configuration
+       options  which  determine how the data is displayed.  Ele-
+       ments are created by the element  create  widget  command.
+       The  configuration options may be specified as the element
+       is created or later by the element configure  widget  com-
+       mand.   There is an internal display list of element names
+       which controls the  drawing  order  of  the  elements.  By
+       default, elements are appended to the display list as they
+       are created.  The element display list can be  managed  by
+       the element show command.
+
+   LEGEND
+       The legend consists of a list of entries, where each entry
+       is an element symbol and label.  By default, the legend is
+       located  in  the  right margin of the graph.  However, the
+       legend may appear anywhere in the  plotting  area  of  the
+       graph by specifying its window coordinates.
+
+   TAGS
+       Tags  are  simple  drawing  procedures used to annotate or
+       highlight areas of the graph. A tag may be either  a  text
+       string,  bitmap,  line,  window, or polygon.  A tag may be
+       associated with a particular element, so that the  tag  is
+       displayed  only if the element is displayed.  Tags are the
+       first items drawn when the graph  is  displayed,  so  that
+       elements, symbols, legend, and axes always appear in front
+       of them.
+
+       Tags differ from elements in that they do not  affect  the
+       auto-scaling  of  coordinate  axes.  Furthermore, tags can
+       have  elastic  coordinates  (specified  by  -Inf  and  Inf
+       respectively)  which  translate  into  the axis minimum or
+       maximum limit.  For example, to place a tag so  it  always
+       remains  in  the  lower  left  corner of the plot, use the
+       coordinates -Inf,-Inf.
+
+WIDGET COMMANDS
+       The blt_graph command creates a new Tcl command whose name
+       is  pathName.   This command may be used to invoke various
+       operations on the widget.  It has the general form:
+
+              pathName option ?arg arg ...?
+       Option and the args determine the exact  behavior  of  the
+       command.   The  following commands are valid for blt_graph
+       widgets:
+
+       pathName configure ?options...?
+              Queries or modifies the  configuration  options  of
+              the widget.  Valids options are described in WIDGET
+              OPTIONS.
+
+       pathName crosshairs configure ?options...?
+              Queries or modifies the  configuration  options  of
+              the  crosshairs.   This  command  is similar to the
+              configure command, except that it  applies  to  the
+              options   of   the  crosshairs,  whereas  configure
+              applies to the options for the graph  as  a  whole.
+              See  CROSSHAIRS  OPTIONS for a description of valid
+              options.
+
+       pathName crosshairs toggle
+              Toggles the current state of the crosshairs,  turn-
+              ing  them on or off.  This command returns an empty
+              string.
+
+       pathName element activate name ?index...?
+              Specifies which data points of element name are  to
+              be  drawn  using  active  foreground and background
+              colors.  Name is the name of the element and  index
+              is  a  number  representing  the  index of the data
+              point. If no indices  are  present  then  all  data
+              points  become  active.   This  command returns the
+              empty string.
+
+       pathName element append name coords
+              Appends pairs of x,y data points to  element  name.
+              coords  is a list of numeric expressions (x,y graph
+              coordinates) representing data points.  It  returns
+              the empty string.
+
+       pathName element closest winX winY ?name...?
+              Finds  the data point closest to the window coordi-
+              nates winX  and  winY  in  the  element  name.   It
+              returns  a  list containing the name of the closest
+              element, the index of its closest  point,  and  the
+              graph  x,y  coordinates  of  the point.  If no data
+              point within a threshold distance can be found (see
+              the -halo option), then the empty list is returned.
+              Name is the name  of  an  element,  which  must  be
+              mapped.   If  no  elements  are specified, then all
+              mapped elements are searched.
+
+       pathName element configure name ?options...?
+              This command is similar to the  configure  command,
+              except  that  it applies to the options of an indi-
+              vidual element, whereas configure  applies  to  the
+              options for the graph as a whole.  Options may have
+              any of the values accepted by  the  element  create
+              widget  command. See ELEMENT OPTIONS for a descrip-
+              tion of valid options.
+       pathName element create name ?options...?
+              Creates a new element name in the  graph.   Element
+              names must be unique, so name can not already exist
+              in the graph.  If additional arguments are present,
+              they  specify  any of the element options (see ELE-
+              MENT OPTIONS ).
+
+       pathName element deactivate name ?name...?
+              Deactivate the named elements.  The  elements  will
+              be  redrawn using their normal foreground and back-
+              ground colors.  Name is the name  of  the  element.
+              This command returns the empty string.
+
+       pathName element delete ?name ...?
+              Deletes  the  element name from the graph.  Returns
+              the empty string.
+
+       pathName element names
+              Returns a list of all elements. This  differs  from
+              element  show  in  that it returns the names of all
+              elements, not just those  in  the  element  display
+              list.
+
+       pathName element show ?names?
+              Queries  or  resets  the element display list.  The
+              element display list  defines  which  elements  are
+              drawn  and  in  what order.  Names is a list of the
+              elements to be displayed.  If  there  is  no  names
+              argument, the list of elements currently being dis-
+              played is returned.
+
+       pathName invtransform winX winY
+              Performs an inverse coordinate transformation, map-
+              ping  x,y  window  coordinates to graph coordinates
+              (using the standard x and y axes).  Returns a  list
+              of containing the x and y graph coordinates.
+
+       pathName legend activate name...
+              Specifies that the legend entries of the named ele-
+              ments should be drawn with the active legend  back-
+              ground and foreground colors.  The entries may also
+              be  drawn  with  a  different  relief  (using   the
+              -activerelief   and   -activeborderwidth  options).
+              Name is the name of an element in the graph.
+
+       pathName legend configure ?options...?
+              This command is similar to the  configure  command,
+              except  that it applies to the options for the leg-
+              end, whereas configure applies to the  options  for
+              the  graph  as  a  whole.  See LEGEND OPTIONS for a
+              description of valid options.
+
+       pathName legend deactivate name...
+              Specifies that  the  legend  enties  of  the  named
+              elements should be drawn with the legend background
+              and foreground colors.  Name is the name of an ele-
+              ment in the graph.
+
+       pathName legend get string
+              Returns  the  name of the graph element at the cur-
+              rent screen position in the legend.  String must be
+              in  the  form  @x,y,  where  x and y are the window
+              coordinates.  If the given  screen  coordinates  do
+              not  lie  over  a legend entry, the empty string is
+              returned.
+
+       pathName postscript ?fileName? ?options...?
+              Generates PostScript commands to print  the  graph.
+              If  no fileName argument is present, the PostScript
+              output is returned. Otherwise, fileName is  created
+              and  will  contain  the PostScript output.  In this
+              case the empty string is returned.  If any  option-
+              value  pairs  are  present,  they set configuration
+              options controlling how the  PostScript  is  gener-
+              ated.  See  POSTSCRIPT OPTIONS for a description of
+              valid options.
+
+       pathName psconfigure ?options...?
+              Queries or modifies the options of  the  postscript
+              command.   See POSTSCRIPT OPTIONS for a description
+              of valid options.
+
+       pathName tag after tagId ?tagId?
+              Reorders the tag display list placing the first tag
+              specified  after  the  second.   If no second tagId
+              argument is specified, the tag is placed at the end
+              of  the  list.  This command can be used to control
+              how tags are displayed since tags are drawn in  the
+              order  of  this  display list.  The empty string is
+              returned.
+
+       pathName tag before tagId ?tagId?
+              Reorders the tag display list placing the first tag
+              specified  before  the  second.  If no second tagId
+              argument is specified, the tag  is  placed  at  the
+              beginning of the list.  This command can be used to
+              control how tags are displayed since tags are drawn
+              in  the  order  of  this  display  list.  The empty
+              string is returned.
+
+       pathName tag configure tagId ?options...?
+              Queries or modifies the  configuration  options  of
+              the particular tag.  See TAG OPTIONS for a descrip-
+              tion of valid options.
+
+       pathName tag coords tagId ?coords?
+              Queries or resets the coordinates of the tag desig-
+              nated by tagId.  If coords is present, it is a list
+              of coordinate pairs representing the points of  the
+              tag.  This list is used to re-position the tag.  If
+              the coords argument is  not  present,  the  current
+              list of coordinates for tagId is returned.
+
+       pathName tag create type ?coords? ?options...?
+              Creates  a  tag  of  the selected type. Type may be
+              either text,  line,  bitmap,  polygon,  or  window.
+              coords is a list of coordinate pairs of points used
+              to  position  the  tag.   See  TAG  OPTIONS  for  a
+              description of valid options.  This command returns
+              a unique tag identifier, which is used as the tagId
+              argument in other tag-related commands.
+
+       pathName tag delete tagId ?tagId..?
+              Deletes  each  of the specified tags.  This command
+              returns the empty string.
+
+       pathName tag ids ?pattern?
+              Returns a list of IDs of tags created.  If  pattern
+              is  supplied, only those tags whose IDs matching it
+              will be returned.
+
+       pathName tag type tagId
+              Returns the type of the tag given by tagId, such as
+              Line  or Text.  If tagId is not a valid a tag iden-
+              tifier, the empty string is returned.
+
+       pathName transform x y
+              Transforms the graph coordinates into window  coor-
+              dinates,  by  mapping  the  x and y values onto the
+              standard axes (x and y).  Returns a list containing
+              the  x  and y window coordinates.  Please note that
+              graph coordinates far outside of the axis range are
+              not guarenteed to be accurate.
+
+       pathName xaxis configure ?options...?
+
+       pathName yaxis configure ?options...?
+
+       pathName x2axis configure ?options...?
+
+       pathName y2axis configure ?options...?
+              Queries  or  modifies  the configuration options of
+              the  coordinate  axis.   See  AXIS  OPTIONS  for  a
+              description of valid options.
+
+       pathName xaxis limits
+
+       pathName yaxis limits
+
+       pathName x2axis limits
+       pathName y2axis limits
+              Returns  a list of two graph coordinates represent-
+              ing the minimum and maximum limits of  the  x-axis.
+              The format of the list returned is min max.
+
+
+CONFIGURATION OPTIONS
+   WIDGET OPTIONS
+       The  following  widget options are valid for the configure
+       command.
+
+              pathName configure ?option? ?value option value ...?
+       The configure command queries or modifies  the  configura-
+       tion  options  of  the widget.  If no option is specified,
+       returns a list describing all of the available options for
+       pathName (see Tk_ConfigureInfo for information on the for-
+       mat of this list).  If option is specified with no  value,
+       then  the  command returns a list describing the one named
+       option (this list will be identical to  the  corresponding
+       sublist  of the value returned if no option is specified).
+       If one or more option-value pairs are specified, then  the
+       command  modifies  the  given widget option(s) to have the
+       given value(s); in this case the command returns the empty
+       string.
+
+       -bottommargin pixels
+              Specifies  the  size  of  the  margin  from  the x-
+              coordinate axis to the bottom of the  window.   The
+              x-axis  title  is displayed in this margin.  Pixels
+              may be specified in any of the forms  described  in
+              Tk_GetPixels.   If  pixels  is less than one pixel,
+              the the margin size is selected automatically.
+
+       -bufferelements boolean
+              Specifies whether to use a pixmap to cache the dis-
+              play  of  elements.  This is especially useful when
+              there are many data points or the graph is  redrawn
+              frequently.  Boolean is true by default.
+
+       -halo pixels
+              Specifies  a  threshold distance when searching for
+              the closest data point  (see  the  element  closest
+              command).   Only  data  points within this distance
+              are considered in the search.  If this option isn't
+              specified, it defaults to 0.5i.
+
+       -height pixels
+              Specifies  a  desired  window height that the graph
+              widget should request from  its  geometry  manager.
+              The default height is 400.
+
+       -invertxy boolean
+              Specifies that placement of the x and y axes should
+              be inverted.  If boolean is  true,  the  x-axis  is
+              exchanged  with  the y-axis.  By default boolean is
+              false.
+
+       -leftmargin pixels
+              Sets the size of the margin from the left  edge  of
+              the  window  to  the the y-coordinate axis.  The y-
+              axis title is displayed in this margin.  If  pixels
+              is less than one pixel, the margin size is selected
+              automatically.
+
+       -plotbackground color
+              Sets the background color of the plotting area.
+
+       -plotborderwidth pixels
+              Sets the width of the 3-D border to draw around the
+              outside  of  the  plotting  area (if such border is
+              being  drawn;  the  plotrelief  option   determines
+              this).  By default is the plot border width is 2.
+
+       -plotrelief string
+              Specifies  the  3-D effect desired for the plotting
+              area.   String  must  be  in  a  form  accepted  by
+              Tk_GetRelief.  It indicates how the interior of the
+              plotting area should appear relative to rest of the
+              graph;  for  example,  raised means the plot should
+              appear to protrude from the graph, relative to  the
+              surface  of the graph.  By default, the plot relief
+              is sunken.
+
+       -rightmargin pixels
+              Sets the size of marging from the plotting area  to
+              the right edge of the window.  By default, the leg-
+              end is displayed in this  margin.   If  Ipixels  is
+              than  1, the margin size is selected automatically.
+
+       -title string
+              Specifies the title of the graph.  If string is the
+              empty  string (the default), no title is displayed.
+
+       -topmargin pixels
+              Sets the size of the marging the top  edge  of  the
+              window  to  the  plotting area.  The graph title is
+              displayed in this margin.  If pixels is  less  than
+              1, the margin size is selected automatically.
+
+       -width pixels
+              Specifies  a  desired  window  width that the graph
+              widget should request from  its  geometry  manager.
+              The default width is 400.
+
+
+   AXIS OPTIONS
+       The  following  options are valid for the xaxis configure,
+       yaxis  configure,  x2axis  configure,   and   the   y2axis
+       configure commands.
+
+              pathName xaxis configure ?options...?
+
+              pathName yaxis configure ?options...?
+
+              pathName x2axis configure ?options...?
+
+              pathName y2axis configure ?options...?
+       In addition, axis configuration options may be initialized
+       by the option command.  The name fields in  the  blt_graph
+       option  database are prefixed by x, y, x2, or y2 while the
+       class fields are prefixed by Axis. The  following  example
+       sets the color of all axes to blue and the x-axis scale to
+       logarithmic.
+
+              option add *Blt_graph.AxisColor blue
+              option add *Blt_graph.xLogscale true
+
+       -color color
+              Sets the color of the axis and  its  labels.   This
+              option defaults to black.
+
+       -command prefix
+              Specifies  a Tcl command to be invoked when format-
+              ting the axis labels.  Prefix is typically just the
+              name  of  a  Tcl procedure, but the string may also
+              contain extra arguments for  the  procedure.   When
+              invoked,  two arguments (the path name of the graph
+              widget and the numeric value of the axis label) are
+              appended  to the end of the command.  The procedure
+              value should be a string representing the formatted
+              label.  If the value is the empty string or if pre-
+              fix is the empty string, the default axis label  is
+              displayed.   Please  note  that  this  procedure is
+              invoked during the display of the graph.  Resetting
+              graph  configurations  within  this  procedure  can
+              cause unexpected results.
+
+       -descending boolean
+              Specifies whether the values  along  the  axis  are
+              increasing  or decreasing.  If boolean is true, the
+              axis values will decrease.  By  default,  the  axis
+              values increase.
+
+       -font fontName
+              Specifies  the  font  for  axis labels. If fontName
+              isn't specified then it defaults to *-Courier-Bold-
+              R-Normal-*-100-*.
+
+       -linewidth pixels
+              Sets the line width of the axis and its ticks.  The
+              default line width is 0.
+       -logscale boolean
+              Sets the scale of the coordinate axis (either loga-
+              rithmically  or linearly).  If boolean is true, the
+              axis  will  be  displayed  in  logarithmic   scale.
+              Boolean must be a value accepted by Tcl_GetBoolean.
+              By default, the scale is linear.
+
+       -loose boolean
+              Indicates that when auto-scaling the axis, the axis
+              range  should fit loosely around the data points at
+              the outer tick intervals.  Otherwise the axis range
+              fits  tightly  at the limits of the data displayed.
+              By default, the range is tight.
+
+       -mapped boolean
+              Specifies if  the  axis  should  be  displayed.  By
+              default, the standard axes are displayed (x and y),
+              but not the alternate (x2 and y2).
+
+       -max value
+              Sets the maximum limit of the  axis.   Data  points
+              exceeding  this limit are clipped at this value. If
+              value is the empty string (the default),  the  axis
+              is  auto-scaled whereby the maximum limit is deter-
+              mined from the data points of  the  displayed  ele-
+              ments.
+
+       -min value
+              Sets  the  minimum  limit  of the axis. Data points
+              less than this limit are clipped at this value.  If
+              value  is  the empty string (the default), the axis
+              is auto-scaled whereby the minimum limit is  deter-
+              mined  from  the  data points of the displayed ele-
+              ments.
+
+       -rotate theta
+              Specifies the rotation of the axis  labels.   Theta
+              is a real number representing the angle of rotation
+              in degrees.  The default rotation is 0.0 degrees.
+
+       -showticks boolean
+              Indicates if axis ticks  should  be  displayed.  If
+              boolean is true (the default), ticks are displayed.
+
+       -stepsize value
+              Sets the step size between major axis ticks.  Value
+              must  be  greater  than zero and less than the axis
+              range, or the requested step size  is  ignored  and
+              the  step  size  is  automatically calculated based
+              upon the element data points.
+
+       -subticks number
+              Sets the number of minor  axis  ticks  to  be  dis-
+              played.   By  default, the number of minor ticks is
+              5.  If number is zero, no  subticks  will  be  dis-
+              played.
+
+       -ticklength pixels
+              Sets the length of the ticks and subticks (subticks
+              are one-half pixels).  If pixels is negative, ticks
+              will  point  towards the plot, instead of away from
+              it.  The tick length is 0.1i.
+
+       -title string
+              Sets the title of the axis. If string is the  empty
+              string, no axis title will be displayed.
+
+
+   CROSSHAIRS OPTIONS
+       The  following options are valid for the crosshair config-
+       ure command.
+
+              pathName crosshairs configure ?options...?
+       In addition, crosshairs configuration options may be  ini-
+       tialized  by  the  option command.  The name fields in the
+       blt_graph option database are prefixed by  by  xhairs  and
+       classfields are prefixed by Xhairs.  The following example
+       sets the line width of the crosshairs to 2.
+
+              option add *Blt_graph.xhairsLinewidth 2
+
+       -color color
+              Sets the color of the crosshairs.  If  this  option
+              isn't specified, then it defaults to black.
+
+       -dashes dashes
+              Sets  the  dash  style of the crosshairs. dashes is
+              the number of alternatingly  displayed  pixels.  If
+              dashes  is  0 (the default), the crosshairs will be
+              drawn as a solid line.
+
+       -linewidth pixels
+              Set the line width of crosshairs.  The default line
+              width is 0.
+
+       -mapped boolean
+              Specifies if the crosshairs should be displayed. By
+              default, the crosshairs are not displayed.
+
+       -position string
+              Specifies the position of  the  crosshairs.  String
+              must  be in the format @x,y, where x and y are win-
+              dow coordinates.
+
+
+   ELEMENT OPTIONS
+       The following options are valid for the element create and
+       element  configure  commands.   Name  is  the  name of the
+       element to be configured.
+
+              pathName element create name ?options...?
+
+              pathName element configure name ?options...?
+       In addition, element configuration options may be initial-
+       ized  by  the  option  command.   The  name  fields in the
+       blt_graph option database are prefixed by elem.  The  fol-
+       lowing  example  sets  the  symbol type of all elements to
+       line and the line width of all elements to 2.
+
+              option add *Blt_graph.elemSymbol line
+              option add *Blt_graph.LineWidth 2
+
+       -activebackground color
+              Like the  -background  option,  but  specifies  the
+              background  color  to  use when drawing data points
+              which are active (see  the  element  activate  com-
+              mand).
+
+       -activeforeground color
+              Like  the  -foreground  option,  but  specifies the
+              foreground color to use when  drawing  data  points
+              which  are  active  (see  the element activate com-
+              mand).
+
+       -activelinewidth pixels
+              Sets the width of the lines drawn when the  element
+              is active.  If pixels is zero and the symbol is not
+              line,  no line will be drawn when  the  element  is
+              active.  The default line width is 1.
+
+       -background color
+              If  the  symbol  type is line, then color specifies
+              the background color for dashed  lines.   For  non-
+              line  symbols,  color  specifies the fill color for
+              the symbol (the foreground color is  the  outline).
+              If  this option isn't specified then it defaults to
+              white.
+
+       -dashes dashes
+              Sets the dash style for lines. dashes is the number
+              of  alternatingly  colored  (foreground/background)
+              pixels. If dashes is 0 (the default), the  line  is
+              drawn  in  a  solid  fashion.  This option only has
+              effect only if the symbol type is line  or  if  the
+              line width is greater than zero.
+
+       -data values
+              Specifies  the  graph  coordinates  of the the data
+              points to be plotted.  Values is a  list  of  valid
+              numeric  expressions.   It this option isn't speci-
+              fied, it defaults to the empty string.
+       -foreground color
+              Sets the foreground color of the element.  If  this
+              option isn't specified then it defaults to black.
+
+       -label string
+              Sets  the  element  label.  Labels are displayed in
+              the legend next to the element symbol.   If  string
+              is  the  empty string, no legend entry will be dis-
+              played for the element.  By default, the  label  is
+              the name of the element.
+
+       -linewidth pixels
+              Sets  the  width  of the lines drawn.  For non-line
+              symbols, if pixels is greater than zero, a line  is
+              drawn  between the symbols.  The default line width
+              is 0.
+
+       -mapx type
+              Specifies which x-axis  to  map  the  element's  x-
+              coordinates  onto.   Type  must be either x, x2, or
+              both.  The default axis is x.
+
+       -mapy type
+              Specifies which y-axis  to  map  the  element's  y-
+              coordinates  onto.   Type  must be either y, y2, or
+              both.  The default axis is y.
+
+       -noretrace boolean
+              If boolean is true, data points where  x-coordinate
+              values  are not monotonically increasing (where the
+              current x-coordinate value is less than the  previ-
+              ous)  indicate  the  start  of a new line.  In this
+              case, no connecting line segment will be drawn from
+              the  last  to  the  current  point.   If boolean is
+              false, all points will be connected  by  line  seg-
+              ments,  regardless  of  their  order.   The default
+              value is false.
+
+       -scale value
+              Specifies a scale factor for the size of  the  ele-
+              ment's symbol. The default scale factor is 1.0.
+
+       -symbol type
+              Type  specifies the type of symbol to use for plot-
+              ting data points.  Valid  symbol  types  are  line,
+              square,  circle,  diamond,  plus, cross, splus, and
+              scross.  The default symbol type is line.
+
+       -trace string
+              Indicates if to trace  (draw  lines)  between  data
+              points  where  values are increasing or decreasing.
+              String must be either  increasing,  decreasing,  or
+              both.   For  example, if string is increasing, data
+              points   where   x-coordinate   values   are    not
+              monotonically  increasing  (where  the  current  x-
+              coordinate value is less than the  previous)  indi-
+              cate  the  start  of  a new line.  In this case, no
+              connecting line segment will be drawn from the last
+              to  the  current  point.   If  string  is both, all
+              points will be connected by line segments,  regard-
+              less of their order.  The default value is both.
+
+       -xdata values
+              Specifies  the  x-coordinates of the data points to
+              be plotted.  Values is  a  list  of  valid  numeric
+              expressions.   It  this  option isn't specified, it
+              defaults to the empty string.
+
+       -ydata values
+              Specifies the y-coordinates of the data  points  to
+              be  plotted.   Values  is  a  valid list of numeric
+              expressions.  It this option  isn't  specified,  it
+              defaults to the empty string.
+
+
+   LEGEND OPTIONS
+       The  following  options are valid for the legend configure
+       command.
+
+              pathName legend configure ?options...?
+       In addition, legend configuration options may be  initial-
+       ized  by  the  option  command.   The  name  fields in the
+       blt_graph option database are  prefixed  by  legend.   The
+       following  example initializes the legend foreground color
+       to blue in the option database.
+
+              option add *Blt_graph.legendForeground blue
+
+       -activebackground color
+              Sets the active background  color  of  the  legend.
+              All  legend  entries  marked  as active (see legend
+              activate command) are drawn  with  this  background
+              color.
+
+       -activeborderwidth pixels
+              Sets the width of the 3-D border to draw around the
+              outside of the each active legend  entry  (if  such
+              border  is  being  drawn;  the -activerelief option
+              determines this).  By default is the active  border
+              width is 2.
+
+       -activeforeground color
+              Sets  the  active  foreground  color of the legend.
+              All legend entries marked  as  active  (see  legend
+              activate  command)  are  drawn with this foreground
+              color.
+       -activerelief string
+              Specifies the 3-D effect desired for active  legend
+              entries.   String  must  be  in  a form accepted by
+              Tk_GetRelief.  It indicates how   the  interior  of
+              the entry should appear relative to the legend; for
+              example, raised means the entry  should  appear  to
+              protrude  from  the legend, relative to the surface
+              of the  legend.   By  default,  the  active  legend
+              relief is flat.
+
+       -anchor anchorPos
+              Tells  how  to  position the legend relative to the
+              positioning point for  the  legend;  anchorPos  may
+              have  any  of  the  forms accepted by Tk_GetAnchor.
+              For example, if anchorPos is center then the legend
+              is  centered  on  the point; if anchorPos is n then
+              the legend will be drawn such that the  top  center
+              point  of  the  rectangular  region occupied by the
+              legend will be  at  the  positioning  point.   This
+              option defaults to center.
+
+       -background color
+              Sets the background color of the legend. color must
+              be a valid color, it can not be the empty string.
+
+       -borderwidth pixels
+              Sets the width of the 3-D border to draw around the
+              outside  of  the  legend  (if  such border is being
+              drawn; the  relief  option  determines  this).   By
+              default is the legend border width is 2.
+
+       -font fontName
+              FontName  specifies  a font to use when drawing the
+              labels of each element into the  legend.   If  this
+              option  isn't  specified then it defaults to *-Hel-
+              vetica-Bold-R-Normal-*-120-*.
+
+       -foreground color
+              Sets the foreground color of the element labels  in
+              the  legend.   If this option isn't specified, then
+              it defaults to black.
+
+       -ipadx pixels
+              Sets the internal padding to the width of the  leg-
+              end.   Padding  will  be added to both the left and
+              right and between the elements  symbol  and  label.
+              By default is the legend border width is 2.
+
+       -ipady pixels
+              Sets the internal padding to the height of the leg-
+              end.  Padding will be added to  both  the  top  and
+              bottom and between the elements labels.  By default
+              is the legend border width is 2.
+       -mapped boolean
+              Indicates if the legend  should  be  displayed.  If
+              boolean  is  true (the default), the legend will be
+              mapped.
+
+       -padx pixels
+              Specifies extra padding on the left  and  right  of
+              the legend.  The default is 4.
+
+       -pady pixels
+              Specifies  extra  padding  on the top and bottom of
+              the legend.  The default is 0.
+
+       -position string
+              Sets the positioning point of the legend in  window
+              coordinates.   This  option in conjunction with the
+              -anchor option,  determines  where  the  legend  is
+              positioned.  The  format of string is @x,y, where x
+              and y are the window coordinate values.  If  string
+              is  the empty string (the default), the legend will
+              be displayed in the right margin (which is automat-
+              ically extended to accommodate the legend).
+
+       -relief string
+              Specifies  the  3-D  effect desired for the legend.
+              String must be in a form accepted by  Tk_GetRelief.
+              It indicates how  the interior of the legend should
+              appear relative to the graph; for  example,  raised
+              means the legend should appear to protrude from the
+              graph, relative to the surface of  the  graph.   By
+              default, the legend relief is sunken.
+
+
+   TAG OPTIONS
+       The following options are valid for the tag create and tag
+       configure commands.  Tagid is the identifier  returned  by
+       the tag create command.
+
+              pathName tag create type ?coords? ?options...?
+
+              pathName tag configure tagId ?options...?
+       Tag configuration options may be initialized by the option
+       command.  The name fields in the blt_graph option database
+       are  prefixed by bmTag, textTag, lineTag, polyTag, or win-
+       Tag with respect to the tag type.  Class fields  are  pre-
+       fixed  by  Tag.  The following example sets the background
+       color of all tags to blue and the foreground color of  all
+       text tags to white.
+
+              option add *Blt_graph.TagBackground blue
+              option add *Blt_graph.textTagForeground white
+       The  description of tag options is broken into subsections
+       for each tag type.
+   TEXT TAGS
+       A text tag displays a string of  characters  on  a  single
+       line.   They may be used to annotate regions of the graph.
+       Text tags are created with the following widget command:
+
+              pathName tag create text ?coords? ?options...?
+       The argument  coords  specifies  a  list  of  two  numeric
+       expressions  representing the graph coordinates of a point
+       used to position the text on the graph.
+
+       After the coordinate list  there  may  be  any  number  of
+       option-value pairs, each of which sets one of the configu-
+       ration options for the tag.  These same option-value pairs
+       may  be  used  in  the tag configure command to change the
+       tag's configuration.  The following options are  supported
+       for text tags:
+
+       -anchor anchorPos
+              AnchorPos  tells  how to position the text relative
+              to the positioning point for the text; it may  have
+              any  of  the  forms  accepted by Tk_GetAnchor.  For
+              example, if anchorPos is center then  the  text  is
+              centered  on  the point; if anchorPos is n then the
+              text will be drawn such that the top  center  point
+              of the rectangular region occupied by the text will
+              be at the positioning point.  This option  defaults
+              to center.
+
+       -background color
+              Sets  the  background color of the text string.  If
+              color is the empty string, the background  will  be
+              transparent.   If  this option isn't specified then
+              it defaults to white.
+
+       -font fontName
+              Specifies the text  font.   If  this  option  isn't
+              specified,    it    defaults    *-Helvetica-Bold-R-
+              Normal-*-120-*.
+
+       -foreground color
+              Sets the foreground color of  the  text.   If  this
+              option isn't specified then it defaults to black.
+
+       -element name
+              Associates  the tag with the element name.  If name
+              is not the empty string (the default), the  tag  is
+              displayed  only  if  name  exists  and is currently
+              being displayed (see element show).
+
+       -mapx type
+              Specifies  which  x-axis  to  map  the   tag's   x-
+              coordinates  onto.   Type  must be either x, x2, or
+              both.  The default axis is x.
+       -mapy type
+              Specifies  which  y-axis  to  map  the   tag's   y-
+              coordinates  onto.   Type  must be either y, y2, or
+              both.  The default axis is y.
+
+       -rotate theta
+              Specifies how the tag is rotated.  Theta is a  real
+              number   representing  the  angle  of  rotation  in
+              degrees.  The tag is first rotated along its center
+              and is then displayed according to its anchor posi-
+              tion. The default rotation is 0.0 degrees.
+
+       -text string
+              Sets the text string.  The exact way in  which  the
+              text  string  is displayed may be affected by other
+              options such as -anchor or  -rotate.   This  option
+              defaults to the empty string.
+
+       -xoffset pixels
+              Specifies  a x-coordinate offset (in window coordi-
+              nates) from the specified position.
+
+       -yoffset pixels
+              Specifies a y-coordinate offset (in window  coordi-
+              nates) from the specified position.
+
+
+   LINE TAGS
+       A line tag displays one or more connected line segments on
+       the graph.  Line tags are created with widget commands  in
+       the form:
+
+              pathName tag create line ?coords? ?options...?
+       The  argument  coords  specifies a list of numeric expres-
+       sions representing  the  graph  coordinate  pairs  of  the
+       points connecting the line.
+
+       After  the  coords there may be any number of option-value
+       pairs, each of which sets one of the configuration options
+       for the tag.  These same option-value pairs may be used in
+       the tag configure command to change the  tag's  configura-
+       tion.  The following options are supported for line tags:
+
+       -background color
+              Sets  the background color of the line.  The option
+              is affects the line color only  when  the  -stipple
+              option is set.  If this option isn't specified then
+              it defaults to white.
+
+       -dashes dashes
+              Sets the dash style of the line. Dashes is the num-
+              ber of alternatingly displayed pixels. If dashes is
+              0 (the default), the tag will be drawn as  a  solid
+              line.
+       -element name
+              Associates  the tag with the element name.  The tag
+              is displayed only if an element name exists and  is
+              currently displayed (see element show).  If name is
+              the empty string (the default),  the  tag  is  dis-
+              played.
+
+       -foreground color
+              Sets  the foreground color.  The default foreground
+              color is black.
+
+       -linewidth pixels
+              Sets the width of the lines.  The default width  is
+              0.
+
+       -mapx type
+              Specifies   which   x-axis  to  map  the  tag's  x-
+              coordinates onto.  Type must be either  x,  x2,  or
+              both.  The default axis is x.
+
+       -mapy type
+              Specifies   which   y-axis  to  map  the  tag's  y-
+              coordinates onto.  Type must be either  y,  y2,  or
+              both.  The default axis is y.
+
+       -stipple bitmap
+              Indicates  that  the  line  should  be drawn with a
+              stippled pattern rather than solid;  bitmap  speci-
+              fies  the  stipple pattern to use, may be in any of
+              the forms accepted by Tk_GetBitmap.  If  bitmap  is
+              the  empty  string  (the  default) then the line is
+              drawn in a solid fashion.
+
+       -xoffset pixels
+              Specifies an offset in the  x-coordinate  direction
+              (in  window  coordinates)  from the specified posi-
+              tion.  The default offset is 0.
+
+       -yoffset pixels
+              Specifies an offset in the  y-coordinate  direction
+              (in  window  coordinates)  from the specified posi-
+              tion.  The default offset ifs 0.
+
+
+   BITMAP TAGS
+       A bitmap tag displays a bitmap on the graph.  Bitmap  tags
+       are created with widget commands in the form:
+
+              pathName tag create bitmap ?coords? ?options...?
+       The  argument coords specifies a list containing the graph
+       coordinates of a point used to position the bitmap on  the
+       display.   After the coordinate list there may be any num-
+       ber of option-value pairs, each of which sets one  of  the
+       configuration   options   for   the   tag.    These   same
+       option-value pairs may be used in the tag  configure  com-
+       mand  to  change  the  tag's configuration.  The following
+       options are supported for bitmap tags:
+
+       -anchor anchorPos
+              AnchorPos tells how to position the bitmap relative
+              to  the  positioning  point for the bitmap;  it may
+              have any of the  forms  accepted  by  Tk_GetAnchor.
+              For example, if anchorPos is center then the bitmap
+              is centered on the point;  if anchorPos is  n  then
+              the  bitmap  will be drawn such that the top center
+              point of the rectangular  region  occupied  by  the
+              bitmap  will  be  at  the  positioning point.  This
+              option defaults to center.
+
+       -background color
+              Sets the background color of the bitmap.  If  color
+              is  the  empty string, the background color will be
+              transparent.   The  default  background  color   is
+              white.
+
+       -foreground color
+              Sets  the  foreground  color  of  the  bitmap.  The
+              default foreground color is black.
+
+       -bitmap bitmap
+              Specifies the bitmap to be displayed.   Bitmap  may
+              have any of the forms accepted by Tk_GetBitmap.  If
+              bitmap is the empty string (the default),  the  tag
+              will not be displayed.
+
+       -element name
+              Associates  the tag with the element name.  If name
+              is not the empty string (the default), the  tag  is
+              displayed  only if name exists and is being plotted
+              (see element show).
+
+       -mapx type
+              Specifies  which  x-axis  to  map  the   tag's   x-
+              coordinates  onto.   Type  must be either x, x2, or
+              both.  The default axis is x.
+
+       -mapy type
+              Specifies  which  y-axis  to  map  the   tag's   y-
+              coordinates  onto.   Type  must be either y, y2, or
+              both.  The default axis is y.
+
+       -rotate theta
+              Sets the rotation of the bitmap.  Theta is  a  real
+              number   representing  the  angle  of  rotation  in
+              degrees.  The tag is first rotated and then  placed
+              according  to  its  anchor  position.   The default
+              rotation is 0.0.
+       -xoffset pixels
+              Specifies an offset in the  x-coordinate  direction
+              (in  window  coordinates)  from the specified posi-
+              tion.  The default offset is 0.
+
+       -yoffset pixels
+              Specifies an offset in the  y-coordinate  direction
+              (in  window  coordinates)  from the specified posi-
+              tion.  The default offset is 0.
+
+
+   POLYGON TAGS
+       A polygon tag displays a closed region described as two or
+       more  connected  line segments on the graph.  Polygon tags
+       are created with the widget command:
+
+              pathName tag create polygon ?coords? ?options...?
+       The argument coords specifies a list  of  numeric  expres-
+       sions  representing  graph  coordinates which describe the
+       closed polygon.  It is assumed the first and  last  points
+       are connected.
+
+       After  the  coordinate  list  there  may  be any number of
+       option-value pairs, each of which sets one of the configu-
+       ration options for the tag.  These same option-value pairs
+       may be used in the tag configure  command  to  change  the
+       tag's  configuration.  The following options are supported
+       for polygon tags:
+
+       -background color
+              Sets the background  color  of  the  polygon.   The
+              default background color is white.
+
+       -dashes dashes
+              Sets the dash style of the outline around the poly-
+              gon. Dashes is the  number  of  alternatingly  dis-
+              played  pixels.  If  dashes is 0 (the default), the
+              outline will be drawn as a solid line.
+
+       -element name
+              Associates the tag with the element name.  If  name
+              is  not  the empty string (the default), the tag is
+              displayed only if  name  exists  and  is  currently
+              being displayed (see element show).
+
+       -foreground color
+              Sets  the  foreground  color  of  the polygon.  The
+              default foreground color is black.
+
+       -linewidth pixels
+              Sets the width of the outline of  the  polygon.  If
+              pixels  is  zero,  no outline is drawn. The default
+              width is 0.
+       -mapx type
+              Specifies  which  x-axis  to  map  the   tag's   x-
+              coordinates  onto.   Type  must be either x, x2, or
+              both.  The default axis is x.
+
+       -mapy type
+              Specifies  which  y-axis  to  map  the   tag's   y-
+              coordinates  onto.   Type  must be either y, y2, or
+              both.  The default axis is y.
+
+       -stipple bitmap
+              Indicates that the polygon should be drawn  with  a
+              stippled  pattern rather than a solid color; bitmap
+              specifies the stipple pattern to use, in any of the
+              forms  accepted  by Tk_GetBitmap.  If bitmap is the
+              empty string (the default),  then  the  polygon  is
+              filled with a solid (foreground) color.
+
+       -xoffset pixels
+              Specifies an x-coordinate offset (in window coordi-
+              nates) from the specified  position.   The  default
+              offset is 0.
+
+       -yoffset pixels
+              Specifies  a y-coordinate offset (in window coordi-
+              nates) from the specified position.  The default is
+              offset 0.
+
+
+   WINDOW TAGS
+       A window tag displays a particular window at a given posi-
+       tion on the graph.  Window tags are created with the  wid-
+       get command:
+
+              pathName tag create window ?coords? ?options...?
+       The  argument coords specifies a list containing the graph
+       coordinates of a point used to position the window on  the
+       display  After  coords, there may be any number of option-
+       value pairs, each of which sets one of  the  configuration
+       options for the tag.  These same option-value pairs may be
+       used in the tag configure command to change the tag's con-
+       figuration.   The following options are supported for win-
+       dow tags:
+
+       -anchor anchorPos
+              AnchorPos tells how to position the window relative
+              to  the  positioning  point for the window;  it may
+              have any of the  forms  accepted  by  Tk_GetAnchor.
+              For example, if anchorPos is center then the window
+              is centered on the point;  if anchorPos is  n  then
+              the window will be displayed such that the top cen-
+              ter point of the rectangular region occupied by the
+              window  will  be  at  the  positioning point.  This
+              option defaults to center.
+       -element name
+              Associates the tag with the element name.  If  name
+              is  not the empty string, the tag is displayed only
+              if name exists and  is  currently  being  displayed
+              (see  element  show).   This option defaults to the
+              empty string.
+
+       -height pixels
+              Specifies the height to assign to the tag's window.
+              If  this option isn't specified, or if it is speci-
+              fied as the empty string, then the window is  given
+              whatever height it requests internally.
+
+       -mapx type
+              Specifies   which   x-axis  to  map  the  tag's  x-
+              coordinates onto.  Type must be either  x,  x2,  or
+              both.  The default axis is x.
+
+       -mapy type
+              Specifies   which   y-axis  to  map  the  tag's  y-
+              coordinates onto.  Type must be either  y,  y2,  or
+              both.  The default axis is y.
+
+       -width pixels
+              Specifies  the width to assign to the tag's window.
+              If this option isn't specified, or if it is  speci-
+              fied  as the empty string, then the window is given
+              whatever width it requests internally.
+
+       -window pathName
+              Specifies the window to be managed  by  the  graph.
+              The window specified by pathName must be a child of
+              the blt_graph widget.
+
+       -xoffset pixels
+              Specifies an x-coordinate offset (in window coordi-
+              nates)  from  the  specified position.  The default
+              offset is 0.
+
+       -yoffset pixels
+              Specifies a y-coordinate offset (in window  coordi-
+              nates)  from  the  specified position.  The default
+              offset is 0.
+
+
+   POSTSCRIPT OPTIONS
+       The following options are valid for configuring PostScript
+       output using either the postscript or the psconfigure com-
+       mand.
+
+              pathName postscript ?fileName? options...?
+
+              pathName psconfigure ?options...?
+       -colormap varName
+              VarName must be the name of a global array variable
+              that  specifies  a  color  mapping from the X color
+              name to PostScript.  Each element of  varName  must
+              consist  of  PostScript  code  to  set a particular
+              color value (e.g.  ``1.0  1.0  0.0  setrgbcolor'').
+              When outputting color information in PostScript, it
+              checks to see if there is  an  element  of  varName
+              with the same name as the color. If so, it uses the
+              value of the element as the PostScript  command  to
+              set  the  color.  If this option hasn't been speci-
+              fied, or if there isn't an entry in varName  for  a
+              given  color, then it uses the red, green, and blue
+              intensities from the X color.
+
+       -colormode mode
+              Specifies how to output  color  information.   Mode
+              must  be either color (for full color output), gray
+              (convert all colors  to  their  gray-scale  equiva-
+              lents)  or mono (convert foreground colors to black
+              and background colors to white).  The default  mode
+              is color.
+
+       -fontmap varName
+              VarName must be the name of a global array variable
+              that specifies a font mapping from the X font  name
+              to  PostScript.   Each element of varName must con-
+              sist of a Tcl list with one or two elements,  which
+              are  the  name and point size of a PostScript font.
+              When outputting PostScript commands for a  particu-
+              lar  font,  Tk checks to see if varName contains an
+              element with the same name as the  specified  font.
+              If there is such an element, then the font informa-
+              tion contained in  that  element  is  used  in  the
+              PostScript  output.   (If the point size is omitted
+              from the list, the point size  of  the  X  font  is
+              used).   Otherwise  the  X  font  is examined in an
+              attempt to guess what PostScript font to use.  This
+              works  only  for  fonts  whose  foundry property is
+              Adobe (such as Times,  Helvetica,  Courier,  etc.).
+              If all of this fails then the font defaults to Hel-
+              vetica-Bold.
+
+       -landscape boolean
+              If boolean is true, this specifies the printed area
+              is to be rotated 90 degrees.  In non-rotated output
+              the x axis of the printed area runs along the short
+              dimension  of  the page (``portrait'' orientation);
+              in rotated output the x axis runs  along  the  long
+              dimension  of the page (``landscape'' orientation).
+              Defaults to false.
+
+       -pageanchor anchor
+              Specifies which point of the printed area should be
+              appear  over  the  positioning  point  on  the page
+              (which is given by the -pagex and -pagey  options).
+              For  example, -pageanchor n means that the top cen-
+              ter of the printed area should be  over  the  posi-
+              tioning point.  Defaults to nw.
+
+       -pageheight size
+              Specifies  that  the  height  of the graph drawn in
+              PostScript.  The  graph  is  not  uniformly  scaled
+              since  this also scales the fonts.  Size may be any
+              value  accepted  by  Tk_GetPixels.   The  resulting
+              pixel value is then converted to postscript printer
+              points.  This means that a height 8i will be  prop-
+              erly  converted  to 8 inches. This options defaults
+              to the height of the graph window.
+
+       -pagewidth size
+              Specifies that the width  of  the  graph  drawn  in
+              PostScript.   The  graph  is  not  uniformly scaled
+              since this also scales the fonts.  Size may be  any
+              value  accepted  by  Tk_GetPixels.   The  resulting
+              pixel value is then converted to postscript printer
+              points.  This means that a width 6.5i will be prop-
+              erly converted to 6.5 inches. This options defaults
+              to the width of the graph window.
+
+       -pagex position
+              Specifies  the x-coordinate of the page positioning
+              point.  This (with the  -pageanchor  option)  indi-
+              cates  where  the graph is placed on the PostScript
+              page.   Position  may  be  any  value  accepted  by
+              Tk_GetPixels.  The  resulting  pixel  value is then
+              converted  to  postscript  printer   points.    The
+              default is 1i.
+
+       -pagey position
+              Specifies  the y-coordinate of the page positioning
+              point.  This (with the  -pageanchor  option)  indi-
+              cates  where  the graph is placed on the PostScript
+              page.   Position  may  be  any  value  accepted  by
+              Tk_GetPixels.  The  resulting  pixel  value is then
+              converted  to  postscript  printer   points.    The
+              default is 1i.
+
+SETTING DATA FROM C
+       The  data points of any element can be reset from a C rou-
+       tine  using  the  convenience  function  Blt_GraphElement.
+       This can be useful in situations where it is too expensive
+       to translate the data values from string  representations.
+       Another possible use could be to read in special data file
+       formats.
+
+       int Blt_GraphElement(interp, pathName, elemName, numValues, valueArr)
+           Tcl_Interp *interp;         /* Interpreter of the graph widget */
+           char *pathName;             /* Path name of the graph widget */
+           char *elemName;             /* Name of the element to reset */
+           int numValues;              /* Number of values in array */
+           double *valueArr;           /* Array of x,y coordinate pairs */
+
+       The interpreter must be the same as the one containing the
+       graph  widget and both the graph and the element specified
+       must already exist.  The data array must contain pairs  of
+       x,y coordinates.  The number specified is the total number
+       values in this array.  The data values in  the  array  are
+       copied  into the graph widget for that element.  You don't
+       need to worry about allocating space for them.
+
+       Blt_GraphElement will return TCL_OK  if  successful.   The
+       graph will be redrawn with the new data points at the next
+       idle  point.    Otherwise   it   returns   TCL_ERROR   and
+       "interp->result" will contain an error message.
+
+BINDINGS
+       There are no default bindings.
+
+BUGS
+       Auto-scale routines do not use requested min/max limits as
+       boundaries when the axis is logarithmically scaled.
+
+       The needs to be a special mapping for undefined log  scale
+       values  (>=  0.0).   Possibly set up a "red zone" of unde-
+       fined values which divides the positive and negative  val-
+       ues.
+
+       The  PostScript  output  generated  for polygons with more
+       than 1500 points may exceed the limits  of  some  printers
+       (See PostScript Language Reference Manual, page 568).  The
+       work-around is to break the polygon into separate  pieces.
+
+KEYWORDS
+       graph, widget

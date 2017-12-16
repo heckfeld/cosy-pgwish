@@ -1,0 +1,116 @@
+NAME
+       blt_watch - call Tcl procedures before and after each com-
+       mand
+
+SYNOPSIS
+       blt_watch create name ?options?
+
+       blt_watch activate name
+
+       blt_watch deactivate name
+
+       blt_watch delete name
+
+       blt_watch configure name ?options
+
+       blt_watch info name
+
+       blt_watch names
+
+DESCRIPTION
+       This command arranges for  Tcl  procedures  to  be  called
+       before  and/or  after  each the execution of each Tcl com-
+       mand.  This command may be useful in the logging,  profil-
+       ing, or tracing of Tcl code.
+
+WATCH COMMANDS
+       The following commands are available for the blt_watch:
+
+       blt_watch activate name
+              Activates  the  watch,  causing Tcl commands the be
+              traced to the maximum depth selected.
+
+       blt_watch create name ?options?...
+              Creates a new watch name. It's an error if  another
+              watch name already exists and an error message will
+              be returned.  Options may have any  of  the  values
+              accepted  by the blt_watch configure command.  This
+              command returns the empty string.
+
+       blt_watch configure name ?options...?
+              Queries or modifies the  configuration  options  of
+              the  watch  name.   Name  is  the  name of a watch.
+              Options may have any of the following values:
+
+              -active boolean
+                     Specifies  if  the  watch  is  active.    By
+                     default, watches are active when created.
+
+              -postcmd string
+                     Specifies a Tcl procedure to be called after
+                     each Tcl command.  String is name of  a  Tcl
+                     procedure and optionally any extra arguments
+                     to be passed  to  it.   Five  arguments  are
+                     appended:   1)  the  current  level  2)  the
+                     command string 3) a list containing the com-
+                     mand  after  substitutions  and  split  into
+                     words 4) the return code of the previous Tcl
+                     command,  and 5) the results of the previous
+                     command.  The return status of  the  postcmd
+                     procedure is always ignored.
+
+              -precmd string
+                     Specifies  a  Tcl  procedure  to  be  called
+                     before each Tcl command.  String is name  of
+                     a  Tcl  procedure  and  optionally any extra
+                     arguments to be passed to it.   Three  argu-
+                     ments  are appended: 1) the current level 2)
+                     the command string, and  3) a list  contain-
+                     ing  the  command  after  substitutions  and
+                     split into words.  The return status of  the
+                     precmd procedure is always ignored.
+
+              -maxlevel number
+                     Specifies  the  maximum  evaluation depth to
+                     watch Tcl  commands.   The  default  maximum
+                     level is 10000.
+
+              blt_watch deactivate name
+                     Deactivates  the watch, causing Tcl commands
+                     to be no longer traced.
+
+              blt_watch info name
+                     Returns the configuration information  asso-
+                     ciated  with  the  watch  name.  Name is the
+                     name of a watch.
+
+              blt_watch names ?how?
+                     Lists the names of the watches for  a  given
+                     state.   How  may  be  one of the following:
+                     active, idle, or ignore.  If no how argument
+                     is specified all, watches are listed.
+
+       If  no  level  argument  is  given,  the  current level is
+       printed.
+
+EXAMPLE
+       The following example use blt_watch to trace Tcl  commands
+       (printing  to  standard  error) both before and after they
+       are executed.
+
+
+              proc preCmd { level command argv } {
+                  set name [lindex $argv 0]
+                  puts stderr "$level $name => $command"
+              }
+
+              proc postCmd { level command argv retcode results } {
+                  set name [lindex $argv 0]
+                  puts stderr "$level $name => $argv0= ($retcode) $results"
+              }
+
+              blt_watch create trace   -postcmd postCmd -precmd preCmd
+
+
+KEYWORDS
+       debug

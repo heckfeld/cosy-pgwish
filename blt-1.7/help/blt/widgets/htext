@@ -1,0 +1,352 @@
+NAME
+       blt_htext - Create and manipulate hypertext widgets
+
+SYNOPSIS
+       blt_htext pathName [options]
+
+STANDARD OPTIONS
+       background      cursor         font            foreground
+       text            xScrollCommand yScrollCommand
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:           fileName
+       Class:          FileName
+       Command-Line Switch:-filename
+
+              Specifies a blt_htext file to be displayed  in  the
+              window.   If  the  value  is  the empty string, the
+              -text option is used instead.  See the section FILE
+              FORMAT for a description of the blt_htext file for-
+              mat.
+
+       Name:           height
+       Class:          Height
+       Command-Line Switch:-height
+
+              Specifies the desired height of the  viewport  win-
+              dow.  The  value  must  be  in  a  form accepted by
+              Tk_GetPixels. If the value is less  than  one,  the
+              window  will  grow to accommodate the entire length
+              of text.
+
+       Name:           specialChar
+       Class:          SpecialChar
+       Command-Line Switch:-specialchar
+
+              Specifies the ASCII value  of  the  special  double
+              character delimiters.  In blt_htext files, the text
+              between these special characters is evaluated as  a
+              block  of Tcl commands. The default special charac-
+              ter is the percent sign.
+
+       Name:           lineSpacing
+       Class:          LineSpacing
+       Command-Line Switch:-linespacing
+
+              Specifies the spacing between each  line  of  text.
+              The   value   must   be   in  a  form  accepted  by
+              Tk_GetPixels. The default value is 1 pixel.
+
+       Name:           width
+       Class:          Width
+       Command-Line Switch:-width
+
+              Specifies the desired width of the viewport window.
+              The   value   must   be   in  a  form  accepted  by
+              Tk_GetPixels. If the value is less  than  one,  the
+              window  will grow to accommodate the widest line of
+              text.
+
+       Name:           xScrollUnits
+       Class:          ScrollUnits
+       Command-Line Switch:-xscrollunits
+
+              Specifies the horizontal  scrolling  distance.  The
+              default is 10 pixels.
+
+       Name:           yScrollUnits
+       Class:          ScrollUnits
+       Command-Line Switch:-yscrollunits
+
+              Specifies  the  vertical  scrolling  distance.  The
+              default is 10 pixels.
+
+DESCRIPTION
+       The blt_htext command creates a new window (given  by  the
+       pathName  argument)  and makes it into a blt_htext widget.
+       Additional options, described above, may be  specified  on
+       the  command  line  or in the option database to configure
+       aspects of the widget such as its color and font.  At  the
+       time  this command is invoked, there must not exist a win-
+       dow named pathName, but pathName's parent must exist.  The
+       blt_htext command returns its pathName.
+
+       The blt_htext widget is hybrid of a non-editable text wid-
+       get and a geometry manager (e.g. the packer).  It displays
+       text (optionally read from file) in a window.  Text can be
+       scrolled  either  horizontally  or  vertically  using  the
+       blt_htext window as a viewport.  In addition, Tcl commands
+       can be embedded into the text which are evaluated  as  the
+       text  is  parsed.   Text between special double characters
+       (percent signs "%%") is  immediately  passed  to  the  Tcl
+       interpreter for evaluation.
+
+       Furthermore,  any widget or widget hierarchy can be packed
+       in-line and made to appear on  the  current  line  of  the
+       text.   Widgets are packed using the blt_htext append com-
+       mand.  All widgets must be children of the blt_htext  win-
+       dow  and must already exist before packing.  Once a widget
+       has been packed it cannot be moved to a different position
+       within  the  text.   Widgets  can be resized but they will
+       remain at the same position within the text.
+
+       Before a file or text string is parsed  by  the  blt_htext
+       widget,  all  the widget's current children are destroyed.
+       You can  reload  files  or  text  without  worrying  about
+       unmapping or destroying each child window beforehand.
+
+       Setting  the  either  the -filename or -text configuration
+       option will adjust  the  value  of  the  other.   If  both
+       options  are  set,  the file takes precedence.  When a new
+       file is read using the -filename option, the value of  the
+       -text option is reset to the empty string.  Likewise, when
+       the -text option  is  set,  the  string  representing  the
+       -filename option is cleared.
+
+FILE FORMAT
+       The format of blt_htext text file is typically ASCII text.
+       Text enclosed by special double  characters  (by  default,
+       percent  signs  '%%')  is  interpreted and executed as Tcl
+       commands.  The special character  may be specified by  the
+       -specialchar  option.   In  the  following  example  of  a
+       blt_htext file,  a button widget is appended to  the  text
+       between   the  words "a" and "which".  The pathName of the
+       blt_htext widget is ".ht".
+
+              This will be displayed as normal text.
+              But this will become a %%
+                button .ht.button -text "button" -fg red
+                .ht append .ht.button
+              %% which can invoke a Tcl command.
+
+
+VARIABLES
+       The following global Tcl variables are maintained when  an
+       blt_htext file is parsed.
+
+       blt_htext(widget)
+              is the pathname of the blt_htext widget.
+
+       blt_htext(file)
+              is  the  name  of  the file the blt_htext widget is
+              currently parsing.  It is the empty string when the
+              -text option is used.
+
+       blt_htext(line)
+              is the current line number in the text.
+
+       This  information  might  be used to construct hyper links
+       between different files and/or lines.
+
+
+WIDGET COMMAND
+       The blt_htext command creates a new Tcl command whose name
+       is  pathName.   This command may be used to invoke various
+       operations on the widget.  It has  the  following  general
+       form:
+
+              pathName option ?args?
+       Option  and  args  determine  the  exact  behavior  of the
+       command.
+
+       The following widget commands are available for  blt_htext
+       widgets:
+
+       pathName append child
+              Packs  child  at  the current position in the text.
+              Child is the name of a window to be packed into the
+              blt_htext  window.   Child  must  be a child of the
+              blt_htext window and may be specified by either its
+              pathName or name.
+
+       pathName configure ?option? ?value option value ...?
+              Queries  or  modifies  the configuration options of
+              the widget.  If no option is specified,  returns  a
+              list  describing  all  of the available options for
+              pathName (see Tk_ConfigureInfo for  information  on
+              the  format  of this list).  If option is specified
+              with no value, then  the  command  returns  a  list
+              describing  the one named option (this list will be
+              identical to the corresponding sublist of the value
+              returned  if  no  option  is specified).  If one or
+              more option-value pairs  are  specified,  then  the
+              command modifies the given widget option(s) to have
+              the  given  value(s);  in  this  case  the  command
+              returns  the  empty string.  Option may have any of
+              the values accepted by the blt_htext command.
+
+       pathName gotoline ?line?
+              Scrolls the text to line.  Line is the line  number
+              of  the  new  text  position  and is bounded by the
+              range of lines in the text.  If a line argument  is
+              not present, the current line number is returned.
+
+       pathName childconfigure child
+              Queries  or  resets the positioning of child or the
+              size of the cavity surrounding it. This command  is
+              similar  to  the  configure command, except that it
+              applies to the options of the child window and  its
+              cavity,  whereas  configure applies  to the options
+              for the widget as a whole. Child  is  the  name  of
+              window  packed  into  the  blt_htext window (by the
+              blt_htext append command). The child widget may  be
+              specified by either its pathName or name.  The fol-
+              lowing options are available.
+
+              -anchor anchorPos
+                     Specifies  how  the  child  window  will  be
+                     arranged if there is extra space in the cav-
+                     ity surrounding the  window.  Anchorpos  may
+                     have   any   of   the   forms   accepted  by
+                     Tk_GetAnchor.  For example, if anchorPos  is
+                     center  then  the  window is centered in the
+                     cavity; if anchorPos is w  then  the  window
+                     will  be  drawn such it touches the leftmost
+                     edge of the cavity. This option defaults  to
+                     center.
+
+              -fill style
+                     Indicates  if  the  child  window  should be
+                     expanded to occupy any extra  space  in  the
+                     cavity surrounding it.  Style must be one of
+                     the following: none, x, y, both.   If  style
+                     is  x,  the  width  of  the  child window is
+                     expanded to fill the cavity.  If style is y,
+                     the height is expanded. The default is none.
+
+              -height value
+                     Species the height of the cavity  containing
+                     the  child  window.  Value must be in a form
+                     accepted  by  Tk_GetPixels.   If  value   is
+                     greater  than zero, the cavity is resized to
+                     that height.  If the requested window height
+                     is  greater  than  the  cavity's height, the
+                     window will be reduced to  fit  the  cavity.
+                     By  default,  the cavity is requested height
+                     of the child window.
+
+              -ipadx value
+                     Specifies extra  padding  to  the  left  and
+                     right sides of the child window.  Value must
+                     be in a form accepted by Tk_GetPixels.
+
+              -ipady value
+                     Specifies extra padding to the top and  bot-
+                     tom  sides  of the child window.  Value must
+                     be in a form accepted by Tk_GetPixels.
+
+              -justify value
+                     Justifies the vertical position of the  cav-
+                     ity  containing the child widget in relation
+                     to the line of text. Value  must  be  either
+                     top,  bottom,  or   center.  By default, the
+                     child widget is centered along the  baseline
+                     of the line of text.
+
+              -padx value
+                     Specifies  the padding to the left and right
+                     sides of the  cavity  containing  the  child
+                     window.  Value must be in a form accepted by
+                     Tk_GetPixels.
+
+              -pady value
+                     Specifies the padding on the top and  bottom
+                     sides  of  the  cavity  containing the child
+                     window.  Value must be in a form accepted by
+                     Tk_GetPixels.
+              -relheight value
+                     Specifies  the height of the cavity contain-
+                     ing the child window relative to the  height
+                     of  the viewport window.  Value is real num-
+                     ber indicating the ratio of  the  height  of
+                     the cavity to the viewport.  If value is 0.0
+                     or less, the  request  is  ignored  and  the
+                     height of the cavity is the requested height
+                     of the child window.
+
+              -relwidth value
+                     Specifies the width of the cavity containing
+                     the  child  window  relative to the width of
+                     the viewport window.  Value is  real  number
+                     indicating  the  ratio  of  the width of the
+                     cavity to the viewport.  If value is 0.0  or
+                     less,  the  request is ignored and the width
+                     of the cavity is the requested width of  the
+                     child window.
+
+              -width value
+                     Species  the  width of the cavity containing
+                     the child window.  Value must be in  a  form
+                     accepted   by  Tk_GetPixels.   If  value  is
+                     greater than zero, the cavity is resized  to
+                     that  width.   If the requested window width
+                     is greater than the cavity's width, the win-
+                     dow  will  be reduced to fit the cavity.  By
+                     default, the cavity is  requested  width  of
+                     the child window.
+
+       pathName scan option args
+              This  command  is  used  to  implement  scanning on
+              texts.  It has two forms, depending on option:
+
+              pathName scan mark y
+                     Records y and the current view in  the  text
+                     window;  used in conjunction with later scan
+                     dragto commands.  Typically this command  is
+                     associated  with a mouse button press in the
+                     widget.  It returns an empty string.
+
+              pathName scan dragto y
+                     This command computes the difference between
+                     its  y  argument  and  the y argument to the
+                     last scan mark command for the  widget.   It
+                     then adjusts the view up or down by 10 times
+                     the difference in y-coordinates.  This  com-
+                     mand  is  typically  associated  with  mouse
+                     motion events in the widget, to produce  the
+                     effect  of  dragging  the text at high speed
+                     through the window.  The return value is  an
+                     empty string.
+       pathName search pattern ?from? ?to?
+              Returns  the  number of the next line matching pat-
+              tern.  Pattern is a string which obeys the matching
+              rules  of  Tcl_StringMatch.   From  and to are text
+              line numbers (inclusive) which  bound  the  search.
+              If  no  match  for  pattern  can  be  found,  -1 is
+              returned.
+
+       pathName xview ?position?
+              Moves the viewport horizontally to the new text  x-
+              coordinate  position.   Position is the offset from
+              the left side of the text to the  current  position
+              and  must be in a form accepted by Tk_GetPixels. If
+              position is not present, the current text  position
+              is returned.
+
+       pathName yview ?position?
+              Moves  the  viewport  vertically to the new text y-
+              coordinate position.  Position is the  offset  from
+              the  top  of  the  text to the current position and
+              must be in a  form  accepted  by  Tk_GetPixels.  If
+              position  is not present, the current text position
+              is returned.
+
+BUGS
+       Text with embedded tabs can be obscured by  child  windows
+       when scrolled horizontally.
+
+KEYWORDS
+       hypertext, widget

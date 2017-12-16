@@ -1,0 +1,16 @@
+--- Do 1. Okt 10:27:32 CEST 2015
+	Die verwendeten Aufrufe aus der libpq sind
+
+		PGconn *PQsetdb(char *pghost,
+			char *pgport,
+			char *pgoptions,
+			char *pgtty,
+			char *dbName);
+
+		PGresult *PQexec(PGconn *conn, const char *command);
+
+		int PQntuples(const PGresult *res);
+
+		char *PQgetvalue(const PGresult *res,
+			int row_number,
+			int column_number);

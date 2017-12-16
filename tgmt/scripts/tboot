@@ -1,0 +1,29 @@
+#!/bin/sh
+# %Z%%M%        %I% (mike) %H%
+#
+# tboot
+# Load binary images and start target
+#
+TLOAD_PROG=`basename $0`
+export TLOAD_PROG
+
+###############################################################################
+# Check for correct parameter count
+#
+if [ $# -eq 0 ]
+then
+    echo "USAGE: $TLOAD_PROG target"
+    exit 1
+fi
+
+###############################################################################
+# Variables
+#
+#CPC=/ccP/cpc
+
+###############################################################################
+# MAIN
+#
+
+tload -b $*
+exit            # return exit status of tload

@@ -1,0 +1,15 @@
+       dup fileId ?targetFileId?
+              Duplicate  an  open  file.  A new file id is opened
+              that addresses the same file as fileId.
+
+              If targetFileId is specified, the the file  is  dup
+              to this specified file id.  Normally this is stdin,
+              stdout, or stderr.  The  dup  command  will  handle
+              flushing  output and closing this file.  The target
+              file should be open if its one of stdin, stdout, or
+              stderr and the process is not going to do an execl.
+              Otherwise internal C code that uses  one  of  these
+              files  via  direct  access to stdio FILE struct may
+              behave strangely or fail.
+
+              This command is provided by Extended Tcl.

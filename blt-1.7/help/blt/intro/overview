@@ -1,0 +1,150 @@
+NAME
+       blt_intro - Introduction to the BLT library
+
+DESCRIPTION
+       BLT is a library of extensions to the Tk library.  It adds
+       new commands and variables (all prefixed by "blt_") to the
+       application's interpreter.
+
+
+COMMANDS
+       The  following  commands are added to the interpreter from
+       the BLT library:
+
+       blt_drag&drop  Provides a drag-and-drop facility  for  Tk.
+                      Information (represented by a token window)
+                      can be dragged to and from any  Tk  window,
+                      including  those of another Tk application.
+                      blt_drag&drop  acts   as   a   coordinator,
+                      directing  Tk  send  commands  between  (or
+                      within) TCL/Tk applications.
+
+       blt_htext      A simple hypertext  widget.  Combines  text
+                      and  Tk  widgets  into a single scroll-able
+                      window.  Tcl commands can be embedded  into
+                      text,  which  are  invoked  as  the text is
+                      parsed.  In addition,  Tk  widgets  can  be
+                      appended to the window at the current point
+                      in the text.  blt_htext can be also used to
+                      create scrolled windows of Tk widgets.
+
+       blt_graph      A  2D  plotting widget.  Plots two variable
+                      data in a window with  an  optional  legend
+                      and annotations.   It has of several compo-
+                      nents; coordinate axes, crosshairs, a  leg-
+                      end, and a collection of elements and tags.
+
+       blt_barchart   A barchart widget.  Plots two-variable data
+                      as  rectangular  bars  in a window.  The x-
+                      coordinate values designate the position of
+                      the  bar  along  the  x-axis,  while the y-
+                      coordinate values designate the  magnitude.
+                      The blt_barchart widget has of several com-
+                      ponents;  coordinate  axes,  crosshairs,  a
+                      legend,  and  a  collection of elements and
+                      tags.
+
+       blt_table      A table geometry manager for Tk.  You spec-
+                      ify  window  placements as table row,column
+                      positions and windows can also span  multi-
+                      ple  rows  or  columns.   It  also has many
+                      options for setting and/or bounding  window
+                      sizes.
+
+       blt_bitmap     Reads  and  writes bitmaps from Tcl.  New X
+                      bitmaps can be defined on-the-fly from Tcl,
+                      obviating  the  need  to copy around bitmap
+                      files.   Other  options  query   loaded   X
+                      bitmap's dimensions and data.
+
+       blt_bgexec     Like  Tcl's exec command, blt_bgexec runs a
+                      pipeline of  Unix  commands  in  the  back-
+                      ground.   Unlike  exec,  the  output of the
+                      last process is collected and a global  Tcl
+                      variable   is   set  upon  its  completion.
+                      blt_bgexec can be used with tkwait to  wait
+                      for  Unix  commands  to  finish while still
+                      handling expose events.  Intermediate  out-
+                      put is also available while the pipeline is
+                      active.
+
+       blt_busy       Creates  a  "busy  window"  which  prevents
+                      user-interaction  when  an  application  is
+                      busy.  The busy  window  also  provides  an
+                      easy  way  to  have  temporary busy cursors
+                      (such as a watch or hourglass).
+
+       blt_win        Raise, lower, map, or,  unmap  any  window.
+                      The  raise  and  lower functions are useful
+                      for stacking windows above or  below  "busy
+                      windows".
+
+       blt_watch      Arranges  for  Tcl  procedures to be called
+                      before and/or after the execution of  every
+                      Tcl  command.  This  command may be used in
+                      the logging, profiling, or tracing  of  Tcl
+                      code.
+
+       blt_debug      A  simple Tcl command tracing facility use-
+                      ful for debugging Tcl code.  Displays  each
+                      Tcl  command  before and after substitution
+                      along its level in the interpreter on stan-
+                      dard error.
+
+       blt_bell       Rings  the  keyboard  bell.  This is useful
+                      when the application can't write to a  tty.
+
+       blt_cutbuffer  Manipulates X cutbuffer properties. This is
+                      useful  for  communicating  with  other   X
+                      applications  that  don't  properly  use  X
+                      selections.
+
+VARIABLES
+       The following Tcl variables are either set or used by  BLT
+       at various times in its execution:
+
+       blt_library    This variable contains the name of a direc-
+                      tory containing a library  of  Tcl  scripts
+                      and other files related to BLT.  Currently,
+                      this directory contains  the  blt_drag&drop
+                      protocol  scripts and the PostScript prolog
+                      used by blt_graph  and  blt_barchart.   The
+                      value  of  this  variable is taken from the
+                      BLT_LIBRARY environment  variable,  if  one
+                      exists,  or  else from a default value com-
+                      piled into the BLT library.
+
+       blt_versions   This variable is set in the interpreter for
+                      each  application.  It  is  an array of the
+                      current version numbers for each of the BLT
+                      commands  in  the  form major.minor.  Major
+                      and minor are integers.  The major  version
+                      number   increases   in  any  command  that
+                      includes changes that are not backward com-
+                      patible  (i.e.  whenever  existing applica-
+                      tions and scripts may  have  to  change  to
+                      work with the new release).  The minor ver-
+                      sion number increases with each new release
+                      of a command, except that it resets to zero
+                      whenever the major version number  changes.
+                      The array is indexed by the individual com-
+                      mand name.
+
+ADDING BLT TO YOUR APPLICATIONS
+       It's easy to add BLT to an existing Tk  application.   BLT
+       requires  no  patches or edits to the Tcl or Tk libraries.
+       To add BLT, simply add the following code snippet to  your
+       application's tkAppInit.c file.
+
+              if (Blt_Init(interp) != TCL_OK) {
+                  return TCL_ERROR;
+              }
+       Recompile  and  link  with  the BLT library (libBLT.a) and
+       that's it.
+
+BUGS
+       Send    bug    reports,    correspondence,     etc.     to
+       george.howlett@att.com
+
+KEYWORDS
+       BLT

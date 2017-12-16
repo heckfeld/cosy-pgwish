@@ -1,0 +1,386 @@
+NAME
+       blt_table  -  Geometry  manager that arranges windows in a
+       table
+
+SYNOPSIS
+       blt_table master ?slave index options?...
+
+       blt_table column master option ?args...?
+
+       blt_table configure slave ?slave...? ?options...?
+
+       blt_table row master option ?args...?
+
+       blt_table forget slave ?slave...?
+
+       blt_table info slave
+
+       blt_table slaves master ?pattern?
+
+       blt_table masters ?pattern?
+
+DESCRIPTION
+       The blt_table command is a geometry  manager  for  Tk.  It
+       arranges  windows tabularly in a window called the master.
+       The table consists of individual rows  and  columns  whose
+       spacing  define  its  layout.  Windows, called slaves, are
+       positioned in the table by specifying the row and  column.
+       Only  one  slave  can be specified at a single position in
+       the table.  But slaves may span multiple rows and columns.
+
+       By  default,  blt_table tries to arrange all its slaves in
+       the minimum space required. It determines this by querying
+       each  slave  window  for  its requested size.  The maximum
+       requested height all slaves spanning a particular  row  is
+       the  row's  normal size.  Similarly, the maximum requested
+       width of all slaves spanning a particular  column  is  the
+       column's  normal  size.   This,  in  turn,  specifies  the
+       table's size, which is the sum of the normal sizes of  the
+       rows  and columns.  The number of rows and columns a table
+       contains is determined by the indices specified.  There is
+       no mechanism to delete a row or column.
+
+TABLE INDICES
+       An  index  references  a row,column position in the table.
+       It must be in the form "row,column" where row  and  column
+       are  the  respective row and column numbers, starting from
+       zero  (0,0 is the upper leftmost  position).  Row and col-
+       umn  may also be numeric expressions which are recursively
+       evaluated.
+
+SIZE CONSTRAINTS
+       You can limit the amount of space  requested  by  a  slave
+       window.  By specifying both a minimum and maximum limit in
+       which the window's requested size must fall, you can bound
+       a window's size.  This affects the calculation of the nor-
+       mal size of all rows and columns which it spans. In a sim-
+       ilar  fashion, you can directly control the normal size of
+       any row or column.
+
+       This provides two features.  Slave windows  must  be  con-
+       tained  within  the  rows  and columns they are defined to
+       span.  By limiting the size of a row or column,  you  con-
+       trol  the  size  of all windows in spanning it. This over-
+       rides whatever size the slave  has  requested.   Secondly,
+       there's  no  requirement  that a row or column contain any
+       slaves. This means you can create horizontal  or  vertical
+       spacing by simply setting the row or column limits.
+
+RESIZING
+       Blt_table  tries  to fit itself exactly in the master win-
+       dow.  It first tries to change the size of the  master  to
+       the  table's normal size.  If this fails, it then tries to
+       expand or shrink itself to the size  of  the  master.   If
+       normal  size  of the table is smaller than the master win-
+       dow, the extra space is evenly divided among the  rows  or
+       columns.  If  it's  larger,  then  the row and columns are
+       shrunk to fit in the master window.  In  both  cases,  the
+       rows  and  column  sizes are changed with respect to their
+       constraints.
+
+       You can also specify how an individual row or column is to
+       be  resized.   For  example, a column may be set to one of
+       four modes:
+
+              none   Don't resize the column.
+
+              expand Allow the column to only grow  greater  than
+                     its normal width.
+
+              shrink Allow  the  column  to only shrink less than
+                     its normal width.
+
+              both   Resize the column in either direction.
+
+CREATING A TABLE
+       Tables are created by invoking the blt_table command.
+
+                   blt_table master
+       Master is the pathname of  a  window  which  must  already
+       exist.  Blt_table will arrange its slave windows inside of
+       master.  Slave windows are added by designating the  slave
+       window's pathname and table position.
+
+                   blt_table master slave index
+
+TABLE COMMANDS
+       The following commands are available for the blt_table:
+       blt_table master ?slave index options?...
+              Adds  the window slave to the table associated with
+              master.  If a table doesn't exist for  master,  one
+              is  created.   Master is the pathname of the window
+              in which the slave windows will be arranged.  Slave
+              is the pathname of the window to be arranged inside
+              of master at  the  position  designated  by  index.
+              This  command returns the empty string.  Option may
+              have any of the values accepted  by  the  blt_table
+              configure command.
+
+       blt_table column master configure columnIndex ?options...?
+              Queries or modifies the  configuration  options  of
+              the  columns  specified.  ColumnIndex may be in one
+              of two forms; all (indicating  all  columns)  or  a
+              list  of  the  column  indices  to  be  configured.
+              Options may have any of the following values:
+
+              -padx pixels
+                     Specifies an extra  padding  to  the  normal
+                     width  of  the  column.   Pixels  can be any
+                     value accepted by Tk_GetPixels.  The default
+                     padding is 0.
+
+              -resize mode
+                     Indicates  that  the  column  can  expand or
+                     shrink from its normal width when the  table
+                     is resized.  Mode must be one of the follow-
+                     ing: none, expand, shrink, or both.  If mode
+                     is   expand  the  width  of  the  column  is
+                     expanded if there is extra space in the mas-
+                     ter window. If style is shrink its width may
+                     be reduced beyond its normal width if  there
+                     is  not  enough  space  in  the master.  The
+                     default is none.
+
+              -width width
+                     Specifies the limits within which the  width
+                     of  the  column may expand or shrink.  Width
+                     is a list of bounding values.  See the  sec-
+                     tion  BOUNDING LIST FORMAT for a description
+                     of this list.  By default there are no  con-
+                     straints.
+
+       blt_table column master dimension
+              Returns the number of columns in the table.
+
+       blt_table column master info columnIndex
+              Returns a list of the configuration options for the
+              columns specified.  ColumnIndex may be  in  one  of
+              two  forms;  all (indicating all columns) or a list
+              of column indices.  The column  indices  may  them-
+              selves be numeric expressions.
+       blt_table column master sizes columnIndex
+              Returns  the  sizes  of  the  given  columns in the
+              table.  ColumnIndex may be in one of two forms; all
+              (indicating  all  columns)  or  a  list  of  column
+              indices.  The  column  indices  may  themselves  be
+              numeric expressions.
+
+       blt_table configure slave ?slave...? ?options...?
+              Queries  or modifies the configuration options of a
+              slave in a  table.   If  no  option  is  specified,
+              returns  a  list  describing  all  of the available
+              options for slave (see Tk_ConfigureInfo for  infor-
+              mation  on the format of this list).  Slave must be
+              the pathname of a window  already  managed  by  the
+              blt_table.   If  option is specified with no value,
+              then the command returns a list describing the  one
+              named  option  (this  list will be identical to the
+              corresponding sublist of the value returned  if  no
+              option  is specified).  If one or more option-value
+              pairs are specified, then the command modifies  the
+              given option(s) to have the given value(s); in this
+              case the command returns the empty string.  One  of
+              more  slave  windows can be modified (with the same
+              options) at the same time.  The following  configu-
+              ration options are valid:
+
+              -anchor anchorPos
+                     Specifies  how  the  slave  window  will  be
+                     arranged if there is extra space in the span
+                     surrounding  the  window. Anchorpos may have
+                     any of the forms accepted  by  Tk_GetAnchor.
+                     For example, if anchorPos is center then the
+                     window is centered in the rows  and  columns
+                     it  spans; if anchorPos is w then the window
+                     will be drawn such it touches  the  leftmost
+                     edge  of  the  span. This option defaults to
+                     center.
+
+              -columnspan number
+                     Specifies the number of columns  spanned  by
+                     the slave. The default span is 1.
+
+              -fill style
+                     Indicates if the slave should be expanded to
+                     occupy any extra space in the  span.   Style
+                     must  be  one  of the following: none, x, y,
+                     both.  If style is x, the width slave window
+                     is  expanded.   If style is y, the height is
+                     expanded. The default is none.
+
+              -ipadx pixels
+                     Specifies an extra padding  in  addition  to
+                     the  width  requested  by  the slave window.
+                     Pixels  can  be  any   value   accepted   by
+                     Tk_GetPixels.  The default is 0.
+
+              -ipady pixels
+                     Specifies  an  extra  padding in addition to
+                     the height requested by  the  slave  window.
+                     Pixels   can   be   any  value  accepted  by
+                     Tk_GetPixels.  The default is 0.
+
+              -padx pixels
+                     Specifies an extra padding to the  width  of
+                     the span occupying the slave window.  Pixels
+                     can be any value accepted  by  Tk_GetPixels.
+                     The default is 0.
+
+              -pady pixels
+                     Specifies  an extra padding to the height of
+                     the span occupying the slave window.  Pixels
+                     can  be  any value accepted by Tk_GetPixels.
+                     The default is 0.
+
+              -reqheight height
+                     Specifies limits for the requested height of
+                     the  slave  window.  These  limits also con-
+                     strain the amount of internal padding  given
+                     to  the slave.  Height is a list of bounding
+                     values.  See the section BOUNDING LIST  FOR-
+                     MAT  for  a  description  of  this list.  By
+                     default there are no constraints.
+
+              -reqwidth width
+                     Specifies the limits of the  width  which  a
+                     slave  may request. These limits also affect
+                     the amount of internal padding given to  the
+                     slave.   Width is a list of bounding values.
+                     See the section BOUNDING LIST FORMAT  for  a
+                     description  of this list.  By default there
+                     are no constraints.
+
+              -rowspan number
+                     Specifies the number of rows spanned by  the
+                     slave window. The default span is 1.
+
+       blt_table forget slave
+              Requests  that  slave  no  longer have its geometry
+              managed.  Slave is the pathname of the window  cur-
+              rently  managed  by  some table. The window will be
+              unmapped so  that  it  no  longer  appears  on  the
+              screen.   If  slave is not currently managed by any
+              table, an error message is returned, otherwise  the
+              empty string.
+
+       blt_table info slave
+              Returns  a list of the current non-default configu-
+              ration options of for slave.  Slave is the pathname
+              of the window currently managed by some table.  The
+              list is exactly in the form that might be specified
+              to  blt_table  configure  command.  If slave is not
+              currently managed by any table, an error message is
+              returned.
+
+       blt_table masters ?pattern?
+              Returns  a list of pathnames for all master windows
+              matching pattern.  If the pattern argument  is  not
+              present,  then  the names of all the master windows
+              are returned.
+
+       blt_table row master configure row ?options...?
+              Queries or modifies the  configuration  options  of
+              the  row specified by row. Row may be in one of two
+              forms; all (indicating all rows) or a list  of  the
+              row  indices to be configured.  Option may have any
+              of the values accepted by the following:
+
+              -height height
+                     Specifies the limits of the height which the
+                     row  may  expand  or shrink to.  Height is a
+                     list of bounding values.   See  the  section
+                     BOUNDING  LIST  FORMAT  for a description of
+                     this list.  By default  there  are  no  con-
+                     straints.
+
+              -pady pixels
+                     Specifies  an  extra  padding  to the normal
+                     height of the row.  Pixels can be any  value
+                     accepted   by   Tk_GetPixels.   The  default
+                     padding is 0.
+
+              -resize mode
+                     Indicates that the row can expand or  shrink
+                     from  its  normal  height  when the table is
+                     resized.  Mode must be one of the following:
+                     none,  expand,  shrink, or both.  If mode is
+                     expand the height of the row is expanded  if
+                     there  is  extra space in the master window.
+                     If style is shrink its height may be reduced
+                     beyond  its  normal  height  if there is not
+                     enough space in the master.  The default  is
+                     none.
+
+       blt_table row master dimension
+              Returns the number of rows in the table.
+
+       blt_table row master info row ?options...?
+              Returns a list of the configuration options for the
+              rows specified.  RowIndex may  be  in  one  of  two
+              forms;  all  (indicating all rows) or a list of row
+              indices.  The row indices may themselves be numeric
+              expressions.
+       blt_table row master sizes rowIndex
+              Returns  the  sizes of the given rows in the table.
+              RowIndex may be in one of two forms; all  (indicat-
+              ing all rows) or a list of the row indices.
+
+       blt_table slaves master ?pattern?
+              Returns  a  list of pathnames for all slave windows
+              managed by master matching pattern.  If the pattern
+              argument  is not present, then the names of all the
+              slave windows are returned.  Master is the pathname
+              of  a  master  window.  If master is not the master
+              window of any table, an error message is  returned.
+
+BOUNDING LIST FORMAT
+       Constraints  for  various  options (-reqheight, -reqwidth,
+       -height, and -width) are specified by supplying a bounding
+       list  of values.  Each value must be in a form accepted by
+       Tk_GetPixels.  The interpretation of this  list  is  based
+       upon the number of values it contains:
+
+              {}     Empty list. No bounding is performed.
+
+              { x }  Set  the  size of the window or partition at
+                     x. The size of the partition or window  can-
+                     not grow or shrink.
+
+              { min max }
+                     Bound  the  size  of the window or partition
+                     between min and max.
+
+              { min max nom}
+                     Bound the size of the  window  or  partition
+                     between  min  and max.  In addition, set the
+                     normal size to nom.
+       The maximum bound max can also  be  specified  as  Inf  to
+       indicate  a  unlimited  maximum bound.  This can be useful
+       when you wish only to set the minimum or nominal size of a
+       window or partition.
+
+EXAMPLE
+       The  following  example arranges a canvas, two scrollbars,
+       and a title in a frame.
+
+              blt_table .frame \
+                   .title 0,0 -columnspan 2 -anchor center \
+                   .canvas 1,0 -fill both \
+                   .vscroll 1,1 -fill y \
+                   .hscroll 2,0 -fill x
+              blt_table column .frame configure 1 -resize none
+              blt_table row .frame configure 2 -resize none
+
+       The rows and columns containing the scrollbars are  frozen
+       at  their  normal  size,  so  that  even  if  the frame is
+       resized, the scrollbars will remain the same width.
+BUGS
+       There is no warning or error if  a  window  is  already  a
+       slave  or  master,  managed  by  another  geometry manager
+       (there currently is no way to properly detect this).  Typ-
+       ically,  the  window will be repositioned by both geometry
+       managers, ad infinitum.  The only  recourse  is  to  avoid
+       doing this.
+
+KEYWORDS
+       frame, geometry manager, location, table, size

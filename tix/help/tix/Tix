@@ -1,0 +1,82 @@
+NAME
+       TIX - Summary of the TIX widget set
+
+SYNOPSIS
+       tixInit  ?-beta boolean? ?-binding bName? ?-debug boolean?
+       ?-fontset fName? ?-libdir path? ?-scheme sName?
+
+
+DESCRIPTION
+       TIX is a set of compound widgets based on TK  3.6.  It  is
+       solely written in TCL using the TIX Intrinsics library and
+       does not require any recompilation of TCL/TK.  The  latest
+       release of Tix is Tix 3.6.
+
+       To  use  the  TIX  widgets, you have to append the library
+       directory of TIX to the auto-load path by using  the  fol-
+       lowing  command:  (assuming that you have installed TIX in
+       /usr/local/lib/tix)
+
+       lappend auto_path /usr/local/lib/tix
+
+
+       The TIX widget set must be initialized before you can  use
+       it.  You  can initialize TIX using the command tixInit. It
+       accetps the following options:
+
+
+       -beta boolean: Specifies whether you want to use the  wid-
+       gets inside the directory library/beta. Only values "true"
+       and "false" are allowed. The widgets in this directory are
+       consider  unstable  and you are advised not to use them in
+       any critical applications. These widgets are  not  guaran-
+       teed  to  be supported in the future. The default value is
+       "true".
+
+       -binding bName: Specifies the event bindings. In this ver-
+       sion  of Tix, the bindings supported are Motif, which will
+       make your application behave close to Motif(tm),  and  TK.
+       The default is TK.
+
+       -debug boolean: Specifies whether the Intrinsics should be
+       debugged. Only values "true" and "false" are  allowed.  If
+       this  option  is  enabled, all the internal errors will be
+       printed. This option is useful for Tix  widget  developers
+       and hackers.
+
+       -fontset  fName: The fontset to use in your application. A
+       fontset defines the fonts to be used as normal text,  bold
+       font,  italic  font  ...  etc. In this version of Tix, the
+       fontsets  supported  are  12Point,  14Point  and  TK.  The
+       default is TK.
+
+       -libdir  path: The path of the directory that contains the
+       Tix library. The default value is /usr/local/lib/tix.
+       -scheme sName: The color scheme to use  in  your  applica-
+       tion.   In  this version of Tix, the schemes supported are
+       Gray, SGIGray, Blue and TK. The default is TK.
+
+
+Example TIX startup script
+       #!/usr/local/bin/wish -f
+       set TIX_LIBRARY  /usr/local/lib/tix
+
+       lappend auto_path $TIX_LIBRARY
+       tixInit -libdir $TIX_LIBRARY -scheme Gray -fontset 14Point -binding Motif
+
+       # At here, jump to the start of your program
+
+
+Files
+       There are files in the demos directory in the TIX  distri-
+       bution  that  illustrates  how you can include TIX in your
+       application.
+
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+
+
+KEYWORDS
+       TIX, compound widgets, TIX Intrinsics

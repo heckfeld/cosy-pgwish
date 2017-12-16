@@ -1,0 +1,104 @@
+'\" te
+.TH tgt_owner "1" "" "TGMT"
+.ds)H Cosy-Control
+.SH NAME
+.nf
+tgt_owner - Zugriff auf die Datenbank, die Informationen
+            bzgl. der Eigent\(:umer der Targets enth\(:alt
+.SH SYNOPSIS
+.nf
+.ft B
+tgt_owner -[i|f[ file]|d|l[ -s file]|a]
+tgt_owner <targetname>
+.fi
+.ad b
+.SH BESCHREIBUNG
+\fBtgt_owner\fR ist ein Tool, mit dem auf die Datenbank \fB$TMDB/owner\fR
+zugegriffen wird.
+.sp
+Die Datenbank enth\(:alt zu einem Target den Namen des Eigent\(:umers (Owner).
+.br
+Wird ein neuer Eintrag in die Datenbank gemacht, so ist der Name des
+Eigent\(:umers automatisch der Name aus der Environmentvariablen \fBLOGNAME\fR.
+.sp
+Die Environmentvariable \fBTMDB\fR mu\[ss] gesetzt sein.
+Die Datenbank \fBowner\fR mu\[ss] sich in diesem Directory befinden.
+.br
+Ist die Variable \fBTMDB\fR nicht initialisiert, wird sie auf \fB$PWD\fR
+gesetzt.
+.SH OPTIONEN
+.TP 8
+.B -i 
+F\(:ur ein Target wird ein neuer Eintrag gemacht (oder ein alter \(:uberschrieben).
+Der Name des Targets mu\[ss] interaktiv eingegeben werden.
+Er wird vom Standard-Input eingelesen.
+Der Name des Eigent\(:umers wird aus der Environmentvariablen \fBLOGNAME\fR
+gelesen.
+.TP 8
+.B -f[ file]
+Die in \fIfile\fR
+enthaltenen Daten werden in die Datenbank eingetragen.
+Jede Zeile enth\(:alt den Namen eines Targets und
+wird f\(:ur einen Eintrag ausgewertet.
+.br
+Es duerfen auch Leer- und Kommentarzeilen (beginnend mit #) benutzt werden.
+.br
+Ist \fIfile\fR nicht angegeben, werden die Daten vom Standard-Input gelesen.
+.br
+Der Name des Eigent\(:umers wird aus der Environmentvariablen \fBLOGNAME\fR
+gelesen.
+.TP 8
+.B -d 
+Die Daten zu einem Target werden gel\(:oscht. Der Name des Targets mu\[ss]
+interaktiv eingegeben werden.
+.TP 8
+.B -l[ -s file]
+Der Eintrag zu einem Target wird ausgegeben. Der Name des Targets mu\[ss]
+interaktiv eingegeben werden.
+.br
+Ist \fB-s \fIfile\fR angegeben, wird der Eintrag an \fIfile\fR angeh\(:angt.
+.TP 8
+.B -a 
+Der gesamte Inhalt der Datenbank wird ausgegeben.
+.TP 8
+.B <targetname>
+Der Eintrag zu \fItargetname\fR wird ausgegeben.
+.SH FEHLER
+.TP 4
+.B 0
+Alles ok.
+.TP 4
+.B 1
+Falsche Usage.
+.TP 4
+.B 2
+Fehler beim Úffnen der Datenbank.
+.TP 4
+.B 3
+Das Programm wurde durch 'CTRL-C' abgebrochen.
+.TP 4
+.B 4
+Daten konnten nicht eingetragen, gelesen oder gel\(:oscht werden.
+.TP 4
+.B 5
+Datei konnte nicht ge\(:offnet werden.
+.TP 4
+.B 6
+Fehlerhafte Eingabe.
+.SH WARNUNGEN 
+Das Programm \(:uberpr\(:uft nicht,
+ob das eingegebene Target schon in der Datenbank enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.SH SIEHE AUCH
+.SH DATENBANKEN
+$TMDB/owner
+.SH FILES
+$CPC/bin/tgt_owner
+.br
+$CPC/src/tgmt/tgt_owner/tgt_owner.c
+.SH AUTOR
+Christine Haberbosch
+.br
+<tine@cecs.cc.kfa-juelich.de>
+.br
+2397

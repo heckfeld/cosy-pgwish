@@ -1,0 +1,159 @@
+NAME
+       tixDlgBtns - Create and manipulate TIX Dialog Buttons wid-
+       gets
+
+SYNOPSIS
+       tixDlgBtns pathName ?options?
+
+STANDARD OPTIONS
+       anchor          background     cursor
+       relief          borderWidth    geometry
+
+
+       See the ``options'' manual entry for details on the  stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          font
+       Class:                         Font
+       Command-Line Switch:           -font
+
+              Specifies  the  font used by all the buttons inside
+              the DlgBtns widget.
+
+       Name:                          foreground
+       Class:                         Foreground
+       Command-Line Switch:           -foreground
+
+              Specifies the foreground of all the buttons  inside
+              the DlgBtns widget.
+
+       Name:                          buttonBg
+       Class:                         Background
+       Command-Line Switch:           -buttonbg
+
+              Specifies  the background of all the buttons inside
+              the DlgBtns widget.
+
+
+       Name:                          orientation
+       Class:                         Orientation
+       Command-Line Switch:           -orientation
+       Alias:                         -orient
+
+              Static Option. Specifies  the  orientation  of  the
+              button subwidgets. Only the values "horizontal" and
+              "vertical" are recognized.
+
+
+       Name:                          padx
+       Class:                         Pad
+       Command-Line Switch:           -padx
+
+              Specifies the horizontal padding between two neigh-
+              boring button subwidgets in the DlgBtns widget.
+       Name:                          padx
+       Class:                         Pad
+       Command-Line Switch:           -padx
+
+              Specifies  the  vertical padding between two neigh-
+              boring button subwidgets in the DlgBtns widget.
+
+
+       Name:                          state
+       Class:                         State
+       Command-Line Switch:           -state
+
+              Specifies the state of all the buttons  inside  the
+              Select widget.
+
+              Note:  Setting  this option using the config widget
+              command will enable or disable all the buttons sub-
+              widgets.  Original states of the individual buttons
+              are not saved. Only the values "normal"  and  "dis-
+              abled" are recognized.
+
+
+
+DESCRIPTION
+       The  tixDlgBtns command creates a new window (given by the
+       pathName argument) and makes it into a DlgBtns widget. The
+       DlgBtns,  or  Dialog Buttons, widget is a container widget
+       to hold the ``action'' buttons in  a  dialog  box.   Addi-
+       tional  options,  described above, may be specified on the
+       command line  or  in  the  option  database  to  configure
+       aspects of the DlgBtns such as its cursor and relief.
+
+WIDGET COMMAND
+       The  DlgBtns  command creates a new Tcl command whose name
+       is the same as the path  name  of  the  DlgBtns's  window.
+       This  command  may be used to invoke various operations on
+       the widget.  It has the following general form:
+
+              pathName option ?arg arg ...?
+
+       PathName is the name of the command, which is the same  as
+       the  frame widget's path name.  Option and the args deter-
+       mine the exact behavior of  the  command.   The  following
+       commands are possible for DlgBtns widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Query  or  modify  the configuration options of the
+              widget.  If no option is specified, returns a  list
+              describing  all  of the available options for path-
+              Name (see Tk_ConfigureInfo for information  on  the
+              format  of this list).  If option is specified with
+              no value, then the command returns a list  describ-
+              ing the one named option (this list will be identi-
+              cal to  the  corresponding  sublist  of  the  value
+              returned  if  no  option  is specified).  If one or
+              more option-value pairs  are  specified,  then  the
+              command modifies the given widget option(s) to have
+              the given  value(s);   in  this  case  the  command
+              returns  an  empty  string.  Option may have any of
+              the values accepted by the frame command.
+
+       pathName add buttonName ?option value ... ?
+              Add a new button subwidget with the  name  bnutton-
+              Name into the DlgBtns widget. Additional configura-
+              tion options can be given to configure the new but-
+              ton subwidget.
+
+       pathName button bnuttonName ?args?
+              The  button command provides a way to access a but-
+              ton subwidget  contained  by  the  DlgBtns  widget.
+              When no additional arguments are given this command
+              returns return the complete pathname of the  button
+              subwidget  with  the  name bnuttonName.  When addi-
+              tional arguments are  given,  these  arguments  are
+              used  to  invoke  the  widget command of the button
+              subwidget.
+
+       pathName invoke bnuttonName
+              Invoke the button subwidget with the name  bnutton-
+              Name.
+
+BINDINGS
+       DlgBtns widgets have no default bindings.
+
+EXAMPLE
+       The  following example creates a DlgBtns widget which con-
+       tains several button subwidgets.
+
+        tixDlgBtns .btns
+
+        #Add some buttons in to the DlgBtns
+        .btns add open  -text "Open"  -command "open_proc"
+        .btns add close -text "CLose" -command "close_proc"
+
+        #Further configure the "open" button
+        .btns button open config -foreground red
+
+        #Invoke the "open" button
+        .btns invoke open
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       TIX, Container Widgets

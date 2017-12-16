@@ -1,0 +1,113 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Sqeezer.itcl,v 1.1.5.1 1994/06/05 17:32:38 mark Exp $
+#
+# itcl_class: Sqeezer
+#--------------------------------------------------------------
+# Description: Sqeezer itcl class
+#	Created from XF 2.3 template "sqeezer.t"
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	none
+#
+# METHODS:
+#	pack_check ....... virtual, pack check button
+#	pack_area ........ virtual, show (pack) hidden area
+#	create_area ...... virtual, create area to hide/show 
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:32:38 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+#
+
+# Force  auto-loading of base class(es)
+Widget 
+
+itcl_class Sqeezer {
+    inherit Widget
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Sqeezer
+    #---------------------------------------------------------------
+    constructor {config} {	
+ 	Widget::constructor frame -bd 3 -relief ridge
+	# 	Widget::constructor label -bitmap $bitmap
+	set area_w  $this.frame
+	set check_w $this.check
+	
+	virtual create_area $area_w
+	
+	# all widget variables are in the global space, so we are
+	# using this starnge name "Sqeezer::state$this
+	checkbutton $check_w \
+	    -anchor w  -relief flat \
+	    -text {Messages} -variable Sqeezer::state$this \
+	    -command "$this _pack_it "
+	
+	virtual pack_check $check_w 
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: pack_check  - virtual, pack check button
+    #---------------------------------------------------------------
+    method pack_check {check} {
+	pack $check -anchor nw -fill x
+    }
+    #---------------------------------------------------------------
+    # METHOD: create_area - virtual, create area to hide/show 
+    #---------------------------------------------------------------
+    method create_area {name} {
+	error "Sqeezer: pure virtual \"create_area\" called" 
+    }
+    #---------------------------------------------------------------
+    # METHOD: pack_area  - virtual, show (pack) hidden area
+    #---------------------------------------------------------------
+    method pack_area {name}   {
+	pack $name  -fill x -anchor nw
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _pack_it - pack/unpack area basing on sqeezer state
+    #---------------------------------------------------------------
+    method _pack_it {} {
+	global Sqeezer::state$this
+
+	if { [set Sqeezer::state[set this]] } {
+	    virtual pack_area $area_w
+	} else {
+	    pack forget $area_w
+	} 
+    } 
+
+    #
+    # PROTECTED DATA
+    #	area_w ........... widget name of the hidden area
+    #	check_w .......... widget name of the check button
+    #
+    protected area_w ""
+    protected check_w ""
+}
+
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Sqeezer.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:32:38  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:32:38  mark
+# Initial revision
+#
+#

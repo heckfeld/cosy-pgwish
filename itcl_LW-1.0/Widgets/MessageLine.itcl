@@ -1,0 +1,110 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: MessageLine.itcl,v 1.1.5.1 1994/06/05 17:31:46 mark Exp $
+#
+# itcl_class: MessageLine
+#--------------------------------------------------------------
+# Description: MessageLine with "history" mechanism support.
+#	HISTORY MECHANIMS IS NOT FINISHED
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Sqeezer
+#
+# PUBLIC ATTRIBUTES:
+#	-message ....... message to add
+#
+# METHODS:
+#	create_area .... virtual, called by Sqeezer to create hidden area
+#	pack_area ...... virtual, called by Sqeezer to pack hidden area
+#	pack_check ..... virtual, called by Sqeezer to pack check button
+#
+#---------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:46 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+#
+
+# Force  auto-loading of base class(es)
+Sqeezer
+
+itcl_class MessageLine {
+    inherit Sqeezer
+	
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new MessageLine
+    #---------------------------------------------------------------
+    constructor {config} {	
+ 	Sqeezer::constructor
+
+	#  Explicitly handle config's that may have been ignored earlier
+	set_config $config
+    }
+
+    #-----------------------------------------------------------------------
+    # METHOD: create_area - virtual, called by Sqeezer to create hidden area
+    #-----------------------------------------------------------------------
+    method create_area {name} {
+	set message_w $name
+	entry $name -relief sunken  -text "$message" 
+    }
+
+    #----------------------------------------------------------------------
+    # METHOD: pack_area - virtual, called by Sqeezer to pack hidden area
+    #----------------------------------------------------------------------
+    method pack_area {name} {
+	pack $name -side right -fill x -anchor nw -expand y
+    }
+
+    #----------------------------------------------------------------------
+    # METHOD: pack_check - virtual, called by Sqeezer to pack check button
+    #----------------------------------------------------------------------
+    method pack_check {check} {
+	pack $check -anchor nw -side left
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _history_add -  add message to history list
+    #---------------------------------------------------------------
+    method _history_add {mess} {
+	incr hsize
+	if {$hsize >= $max_history} {
+	    set start [expr $max_history - $hsize + 1 ]
+	    set history [lrange $history $start 10000]
+	}
+	lappend history $mess
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public message "" {
+	if { "$message_w" != "" } {
+	    $message_w delete 0 end
+	    $message_w insert 0 $message
+	    _history_add $message
+	}
+    }
+
+    #
+    # COMMON DATA
+    # 	max_history ......... max length of history ring buffer
+    # 
+    common max_history 30
+    
+    #
+    # PROTECTED DATA
+    #	message_w ........... widget name of message line
+    #	history ............. history ring buffer
+    # 	current ............. currently shown history element
+    #	hsize ............... history buffer size
+    #
+    protected message_w ""
+    protected history ""
+    protected current -1
+    protected hsize 0
+}

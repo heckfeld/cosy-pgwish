@@ -1,0 +1,19 @@
+#!/bin/bash
+#$Header$
+
+#
+# xtload - lÌdt Kernel, Applikation und Konfiguration in das Target
+#
+# Autor: Michael Simon
+#        Forschungszentrum JÏlich, COSY AP
+#
+# Usage:
+#	xtload [-n] [-b] [-s]
+#
+TLOAD_PROG=`basename $0`
+TLOAD_INFO=cat
+TLOAD_USAGE="$PROGNAME [-n] [-b] [-o interface name] [-r] [-s]"
+export TLOAD_PROG TLOAD_INFO TLOAD_USAGE
+
+tload $*
+exit		# return exit status of tload

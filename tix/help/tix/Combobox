@@ -1,0 +1,230 @@
+NAME
+       tixCombobox - Create and manipulate TIX Combobox widgets
+
+SYNOPSIS
+       tixCombobox pathName ?options?
+
+STANDARD OPTIONS
+       background      cursor
+       relief          borderWidth    geometry
+
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          anchor
+       Class:                         Anchor
+       Command-Line Switch:           -anchor
+
+              Specifies how the string inside the entry subwidget
+              should  be aligned.  Only the values "w" or "e" are
+              allowed. When set the "w", the entry is aligned  to
+              its  beginning.  When  set to "e", it is aligned to
+              its end.
+
+
+       Name:                          command
+       Class:                         Command
+       Command-Line Switch:           -command
+
+              Specifies the command to be called  when  the  Com-
+              bobox is invoked (See the BINDINGS section).
+
+       Name:                          disabledforeground
+       Class:                         DisabledForeground
+       Command-Line Switch:           -disabledforeground
+
+              Specifies  the foreground color to be used when the
+              Combobox widget is disabled.
+
+       Name:                          entryBg
+       Class:                         Background
+       Command-Line Switch:           -entrybg
+
+              Specifies the background of the entry subwidget.
+
+       Name:                          entryWidth
+       Class:                         EntryWidth
+       Command-Line Switch:           -entrywidth
+       Alias:                         -width
+
+              Specifies the width of the entry subwidget.
+
+       Name:                          entryfont
+       Class:                         Font
+       Command-Line Switch:           -entryfont
+
+              Specifies the font of the  entry  subwidget  inside
+              the Combobox widget.
+
+       Name:                          fancy
+       Class:                         Fancy
+       Command-Line Switch:           -fancy
+
+              Specifies whether the cross and tick button subwid-
+              gets should be shown. Only the  values  "true"  and
+              "false" are allowed.
+
+       Name:                          foreground
+       Class:                         Foreground
+       Command-Line Switch:           -foreground
+
+              Specifies  the  foreground color of all the subwid-
+              gets of the Combobox widget.
+
+       Name:                          histLimit
+       Class:                         HistLimit
+       Command-Line Switch:           -histlimit
+
+              Specifies how many previous  user  inputs  will  be
+              stored.
+
+       Name:                          listboxBg
+       Class:                         Background
+       Command-Line Switch:           -listboxbg
+
+              Specifies  the background color of the listbox sub-
+              widget.
+
+       Name:                          listboxFont
+       Class:                         Font
+       Command-Line Switch:           -listboxfont
+
+              Specifies the font of the listbox subwidget.
+
+       Name:                          listboxHeight
+       Class:                         ListboxHeight
+       Command-Line Switch:           -listboxheight
+       Alias:                         -height
+
+              Specifies the height of the listbox subwidget.
+
+       Name:                          scrollbar
+       Class:                         Scrollbar
+       Command-Line Switch:           -scrollbar
+
+              Specifies how the  schollbars  inside  the  listbox
+              subwidget  should  be displayed. See the manual for
+              ScrolledListbox for more details.
+
+       Name:                          state
+       Class:                         State
+       Command-Line Switch:           -state
+
+              Specifies the whether the Combobox widget is normal
+              or  disabled.   Only  the values "normal" and "dis-
+              abled" are recognized.
+
+       Name:                          type
+       Class:                         Type
+       Command-Line Switch:           -type
+
+              Specifies whether the user can edit the  entry  and
+              whether previous user selections will be stored. It
+              can only have one of the following three values:
+
+              static: User cannot edit entry. Previous selections
+              not stored.
+
+              editable:  User can edit entry. Previous selections
+              not stored.
+
+              history: User can edit entry.  Previous  selections
+              are stored.
+
+
+DESCRIPTION
+       The tixCombobox command creates a new window (given by the
+       pathName argument) and makes it into  a  Combobox  widget.
+       Additional  options,  described above, may be specified on
+       the command line or in the option  database  to  configure
+       aspects of the Combobox such as its cursor and relief.
+
+       The  Tix  Combobox widget is similar to the combo box con-
+       trol in MS Windows. The user can give a choice  by  either
+       typing in the entry subwdget or selecting inside the list-
+       box subwidget.
+
+WIDGET COMMANDS
+       The Combobox command creates a new Tcl command whose  name
+       is  the  same  as  the path name of the Combobox's window.
+       This command may be used to invoke various  operations  on
+       the widget. It has the following general form:
+
+              pathName option ?arg arg ...?
+
+       PathName  is the name of the command, which is the same as
+       the frame widget's path name.  Option and the args  deter-
+       mine  the  exact  behavior  of the command.  The following
+       commands are possible for Combobox widgets:
+       pathName configure ?option? ?value option value ...?
+              Query or modify the configuration  options  of  the
+              widget.   If no option is specified, returns a list
+              describing all of the available options  for  path-
+              Name  (see  Tk_ConfigureInfo for information on the
+              format of this list).  If option is specified  with
+              no  value, then the command returns a list describ-
+              ing the one named option (this list will be identi-
+              cal  to  the  corresponding  sublist  of  the value
+              returned if no option is  specified).   If  one  or
+              more  option-value  pairs  are  specified, then the
+              command modifies the given widget option(s) to have
+              the  given  value(s);   in  this  case  the command
+              returns an empty string.  Option may  have  any  of
+              the values accepted by the frame command.
+
+       pathName addhistory string
+              Add the string to the beinning of the listbox.
+
+       pathName appendhistory string
+              Append the string to the end of the listbox.
+
+       pathName entry ?options?
+              When no options are given, this command returns the
+              pathname of the entry subwidget.
+
+              When options are given, the widget command  of  the
+              entry  subwidget will be called with these options.
+
+       pathName get
+              return the current user input in the entry  subwid-
+              get.
+
+       pathName listbox ?options?
+              When no options are given, this command returns the
+              pathname of the listbox subwidget.
+
+              When options are given, the widget command  of  the
+              listbox   subwidget   will  be  called  with  these
+              options.
+
+       pathName pick string
+              Set the content of the entry subwidget to  be  this
+              string.
+
+       pathName pick -at index
+              Select the index'th item inside the lixtbox subwid-
+              get and put it inside the entry subwidget.
+
+BINDINGS
+       [1]    The listbox is popped up when  the  <Down>  key  is
+              pressed inside the entry.
+       [2]    The  combobox is invoked and the current content of
+              the entry is passed to the command specified by the
+              -command   option   if  (1)  <Return>  or  <Double-
+              ButtonPress-1> inside the entry,  (2)  <Return>  or
+              <Double-ButtonPress-1>  inside the listbox. (3) The
+              "tick" button subwidget is invoked.
+
+
+       [3]    The current content of the entry can be selected by
+              clicking  on  the listbox or moving up and down the
+              listbox using the arrow keys.
+
+
+       [4]    cleared if the type of the Combobox is editable  or
+              history '
+
+AUTHOR .PP Ioi Kim Lam - ioi@graphics.cis.upenn.edu '
+KEYWORDS TIX

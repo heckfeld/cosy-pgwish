@@ -1,0 +1,16 @@
+return {
+    {barchart.n       blt/widgets/barchart}
+    {bell.n           blt/control/bell}
+    {bgexec.n         blt/control/bgexec}
+    {bitmap.n         blt/control/bitmap}
+    {busy.n           blt/control/busy}
+    {cutbuffer.n      blt/control/cutbuffer}
+    {debug.n          blt/control/debug}
+    {dragdrop.n       blt/control/dragdrop}
+    {graph.n          blt/widgets/graph}
+    {htext.n          blt/widgets/htext}
+    {intro.n          blt/intro/overview}
+    {table.n          blt/widgets/table}
+    {watch.n          blt/widgets/watch}
+    {win.n            blt/control/win}
+}

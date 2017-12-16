@@ -1,0 +1,40 @@
+NAME
+       tixMkFileDialog  - Convenience function for creating stan-
+       dard file selection dialog boxes.
+
+SYNOPSIS
+       tixMkFileDialog pathName okcmd ?helpcmd?
+
+DESCRIPTION
+       tixMkFileDialog creates a standard standard file selection
+       dialog  box  using  the  tixFileSelectBox  widget  and the
+       tixStdDlgBtns widget.
+
+       The first argument pathName specifies the name of the  top
+       level window that holds the dialog box.
+
+       The  second  argument  okcmd  specify a command to execute
+       when the OK button is invoked in the dialog. okcmd will be
+       called   with   one  additional  parameter:  the  filename
+       selected in the dialog box. If no file is selected,  okcmd
+       will be called with an empty string.
+
+       The  third  argument  helpcmd  is optional. It specifies a
+       command to execute when the Help button in the  dialog  is
+       invoked.  If  the helpcmd is not supplied, the Help button
+       is disalbed.
+
+       When the user selects the Close  button  inside  the  file
+       selection  dialog,  the window is merely withdrawn but not
+       destroyed. Since the file selection doialog  usually  will
+       be  used for many times during the execution of a program,
+       this will  makes  more  efficient  use  of  the  resources
+       because  the  complex  dialog  does not need to be created
+       every time it is opened. You can use the  destroy  command
+       to destroy the dialog when it is necessary.
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       FileSelectBox, StdDlgBtns, TIX

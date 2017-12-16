@@ -1,0 +1,30 @@
+dp/CancelRPC	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/CancelRPfilehandler	to handle file descriptor conditions
+dp/CloseRPC	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/Host	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/MakeRPCClient	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/MakeRPCServer	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/RDO	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/SetCheckCmd	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/accept	Tcl-DP connection management
+dp/address	internet address record manipulation
+dp/after	to handle file descriptor conditions
+dp/atclose	arrange for commands to be evaluated when a file or socket
+dp/atexit	arrange for commands to be evaluated when the process is exited.
+dp/connect	Tcl-DP connection management
+dp/distribObj	dp_DistributeObject, dp_UndistributeObject dp_setf, dp_getf
+dp/isready	to handle file descriptor conditions
+dp/object	.LP
+dp/packetReceive	Tcl-DP connection management
+dp/packetSend	Tcl-DP connection management
+dp/receive	Tcl-DP connection management
+dp/receiveFrom	Tcl-DP connection management
+dp/rpc	dp_RPC, dp_RDO, dp_MakeRPCClient, dp_MakeRPCServer, dp_CloseRPC, dp_CancelRPC,
+dp/send	Tcl-DP connection management
+dp/sendTo	Tcl-DP connection management
+dp/shutdown	Tcl-DP connection management
+dp/socketOption	Change the options on a socket
+dp/syntax	.LP
+dp/update	to handle file descriptor conditions
+dp/waitvariable	to handle file descriptor conditions
+dp/whenidle	to handle file descriptor conditions

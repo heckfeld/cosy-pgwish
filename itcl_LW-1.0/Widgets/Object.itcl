@@ -1,0 +1,153 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Object.itcl,v 1.1.5.2 1994/06/20 13:53:52 mark Exp $
+#
+# itcl_class: Object
+#---------------------------------------------------------------
+# Description : Common base for all classes. Adds common methods
+#	for config and persistency
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : none
+#
+# PUBLIC ATTRIBUTES:
+#	none
+#
+# METHODS:
+#	config ........... get/set public attributes
+#	set_config ....... explicitly set object's config options
+#	pure_virtual ..... report calls of pure virtuals
+#	save_object ...... save state of the current object into file
+#
+# STATIC METHODS (proc):
+#	SaveClass ........ save state of all object of the given class into file
+#
+# PROCEDURES:
+#	itcl_class::reset ..... resets all itcl, delets classes&objects
+#			    ... This is not a class proc, just a tcl proc
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : May 03, 1994
+#
+# Persistency support was posted to net by : 
+#	Bud Bach, Cellular Infrastructure Group, Motorola
+#
+# Last check-in date: $Date: 1994/06/20 13:53:52 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+itcl_class Object {
+    #---------------------------------------------------------------
+    # METHOD: config - performs object configuration. 
+    # 	Tries to emulate tk widgets config
+    # 	If config called without parameters, prints all current 
+    #	public variables in TK "config" format. 
+    #---------------------------------------------------------------
+    method config {args} {
+	if { [llength $args] == 0 } {
+	    set opts ""
+            foreach var [$this info public] {
+                lappend opts "-$var {} {} {[$this info public $var -init]} {[$this info public $var -value]}"
+            }
+            return $opts
+        } elseif {[llength $args] == 1} {
+            set option [string trimleft $args -]
+            if {[$this info exists $option]} {
+                return "-$option {} {} {[$this info public $option -init]} {[$this info public $option -value]}"
+            } else {
+                error "Unknown option: -$option"
+            }
+	} else {
+		eval _doConfig $args
+	}
+    }
+
+
+    #---------------------------------------------------------------
+    # METHOD: _doConfig - configure object via "config" parameter
+    #---------------------------------------------------------------
+    method _doConfig {config} {} 
+
+    #---------------------------------------------------------------
+    # METHOD: pure_virtual - report calls of pure virtuals
+    #---------------------------------------------------------------
+    method pure_virtual {command} {
+	puts stderr \
+	    "Pure virtual \"[virtual info class]::$command\" is called for object $this !"
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: set_config - explicitly set object's config options
+    #---------------------------------------------------------------
+    # 
+    method set_config {config_list} {
+	foreach attr $config_list {
+	    config -$attr [virtual info public $attr -value]
+        }
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: save_object - save state of the current object into file
+    #---------------------------------------------------------------
+    method save_object {fileid} {
+	puts $fileid "[$this info class] $this \\"
+	set publics [$this info public]
+	foreach public $publics {
+	    puts -nonewline $fileid "\t-[lindex [split $public ":"] 2] "
+	    puts -nonewline $fileid "\{[$this info public $public -value]\} \\"
+	    puts $fileid ""
+	}
+	puts $fileid ""
+    }
+
+    #----------------------------------------------------------------------
+    # PROC: SaveClass - save state of all object of the given class into file
+    #-----------------------------------------------------------------------
+    proc SaveClass {fileid class} {
+	set classMembers [itcl_info objects -isa $class]
+	foreach member $classMembers {
+	    $member save_object $fileid
+	}
+    }
+}
+
+
+#--------------------------------------------------------------------
+# PROCEDURE:  itcl_class::reset - Destroy all widgets/objects/classes
+#	This proc cannot be done inside of a class - it deletes classes
+#	and their interpreters !
+#--------------------------------------------------------------------
+proc itcl_class::reset {} {
+    foreach i [winfo child .] {destroy $i}
+    
+    foreach i [itcl_info objects] { 
+	catch {$i delete}
+    }
+    
+    foreach i [itcl_info class] {
+	if { "[itcl_info class $i]" != "" } {
+	    itcl_unload $i
+	}
+    }
+}
+    
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Object.itcl,v $
+# Revision 1.1.5.2  1994/06/20  13:53:52  mark
+# object's config made more smarter (may be used for a single option)
+#
+# Revision 1.1.5.1  1994/06/05  17:31:53  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:52  mark
+# Initial revision
+#
+#
+#

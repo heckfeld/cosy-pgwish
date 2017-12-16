@@ -1,0 +1,22 @@
+NAME
+       blt_debug - print Tcl commands before execution
+
+SYNOPSIS
+       blt_debug ?level?
+
+DESCRIPTION
+       This command acts as a simple trace for Tcl commands.  The
+       command is printed on standard error before and after sub-
+       stitutions  have  occurred.  Level indicates at what level
+       to stop tracing commands.  If level is 0,  no  tracing  is
+       performed. This is the default.
+
+       If  no  level  argument  is  given,  the  current level is
+       printed.
+
+CAVEATS
+       This interface will probably change  dramatically  in  the
+       next release with new functionality.
+
+KEYWORDS
+       debug

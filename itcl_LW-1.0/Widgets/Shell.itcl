@@ -1,0 +1,285 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Shell.itcl,v 1.1.5.1 1994/06/05 17:32:35 mark Exp $
+#
+# itcl_class: Shell
+#---------------------------------------------------------------
+# Description : Widget for providing top-level shell + color icon
+#	Shell defines icon (as canvases) as well. Shell starts in
+#	withdrawn mode, to make it visible one should call "$shell raise"
+#
+# TCL/TK extensions required: itcl TkPixmap
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-title ............. title for the window
+#	-geometry .......... window geometry (widthxheight)
+#	-minsize ........... minimum window size {min_x min_y}
+#	-maxsize ........... maximum window size {max_x max_y}
+#	-iconbitmap ........ bitmap (or pixmap) for icon
+#	-iconcolor ......... icon color
+#	-header ............ text to put on the window's header
+#
+# METHODS:
+#	iconify ............ iconify the shell , even it was withdrawn
+#	hide ............... withdraw the shell , i.e. hides it from window manager
+#	raise .............. restore and raise the shell
+#	getIconCanvas ...... returns canvas widget used for icon drawing
+# 
+# STATIC METHODS (proc) :
+#	Help {widget} ...... calls help method of the Shell closest to $widget
+#	BusyCursor ......... on/off busy cursor
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin ($Locker:  $)
+# Creation date : Mar 30, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:32:35 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget
+
+itcl_class Shell {
+    inherit Widget
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Shell
+    #---------------------------------------------------------------
+    constructor {config} {
+	Widget::constructor toplevel 
+	
+	foreach i { geometry minsize maxsize } {
+	    if {"$i" != "" } {
+		eval wm $i $this [set $i]
+	    }
+	}
+	wm title $this $title
+	_set_icon_bitmap
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: iconify - iconify the shell , even it was withdrawn
+    #---------------------------------------------------------------
+    method iconify {args} {
+	wm iconify   $this
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: hide - withdraw the shell , i.e. hides it from window manager
+    #---------------------------------------------------------------
+    method hide {args} {
+	wm withdraw $this
+    }
+    #---------------------------------------------------------------
+    # METHOD: show - show the shell
+    #---------------------------------------------------------------
+    method show {args} {
+	wm deiconify $this
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: raise - restore and raise the shell
+    #---------------------------------------------------------------
+    method raise {} {
+	show
+	update 
+	::raise $this
+	update 
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: name - description
+    #---------------------------------------------------------------
+    method getIconCanvas {} { return $canvas }
+
+    #---------------------------------------------------------------
+    # METHOD: _set_icon_bitmap - Creates a window for Shell's icon
+    #	sets it to keep a bitmap. Accepts xpm & gif for pixmap. 
+    #	The created icon window contains canvases and may be used 
+    #	for animation and any visual effects
+    #----------------------------------------------------------------------
+    method _set_icon_bitmap {} {
+	set icon   $this.iconWindow
+	set canvas $icon.c
+	
+	# this setting of icon sizes is done mainly for MWM support
+	# WARNING: it may be better 
+	# "wm geometry $icon [winfo reqwidth $icon]x[winfo reqheight $icon]"
+	# for more complicated icons
+	set i_w 48
+	set i_h 48
+
+	# hide the the orig window so that wm hints work
+	wm withdraw $this
+
+	# create the icon window
+	global tk_version
+# mike Tue Jul  4 08:37:40 METDST 1995
+	if {$tk_version > 3.6} {
+	    toplevel $icon \
+		-borderwidth 0 \
+		-class WMIcon \
+		-width ${i_w} -height ${i_h}
+	} {
+	    toplevel $icon -borderwidth 0  -class WMIcon -geometry ${i_w}x${i_h}
+	}
+	wm withdraw $icon
+
+	# create bitmap area
+	canvas $canvas  -borderwidth 0 -width $i_w -height $i_h
+	label $canvas.l -borderwidth 0 -bitmap $iconbitmap -anchor center
+	if { "$iconcolor" != "" } {
+	    _set_icon_color
+	}
+
+	# calculate pixmap position
+	set pw [pinfo width  $iconbitmap]
+	set ph [pinfo height $iconbitmap]
+	if { $pw >= $i_w } {
+	    set x 0 
+	} else {
+	    set x [expr ($i_w-$pw)/2 -1]
+	}
+	if { $ph >= $i_h } {
+	    set y 0 
+	} else {
+	    set y [expr ($i_h-$ph)/2 -1]
+	}
+
+	# should create here according to pixmap size
+	$canvas create window $x $y -window  $canvas.l -anchor nw -tag bitmap
+
+	# pack append $icon $canvas {frame center fill expand}
+	::pack $canvas -fill both -expand yes -anchor center
+
+	foreach i "$icon $canvas $canvas.l" {
+	    bind $i <Double-1> "wm deiconify $this"
+	}
+
+	# Make sure the icon window's geometry is calculated.
+	update idletask
+	
+	# Tell the window manager about the icon window
+	wm iconname   $this $title
+	wm iconwindow $this $icon
+
+	wm geometry   $icon ${i_w}x${i_h}
+
+	#
+	# Get display back in sync before putting the Shell back.
+	#
+	update idletasks
+    }
+	
+    #---------------------------------------------------------------
+    # METHOD: _set_icon_color - change color of icon's canvas&label
+    #---------------------------------------------------------------
+    method _set_icon_color {} {
+	$canvas   config -background $iconcolor
+	$canvas.l config -background $iconcolor
+    }
+    
+    #---------------------------------------------------------------
+    # PROC: Help {widget} - calls context-sensitive help 
+    #	for the Shell parent of the given widget
+    #---------------------------------------------------------------
+    proc Help {widget args} {
+	[winfo toplevel $widget] help
+    }
+
+    #---------------------------------------------------------------
+    # PROC: BusyCursor - switches on/off BusyCursor
+    #---------------------------------------------------------------
+    proc BusyCursor {type} {
+	case $type in {
+	    on  {
+		blt_busy hold .
+		foreach i [itcl_info obj -isa Shell] {
+		    catch {blt_busy hold $i}
+		}
+		
+	    }
+	    off {
+		blt_busy release .
+		foreach i [itcl_info obj -isa Shell] {
+		    catch {blt_busy release $i}
+		}
+	    }
+	    default {error "Bad BusyCursor type: $type"}
+	}
+	update
+    }
+
+    #
+    # PUBLIC DATA
+    #
+
+    public title "Shell" {
+	if {[exists]} {
+	    wm title $this $title
+	}
+    }
+    public geometry "" {
+	if {[exists] && "$geometry" != ""} {
+	    wm geometry $this $geometry
+	}
+    }
+    public minsize {1 1} {
+	if {[exists]} {
+	    eval wm minsize $this $minsize
+	}
+    }
+    public maxsize {800 800} {
+	if {[exists]} {
+	    eval wm maxsize $this $maxsize
+	}
+    }
+    
+    public iconbitmap  tick.xpm {
+	if {[winfo exists $canvas]} {
+	    $canvas.l config -bitmap $iconbitmap
+	    
+	    # should recalculate here according to pixmap size
+	    #	    $canvas.l move $bitmap 
+	}
+    }
+    
+    public iconcolor gray80 {
+	if {[exists]} {
+	    _set_icon_color
+	}
+    }
+
+    public header "" {
+	if {[exists]} {
+	    $this config -text $header
+	}
+    }
+
+    #
+    # PROTECTED DATA
+    #	icon ..... toplevel used as an icon
+    #	canvas ... canvas inside of $icon used for drawing
+    #
+    protected icon   ""
+    protected canvas ""
+
+}
+    
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Shell.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:32:35  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:32:35  mark
+# Initial revision
+#
+#

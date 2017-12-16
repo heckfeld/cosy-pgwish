@@ -1,0 +1,51 @@
+#! /bin/bash
+# KFA Juelich
+# COSY Control
+# $Header$
+
+# troute von plisch:/mnt/cc-x4/ccp/cpc3p0/bin/troute, mit netcat
+
+if [ $# -ne 1 ]
+then echo Usage: troute targetname
+     exit 1
+fi
+
+#HOSTNAMES
+target=$1
+router=`hostname`
+
+#INTERNET ADDRESS
+tip=`tip $target 2>&1`		# Target
+if [ $? -ne 0 ]
+then echo target $target unknown
+     exit 1
+fi
+network=$tip
+
+rip=`tip $router $network 2>&1 | cut -d\\  -f1`		# Router
+if [ $? -ne 0 ]
+then echo router $router unknown
+     echo trying $router-a
+     router=$router-a
+     rip=`tip $router $network 2>&1 | cut -d\\  -f1`	# Router
+     if [ $? -ne 0 ]
+     then echo router $router unknown
+          exit 1
+     fi
+fi
+#default=`echo $rip | cut -d. -f1-3`
+#
+#if [ "$network" != "$default" ]
+#then echo network unreachable
+#     exit 1
+#fi
+
+netcat -q 2 $target 20004 2>/dev/null << END
+route -f add net default $rip 1
+netstat -rn
+END
+retval=$?
+
+echo ""
+
+exit $retval

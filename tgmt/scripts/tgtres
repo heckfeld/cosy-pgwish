@@ -1,0 +1,188 @@
+#!/bin/bash
+
+# $Header$
+
+if test -z "$1"
+then
+    echo "	Usage: $0 <filename>"
+    exit 1
+fi
+
+if test -z "$PGHOST"
+then
+  echo "Die Environment-Variable PGHOST muss gesetzt sein."
+  exit 1
+fi
+
+ftmp=/tmp/cosyadr$$
+fname=$1
+
+echo >> $ftmp
+echo >> $ftmp
+date >> $ftmp
+echo >> $ftmp
+
+while true
+do
+   if test -n "$targetname"
+   then
+       echo -e "Target: \c" >> $ftmp
+       echo "$targetname" >> $ftmp
+       break
+   else
+       echo -e "Targetname: \c"
+       read targetname
+   fi
+done
+while true
+do
+   if test -n "$datenbank"
+   then
+       break
+   else
+       echo -e "Parameter-Datenbank: \c"
+       read datenbank
+   fi
+done
+
+echo >>$ftmp
+echo >>$ftmp
+
+echo "thosts" >> $ftmp
+echo "------" >> $ftmp
+echo "Targetname IA EA WC:" >> $ftmp
+tmp=`tgt_mkthosts -a|grep $targetname`
+while true
+do
+   if test -n "$tmp"
+   then
+      tmp2=`echo $tmp | cut -d' ' -f1`
+      if test "$tmp2" = "$targetname"
+      then
+         echo `echo $tmp |cut -d' ' -f1-4` >> $ftmp
+         break
+      fi
+      tmp=`echo $tmp |cut -d' ' -f5-`
+   else
+      echo "	$0: $targetname   no such target"
+      exit
+   fi
+done
+echo >>$ftmp
+
+echo "fc" >> $ftmp
+echo "--" >> $ftmp
+echo "Targetname Nodeadresse CPU-Typ Slotnummer:" >> $ftmp
+tmp=`tgt_mkfc -a|grep $targetname`
+while true
+do
+  if test -n "$tmp"
+  then
+     tmp2=`echo $tmp | cut -d' ' -f1`
+     if test "$tmp2" = "$targetname"
+     then
+        echo `echo $tmp |cut -d' ' -f1-4` >> $ftmp
+        cpus="$cpus `echo $tmp |cut -d' ' -f3`"
+     fi
+     tmp=`echo $tmp |cut -d' ' -f5-`
+  else
+     break
+  fi
+done
+
+echo >>$ftmp
+
+echo "cpus" >> $ftmp
+echo "----" >> $ftmp
+echo "CPU-Typ Ladeadresse Kernelbinary A.binary" >> $ftmp
+for i in $cpus
+do
+   tmp=`tgt_mkcpus -a|grep $i`
+
+   while true
+   do
+      if test -n "$tmp"
+      then
+         tmp2=`echo $tmp | cut -d' ' -f1`
+         if test "$tmp2" = "$i"
+         then
+            echo `echo $tmp |cut -d' ' -f1-4` >> $ftmp
+            break
+         fi
+         tmp=`echo $tmp |cut -d' ' -f5-`
+      else
+         echo "	$0: $i	no such cpu in cpus"
+         break
+      fi
+   done
+
+done
+echo >>$ftmp
+
+
+echo "param $datenbank" >> $ftmp
+echo "-----" >> $ftmp
+echo "Gruppe Geraet Parameter Adresse:" >> $ftmp
+record=`tgt_mkparam -a $datenbank|grep $targetname|sort -k+1`
+
+count=0
+for i in $record
+do
+    if test $count -eq 3
+    then
+      tgt=`echo $i|cut -f1 -d"."`
+      if test $tgt = $targetname
+      then
+        echo $gruppe $geraet $param $i >> $ftmp
+      fi
+      count=-1
+    else
+      if test $count -eq 0
+      then
+         gruppe=$i
+      else
+         if test $count -eq 1
+         then
+           geraet=$i
+         else
+           param=$i
+        fi
+      fi
+    fi
+    count=`expr $count + 1`
+done
+
+#tgt_mkparam -a $datenbank |grep -v Gruppe >> $ftmp
+
+#tmp=`tgt_mkparam -a $datenbank|grep $geraet`
+#while true
+#do
+# for i in "$tmp"
+# do
+#    echo `echo $i |cut -d' ' -f1-4` >> $ftmp
+#    i=`echo $i |cut -d' ' -f5-`
+# done
+#done
+echo >>$ftmp
+
+echo "tinfo $targetname" >> $ftmp
+echo "-----" >> $ftmp
+tmp=`tinfo $targetname`
+while true
+do
+  if test -n "$tmp"
+  then
+     echo `echo $tmp |cut -d' ' -f1-9` >> $ftmp
+     tmp=`echo $tmp |cut -d' ' -f10-`
+  else
+     break
+  fi
+done
+echo >>$ftmp
+
+if test -s $fname
+then
+  echo  >> $fname
+fi
+fold -w 78 $ftmp >> $fname
+rm $ftmp

@@ -1,0 +1,84 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: MessageList.itcl,v 1.1.5.1 1994/06/05 17:31:50 mark Exp $
+#
+# itcl_class: MessageList
+#--------------------------------------------------------------
+# Description: Squeezed list for message keeping
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Sqeezer
+#
+# PUBLIC ATTRIBUTES:
+#	-message ....... message to add
+#
+# METHODS:
+#	create_area .... virtual, called by Sqeezer to create hidden area
+#	pack_area ...... virtual, called by Sqeezer to pack hidden area
+#	pack_check ..... virtual, called by Sqeezer to pack check button
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:50 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Sqeezer
+
+itcl_class MessageList {
+    inherit Sqeezer
+	
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new MessageList
+    #---------------------------------------------------------------
+    constructor {config} {	
+ 	Sqeezer::constructor
+
+	#  Explicitly handle config's that may have been ignored earlier
+	set_config $config
+    }
+
+    #-----------------------------------------------------------------------
+    # METHOD: create_area - virtual, called by Sqeezer to create hidden area
+    #-----------------------------------------------------------------------
+    method create_area {name} {
+	set message_w $name
+	ScrolledList $name -list "$message_w" -title "Messages" -height 3
+    }
+    
+    #----------------------------------------------------------------------
+    # METHOD: pack_area - virtual, called by Sqeezer to pack hidden area
+    #----------------------------------------------------------------------
+    method pack_area {name} {
+	pack $name -fill both -expand yes -anchor nw 
+    }
+    
+    #----------------------------------------------------------------------
+    # METHOD: pack_check - virtual, called by Sqeezer to pack check button
+    #----------------------------------------------------------------------
+    method pack_check {check} {
+	pack $check -anchor nw -side top
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public message "" {
+	if { "$message_w" != "" } {
+	    $message_w add $message
+	}
+    }
+
+    #
+    # PROTECTED DATA
+    #	message_w ........... widget name of message list
+    #
+    protected message_w ""
+}
+
+    

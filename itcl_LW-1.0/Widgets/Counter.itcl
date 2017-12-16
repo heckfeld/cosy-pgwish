@@ -1,0 +1,101 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Counter.itcl,v 1.1.5.1 1994/06/05 17:30:59 mark Exp $
+#
+# itcl_class: Counter
+#---------------------------------------------------------------
+# Description : Simple counter implementation
+#
+# TCL/TK extensions required: itcl 
+# INHERITS FROM             : Object
+#
+# PUBLIC ATTRIBUTES:
+#	-value ............ counter value to start from
+#
+# METHODS:
+#	++ ................ incr counter value (default step is 1)
+#	-- ................ decr counter value (default step is 1)
+#	reset ............. set the counter value to the original one
+#	get ............... get current value
+# 	value ............. set current and original value
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Jan 04, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:30:59 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Object
+
+itcl_class Counter {
+    inherit Object
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Counter
+    #---------------------------------------------------------------
+    constructor {config} {
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: ++   - incr counter value
+    #---------------------------------------------------------------
+    method ++ {{number 1}}   { incr value $number }
+
+    #---------------------------------------------------------------
+    # METHOD: --   - decr counter value
+    #---------------------------------------------------------------
+    method -- {{number 1}}   { incr value -$number }
+
+    #---------------------------------------------------------------
+    # METHOD: reset - set the counter value to the original one
+    #---------------------------------------------------------------
+    method reset {}          { set value $value_save }
+
+    #---------------------------------------------------------------
+    # METHOD: get - get current value
+    #---------------------------------------------------------------
+    method get   {}          { return $value}
+
+    #---------------------------------------------------------------
+    # METHOD: value - set current and original value
+    #---------------------------------------------------------------
+    method value   {{number "get"}}    { 
+	if { $number != "get" } {
+	    $this config -value $number
+	}
+	return $value
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public value 0 {
+	set value_save $value 
+    }
+    
+    #
+    # PROTECTED DATA
+    #	value_save ....... "original" value for reset operation
+    #
+    protected value_save 0
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Counter.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:30:59  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:30:58  mark
+# Initial revision
+#
+#
+#

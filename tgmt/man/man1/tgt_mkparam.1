@@ -1,0 +1,128 @@
+'\" te
+.TH tgt_mkparam "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgt_mkparam
+\- Manipulieren der Datenbank, in der logischer und physikalischer Namen
+eines Parameters enthalten ist
+.sp
+.SH SYNOPSIS
+.br
+.B tgt_mkparam -[i|f file|d|l|a] Gruppe
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgt_mkparam 
+greift auf die Datenbank 
+\fB$TMDB/\fI$Gruppe\fR zu.
+.sp 2
+In dieser Datenbank ist zu Ger\(:at und Parameter der Gruppe die
+zugeh\(:orige physikalische Adresse enthalten.
+.sp
+Folgende Daten werden f\(:ur die physikalische Adresse abgespeichert :
+.br
+.in 8
+- der Targetname
+.br
+- die Nodeadresse der Karte (hexadezimal)
+.br
+- das FBi (dezimal)
+.br
+- die Stationsnummer (hexadezimal)
+.br
+- die Baseadresse im G64-Crate (hexadezimal)
+.br
+- die Subadresse (hexadezimal)
+.br
+- die Maske (sie mu\[ss] aus 4 hexadezimalen Zahlen bestehen, die durch
+Punkte voneinander getrennt sind. Wird nur ein Wert eingegeben, werden
+alle 4 Zahlen mit diesem Wert initialisiert. Wird nichts eingegeben (<Return>), erh\(:alt die
+Maske den Wert "0x0.0x0.0x0.0x0") und
+.br
+- der Treibername (mu\[ss] im File 'dev' eingetragen sein).
+.br
+.in 5
+.br
+.sp 2
+Folgende Funktionen k\(:onnen ausgef\(:uhrt werden :
+.in 8
+.B -i
+: Daten werden in die Datenbank eingetragen. Sie werden interaktiv vom Stdinput
+eingelesen.
+.br
+.B -f file
+: Die in
+.B file
+enthaltenen Daten werden in die Datenbank eingetragen (Reihenfolge : Gruppe,
+Ger\(:at, Parameter, Targetname, getrennt durch ein Blank, anschlie\[ss]end ein Punkt,
+dann Nodeadresse, FBi, Stationsnummer, Baseadresse im G64-Crate,
+Subadresse, Maske und Treibername, durch einen Punkt getrennt,
+alle Angaben in einer Zeile).
+Es d\(:urfen auch Leerzeilen und Kommentare (beginnend mit #) verwendet werden.
+Ist kein
+.B file
+angegeben, werden die Daten vom Stdinput gelesen.
+.br
+.B -d
+: Daten zum eingegebenen Parameter eines Ger\(:ates werden gel\(:oscht
+.br
+.B -l
+: Eintrag zum eingegebenen Parameter wird ausgegeben
+.br
+.B -a
+: der Inhalt der Datenbank wird ausgegeben
+.in 5
+.sp
+Bei den Optionen
+.B -d
+und
+.B -l
+mu\[ss] der Benutzer das Ger\(:at und den Parameter interaktiv eingeben.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbank mu\[ss] sich in dem Directory
+.B $TMDB
+befinden.
+Ist die Variable TMDB nicht initialisiert, wird sie auf $PWD gesetzt.
+.sp
+.SH R\(:UCKGABEWERT
+.br
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH FEHLER
+- es wird kein oder ein falsches Argument \(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.sp
+.SH SIEHE AUCH
+param(1)
+.sp
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberpr\(:uft nicht, ob der eingegebene Parameter zum Ger\(:at schon in der Datenbank enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.br
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1192
+
+Dirk R\(:utten
+<dirk@cecs.cc.kfa-juelich.de>
+1394

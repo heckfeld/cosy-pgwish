@@ -1,0 +1,151 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Feedback.itcl,v 1.1.5.1 1994/06/05 17:31:12 mark Exp $
+#
+# itcl_class: Feedback
+#--------------------------------------------------------------
+# Description: Provides feedback while a long operation is in progress
+#
+# TCL/TK extensions required: tcl
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-color ........... bar graph color
+#	-relief .......... bar graph relief
+#	-bd .............. bar graph border width
+#	-label ........... label higher the bar
+#	-title ........... feedback window title
+#	-steps ........... how many steps are in 100%
+#
+# METHODS:
+#	step ............. show one step in feedback
+#	refresh .......... reset the Feedback to the start state
+#
+# STATIC METHODS (proc) :
+# 	CenterWindow ..... center a toplevel window
+#
+#---------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:12 $
+#
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget
+
+# Cursor in ann Feebacks should be "watch"
+option add *Feedback*Cursor watch userDefault
+
+itcl_class Feedback {
+    inherit Widget
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Feedback
+    #---------------------------------------------------------------
+    constructor { config } {
+	Widget::constructor toplevel
+
+	label $this.title -width 50 -text $label -anchor center
+	frame $this.center
+	frame $this.bar -bg $color -relief $relief -bd $bd -height 20 -width 1
+
+	pack append $this.center \
+	    [frame $this.spacer -width 5 -height 5] {left} \
+	    $this.bar {frame w}
+	label $this.percentage -text 0% -anchor center
+
+	pack $this.title  -side top -fill x  -expand yes -pady 3 -pady 2
+	pack $this.center -side top -anchor w -pady 5 
+	pack $this.percentage -side top -fill x -expand yes -padx 3 -pady 2
+
+	wm title $this $title
+	Feedback :: CenterWindow $this
+	set width [expr [winfo width $this]-10]
+	$this.center config -width $width
+    } 
+
+    #---------------------------------------------------------------
+    # METHOD: step - show one step in feedback
+    #---------------------------------------------------------------
+    method step {} {
+	incr step
+	set fraction [expr $step/$steps]
+	if { $fraction > 1 } return
+	$this.percentage config -text [format %.0f%% [expr 100.0*$fraction]]
+	$this.bar config -width [format %.0f [expr $width*$fraction]]
+	update
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: refresh - reset the Feedback to the start state
+    #---------------------------------------------------------------
+    method refresh {} { 
+	set step -1
+	step
+    }
+
+    #---------------------------------------------------------------
+    # PROC: CenterWindow - center a toplevel window
+    #---------------------------------------------------------------
+    proc CenterWindow {win} {
+	wm withdraw $win
+	update idletasks
+	set w [winfo reqwidth $win]
+	set h [winfo reqheight $win]
+	set sh [winfo screenheight $win]
+	set sw [winfo screenwidth $win]
+	wm geometry $win +[expr {($sw-$w)/2}]+[expr {($sh-$h)/2}]
+	wm deiconify $win
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public color lightsteelblue { 
+	if [exists] { 
+	    $this.bar config -bg $color
+	}
+    }
+
+    public relief flat { 
+	if [exists] {
+	    $this.bar config -relief $relief 
+	}
+    }
+
+    public bd 0 { 
+	if [exists] {
+	    $this.bar config  -bd $bd
+	}
+    }
+
+    public label "Done in percents" {
+	if [exists] {
+	    $this.title config  -text $label
+	}
+    }
+
+    public title "Feedback" {
+	if [exists] {
+	    wm title $this $title
+	}
+    }
+
+    public steps 100.0000 {
+	set steps [format %f $steps]
+	if { $step != 0 }  refresh
+    }
+
+    #
+    # PROTECTED DATA
+    #	width ........... width of the bar graph
+    #	step ............ current step number
+    #
+    protected width {}
+    protected step 0
+}

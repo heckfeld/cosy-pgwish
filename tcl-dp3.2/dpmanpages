@@ -1,0 +1,32 @@
+return {
+    {Tcl-DP.n           dp/syntax}
+    {dp_CancelRPC.n     dp/CancelRPC}
+    {dp_CloseRPC.n      dp/CloseRPC}
+    {dp_Host.n          dp/Host}
+    {dp_MakeRPCClient.n dp/MakeRPCClient}
+    {dp_MakeRPCServer.n dp/MakeRPCServer}
+    {dp_RDO.n           dp/RDO}
+    {dp_SetCheckCmd.n    dp/SetCheckCmd}
+    {dp_accept.n    dp/accept}
+    {dp_address.n    dp/address}
+    {dp_after.n    dp/after}
+    {dp_atclose.n    dp/atclose}
+    {dp_atexit.n    dp/atexit}
+    {dp_connect.n    dp/connect}
+    {dp_distribObj.n    dp/distribObj}
+    {dp_filehandler.n    dp/CancelRPfilehandler}
+    {dp_isready.n    dp/isready}
+    {dp_object.n    dp/object}
+    {dp_packetReceive.n    dp/packetReceive}
+    {dp_packetSend.n    dp/packetSend}
+    {dp_receive.n    dp/receive}
+    {dp_receiveFrom.n    dp/receiveFrom}
+    {dp_rpc.n    dp/rpc}
+    {dp_send.n    dp/send}
+    {dp_sendTo.n    dp/sendTo}
+    {dp_shutdown.n    dp/shutdown}
+    {dp_socketOption.n    dp/socketOption}
+    {dp_update.n    dp/update}
+    {dp_waitvariable.n    dp/waitvariable}
+    {dp_whenidle.n    dp/whenidle}
+}

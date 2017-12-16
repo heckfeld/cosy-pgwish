@@ -1,0 +1,156 @@
+NAME
+       blt_busy - Block pointer and keyboard events from a window
+       sub-tree
+
+SYNOPSIS
+       blt_busy hold window options ?window options ...?
+
+       blt_busy release window ?window ...?
+
+       blt_busy configure window ?options...?
+
+       blt_busy forget window ?window ...?
+
+       blt_busy hosts pattern
+
+       blt_busy status window
+
+DESCRIPTION
+       This command implements a mechanism to  prevent  keyboard,
+       button,  and pointer events from reaching a window and its
+       descendants.  Events occurring  in  this  window  and  its
+       descendants  in  Tk's  window  hierarchy   are effectively
+       ignored.
+
+       This is particularly useful for  temporarily  deactivating
+       an  hierarchy  of widgets (e.g. buttons and entries) while
+       other processing is occurring.
+
+       Once a window is made busy using the  blt_busy  hold  com-
+       mand,  the  window  and  its  descendants are blocked from
+       receiving events.  Please note that only  the  descendants
+       which  exist  at the time the hold command was invoked are
+       affected.  If a new child window is created following  the
+       command, its events are not blocked.
+
+       The  blocking  feature is implemented by creating and map-
+       ping an InputOnly class sub-window, obscuring some or  all
+       of  the  parent window.  When the sub-window is mapped, it
+       shields its parent and sibling windows from events (it  is
+       always  mapped to be the uppermost sibling).  The size and
+       position of the busy window are determined by a host  win-
+       dow.   Typically the host and parent windows are the same.
+       But in cases where a window is not packed into its parent,
+       the  -in option may be used to specify a different parent.
+
+       The blt_busy command can take any of the following forms:
+
+       blt_busy hold window ?option? ?value option value ...?
+              Creates and activates a busy window associated with
+              window.   Window  must be a valid path name of a Tk
+              window.  It represents the host window which deter-
+              mines  the  position  and  size of the busy window.
+              All device  events  for  the  host  window  and  it
+              descendants will be effectively blocked.  Typically
+              update should be called  immediately  afterward  to
+              insure  that  the busy cursor is updated before the
+              application starts its work.  This command  returns
+              the  empty  string.   The  following  configuration
+              options are valid:
+
+              -cursor cursorName
+                     Specifies the cursor to  be  displayed  when
+                     the  busy  window  is activated.  CursorName
+                     can be in any form accepted by Tk_GetCursor.
+                     The default cursor is watch.
+
+              -in parent
+                     Specifies the parent window of the busy win-
+                     dow. This is needed when the parent and host
+                     windows  are not the same.  Parent specifies
+                     the path name of a mutual ancestor  of  both
+                     the host window and the window hierarchy.
+
+       blt_busy configure window ?option? ?value option value
+              Queries  or  modifies  the configuration options of
+              the busy window.  Window must be the path name of a
+              host  window  (associated by the hold command).  If
+              no option is specified, a list  describing  all  of
+              the    available    options    for    window   (see
+              Tk_ConfigureInfo for information on the  format  of
+              this  list)  is  returned.   If option is specified
+              with no value, then  the  command  returns  a  list
+              describing  the one named option (this list will be
+              identical to the corresponding sublist of the value
+              returned  if  no  option  is specified).  If one or
+              more option-value pairs  are  specified,  then  the
+              command modifies the given widget option(s) to have
+              the  given  value(s);  in  this  case  the  command
+              returns  the  empty string.  Option may have any of
+              the values accepted by the  hold  command.   Please
+              note that the option database is referenced through
+              window.  For example, if a busy window  exists  for
+              the  window .myframe, the busy window cursor can be
+              specified for it by either option command:
+
+                   option add *myframe.busyCursor gumby
+                   option add *Frame.BusyCursor gumby
+
+       blt_busy release window ?window ...?
+              Permits events to be received by window again. This
+              differs  from  the  forget command in that the busy
+              window is retained, but is not active.  An error is
+              reported if window is not a host window.  This com-
+              mand returns the empty string.
+
+       blt_busy forget window ?window ...?
+              Permits events to be received again  by  window  by
+              destroying  the  busy window.  An error is reported
+              window is not a host window.  This command  returns
+              the empty string.
+
+       blt_busy hosts ?pattern?
+              Returns  the  pathnames  of  all host windows which
+              have a busy window associated with them.  If a pat-
+              tern  argument  is  present, the pathnames of hosts
+              matching pattern are returned.
+
+       blt_busy status window
+              Returns the status of the  busy  window  associated
+              with window.  An error is reported if window is not
+              a host window.  If window  is  currently  prevented
+              from  receiving events, 1 is returned, otherwise 0.
+
+
+KEYBOARD EVENTS
+       Since Tk allows  for  keyboard  events  to  be  redirected
+       through windows not in the parent window's hierarchy, care
+       must be taken to turn off focus while processing is occur-
+       ring.
+
+                   blt_busy hold .frame
+                   focus none
+       The  above  example  clears  the  focus  immediately after
+       invoking the hold command so that no keyboard events  will
+       be relayed to windows under the hierarchy of .frame.
+
+BUGS
+       Creating  a  busy  window will generate Enter/Leave events
+       for windows that it covers.  Please note this when  track-
+       ing Enter/Leave events for windows.
+
+       There's  no way to exempt particular windows in an hierar-
+       chy so that they may still receive events.  The busy  win-
+       dow  is  always mapped above its siblings. The work around
+       is to create busy windows for each child in the  hierarchy
+       (except  for the windows where events are desired) instead
+       of the parent window.
+
+       When busy windows  are  created,  they  are  automatically
+       mapped;  thus  blocking  events  from  the  parent and its
+       descendants.  There is no two-step  process  which  allows
+       one to create a busy window, and later when convenient, to
+       activate it so that it blocks events.
+
+KEYWORDS
+       busy, keyboard events, pointer events, window, cursor

@@ -1,0 +1,126 @@
+
+             Tcl Distributed Programming (Tcl-DP)
+               (Version 3.2; June 1, 1994)
+
+		      Brian C. Smith
+		Department of Computer Science
+		    Cornell University
+
+		     Lawrence A. Rowe
+               Computer Science Division-EECS
+             University of California at Berkeley
+
+This directory contains a freely distributable extension to Tcl/Tk
+called Tcl Distributed Programming (Tcl-DP).  Tcl-DP adds TCP and IP
+connection management, remote procedure call (RPC), and distributed
+object protocols to Tcl/Tk.  A C interface to the RPC primitives is
+also provided.  Unlike the "send" command of Tk, Tcl-DP does not
+require that Tcl/Tk processes that want to communicate share an X
+server because Tcl-DP is built directly upon TCP/IP.
+
+BACKGROUND
+
+Tcl stands for the Tool Command Language, a freely distributable,
+embeddable scripting language package.  Tk is an freely distributable X
+windows interface toolkit and widget library implemented by a
+collection of new commands added to Tcl.  Information about Tcl/Tk is
+available by anonymous ftp from sprite.berkeley.edu [128.32.150.27].
+Tcl-DP was originally developed for Tcl 6.5 and Tk 3.0.  Tcl-DP Version
+3.2 is compatible with Tcl 7.3 and Tk 3.6.
+
+This distribution contains the source code for Tcl-DP, man pages that
+describe the commands, and several examples that illustrate how to use
+Tcl-DP to build simple distributed applications.  Tcl-DP is available
+by anonymous ftp from mm-ftp.cs.berkeley.edu [128.32.149.157] in the
+/pub/multimedia/Tcl-DP directory.
+
+The Makefile creates a library, libdpnetwork.a, that can be linked with
+your application programs.  To use Tcl-DP, you must initialize your Tcl
+interpreters with the Tdp_Init C procedure (see dp.h and tkAppInit.c).
+After initialization, all distributed programming can be done with Tcl
+commands.
+
+In the examples subdirectory, several sample applications are supplied
+that use Tcl-DP.  As you can see from the examples, the distributed
+programming mechanisms of Tcl-DP are very simple.  A dp_RPC command,
+for example, sends a Tcl command to a remote process, which evaluates
+the command in the destination Tcl interpreter and returns the result
+as the value of the dp_RPC command.
+
+The services subdirectory contains an extended example of Tcl-DP.  It
+contains Tcl-DP scripts to implement a name server, a daemon to which
+server applications can advertise their location, and from which client
+applications can locate the servers.  See services/README.
+
+New in version 3.2, the dplite subdirectory contains several modified
+Tk 3.6 source code files that allows Tcl-DP to be compiled and linked
+without X11.  This results in a significantly smaller executable and
+should make the port to other operating systems easier.
+
+COMPILING/USING TCL-DP
+
+To compile the dpwish program:
+
++) If you do not already have Tcl 7.3 and Tk 3.6, get a copy and follow
+the instructions to build the system.  Tcl-DP 3.2 may not work with
+earlier versions of Tcl/Tk.  Although not required, we recommend that
+you place tcl-dp3.2 in a sibling directory to tcl7.3 and tk3.6, and
+then make a symlink from tcl-dp3.2 to tcl-dp.
+
++) In the tcl-dp directory (i.e., where this README resides), edit
+"Makefile.in" to customize Tcl-DP for your site.
+
++) Type "./configure".  This runs a configuration script created by GNU
+autoconf, which configures Tcl for your system and creates a Makefile.
+
++) Type "make".  This will create a library archive called
+"libdpnetwork.a", a Tcl-DP extended wish called "dpwish," and
+a symbolic link to dpwish called "dptcl."
+
++) Type "make install" to install Tcl-DP's binaries, library files,
+and manual pages in standard places.  In the default configuration
+information will be installed in /usr/local so you'll need write
+permission on this directory.
+
+If you wish to make the dplite version of Tcl-DP:
+
++) Go into the dplite subdiretory. 
+
++) Edit "Makefile.in" and run "configure."
+
++) Type "make".  This will create a library archive called
+"libdplite.a" and a Tcl-DP shell called "dpsh."
+
++) Type "make install" to install the DP-Lite's binary and library file
+in standard places.  In the default configuration information will be
+installed in /usr/local so you'll need write permission on this
+directory.
+
+To learn how to use Tcl-DP:
+
++) Read the README file in the examples subdirectory and play with
+the example applications.
+
++) Read the Tcl-DP man page (Tcl-DP.l), and the other man pages 
+in the doc subdirectory.
+
+To report bugs, bug fixes, descriptions of interesting Tcl-DP 
+applications, and suggested improvements:
+
++) Send email to tcl-dp@roger-rabbit.CS.Berkeley.EDU or
+tcl-dp-bugs@roger-rabbit.CS.Berkeley.EDU
+
+or
+
++) Post an article in the comp.lang.tcl newsgroup.
+
+We extend our thanks to everyone who helped to create, debug, and
+distribute this software.  Although there are too many people to
+mention at this point, the following people deserve special attention:
+
+  John Ousterhout, creator of Tcl/Tk; 
+  Pekka Nikander, creator of tcpConnect;
+  Tim MacKenzie, creator of tclRawTCP;
+  Lou Salkind, ported Tcl-DP to Tcl 7.0/Tk 3.3
+  R Lindsay Todd, developed security mechanism
+  Craig Federighi, developed extended name server code

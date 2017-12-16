@@ -1,0 +1,25 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+#
+# TEST
+#
+if {!$tcl_interactive} { set auto_path "$auto_path ../Widgets"}
+catch {source ../Gray14.tcl}
+
+set steps 30
+button .e -text exit -command exit
+pack .e
+
+Feedback .feed -label "Discovery ...  " -title "Discovery Status" -steps $steps
+proc do_step { feed time } {
+	global steps
+	incr steps -1
+	$feed step
+	if { $steps >= 0 } { 
+	    after $time do_step $feed $time 
+	} else {
+	    $feed config -color green -label "Discovery ... Done"
+	}
+}
+
+do_step .feed 100

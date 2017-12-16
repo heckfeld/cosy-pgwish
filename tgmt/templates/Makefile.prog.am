@@ -1,0 +1,8 @@
+
+
+bin_PROGRAMS = tgtmgt
+tgtmgt_SOURCES = main.c
+
+tgtmgt_LDADD = $(top_srcdir)/../libtgtmgt/$(build)/libtgtmgt.la -lpq
+
+AM_CPPFLAGS = -I$(top_srcdir)/../h

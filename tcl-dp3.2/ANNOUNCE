@@ -1,0 +1,198 @@
+Tcl-DP, Version 3.2
+June 1, 1994
+
+This is to announce the official release of Tcl-DP, version 3.2.  You
+can get Tcl-DP 3.2 from mm-ftp.cs.berkeley.edu [128.32.149.157] in the
+/pub/multimedia/Tcl-DP directory.  Copies of this file have been
+uploaded to harbor.ecn.purdue.edu and should appear there shortly.
+Below are the major changes since version 3.1 and the README.
+
+1. 6/5/94 (enhancement) Added retFile option to dp_MakeRPCServer to
+   enable the command to return both a port and the file descriptor
+   of the listening socket.
+
+2. 6/1/94 (enhancement) Added ifdefs to port Tcl-DP to DGUX
+   (Courtesy Ross Andrus, <ross@augie.insci.com>)
+
+3. 5/31/94 (bug fix) Fixed bugs associated with the SO_LINGER and
+   SO_REUSEADDR socket options.  Since these options *must* be
+   set before the bind() system call is used on a a socket, putting
+   them in the dp_socketOption command was useless.  Hence, the -linger
+   and -reuseAddr options to dp_socketOption is no longer supported,
+   and two new options have been added to dp_connect.
+       *** POTENTIAL INCOMPATIBILITY ***
+
+4. 5/29/94 (new feature) Added library and flags to make dpsh program.
+   This version of Tcl-DP uses a modified version of the tk library
+   (included in this distribution) that eliminates the widget set
+   and dependencies on Xlib.  This should make the port to non-Unix
+   platforms easier.
+
+5. 5/29/94 (new feature) Added patch to interpret name of dpwish
+   command specially.  If the program is called "dptcl" then the -notk
+   flag is assumed by default.  This makes writing shell scripts easier --
+   for example, many time you want to use
+
+       #!/usr/local/dpwish -notk -f
+
+   but can't.  With this scheme, just use
+
+       #!/usr/local/dptcl -f
+
+   and the "-notk" flag is implied.
+   (Courtesy Gregory Gulik, <gulik@mink.cig.mot.com>)
+
+6. 5/29/94 (bug fix) Fixed bug in RDO calls where the command had
+   one or more \n's in it and both error and callbacks were provided.
+   (Courtesy Gordon Chaffee <chaffee@plateau.cs.berkeley.edu>)
+
+7. 5/29/94 (enhancement) Added tilde substitution in for unix domain
+   sockets.
+
+8. 5/29/94 (bug fix) Fixed bug in dp_send -- nonewline flag was ignored
+   if NO_WRITEV was defined.
+
+9. 5/29/94 (new feature) Added Tdp_RDO, a C interface to dp_RDO.
+   (Courtesy Gordon Chaffee <chaffee@plateau.cs.berkeley.edu>)
+
+10. 4/19/94 (bug fix) Fixed bug in dp_receiveFrom where unpredictable
+   results were returned if the "numBytes" parameter was specified and
+   was less than the length of the message.
+
+11. 4/19/94 (enhancement) Cleaned up man pages.
+
+12. 3/30/94 (bug fix) Fixed bug in non-blocking mode of Tdp_SetBlocking()
+    (Courtesy Robert M. Fleischman <rmf@diamond.bbn.com>)
+
+13. 3/2/94 (bug fix) Fixed bug where strcmp of -peek in dp_receive didn't
+    work. (Courtesy Frank Lonigro <franco@it.bu.edu>)
+
+14. 2/28/94 (enhancement) Modified dp_address and dp_connect to allow the
+    port argument to be specified by either name or number.
+    (Courtesy Mark Moraes <Mark-Moraes@deshaw.com>)
+
+------------------------------- README ---------------------------------
+
+             Tcl Distributed Programming (Tcl-DP)
+               (Version 3.2; June 1, 1994)
+
+		      Brian C. Smith
+		Department of Computer Science
+		    Cornell University
+
+		     Lawrence A. Rowe
+               Computer Science Division-EECS
+             University of California at Berkeley
+
+This directory contains a freely distributable extension to Tcl/Tk
+called Tcl Distributed Programming (Tcl-DP).  Tcl-DP adds TCP and IP
+connection management, remote procedure call (RPC), and distributed
+object protocols to Tcl/Tk.  A C interface to the RPC primitives is
+also provided.  Unlike the "send" command of Tk, Tcl-DP does not
+require that Tcl/Tk processes that want to communicate share an X
+server because Tcl-DP is built directly upon TCP/IP.
+
+BACKGROUND
+
+Tcl stands for the Tool Command Language, a freely distributable,
+embeddable scripting language package.  Tk is an freely distributable X
+windows interface toolkit and widget library implemented by a
+collection of new commands added to Tcl.  Information about Tcl/Tk is
+available by anonymous ftp from sprite.berkeley.edu [128.32.150.27].
+Tcl-DP was originally developed for Tcl 6.5 and Tk 3.0.  Tcl-DP Version
+3.2 is compatible with Tcl 7.3 and Tk 3.6.
+
+This distribution contains the source code for Tcl-DP, man pages that
+describe the commands, and several examples that illustrate how to use
+Tcl-DP to build simple distributed applications.  Tcl-DP is available
+by anonymous ftp from mm-ftp.cs.berkeley.edu [128.32.149.157] in the
+/pub/multimedia/Tcl-DP directory.
+
+The Makefile creates a library, libdpnetwork.a, that can be linked with
+your application programs.  To use Tcl-DP, you must initialize your Tcl
+interpreters with the Tdp_Init C procedure (see dp.h and tkAppInit.c).
+After initialization, all distributed programming can be done with Tcl
+commands.
+
+In the examples subdirectory, several sample applications are supplied
+that use Tcl-DP.  As you can see from the examples, the distributed
+programming mechanisms of Tcl-DP are very simple.  A dp_RPC command,
+for example, sends a Tcl command to a remote process, which evaluates
+the command in the destination Tcl interpreter and returns the result
+as the value of the dp_RPC command.
+
+The services subdirectory contains an extended example of Tcl-DP.  It
+contains Tcl-DP scripts to implement a name server, a daemon to which
+server applications can advertise their location, and from which client
+applications can locate the servers.  See services/README.
+
+New in version 3.2, the dplite subdirectory contains several modified
+Tk 3.6 source code files that allows Tcl-DP to be compiled and linked
+without X11.  This results in a significantly smaller executable and
+should make the port to other operating systems easier.
+
+COMPILING/USING TCL-DP
+
+To compile the dpwish program:
+
++) If you do not already have Tcl 7.3 and Tk 3.6, get a copy and follow
+the instructions to build the system.  Tcl-DP 3.2 may not work with
+earlier versions of Tcl/Tk.  Although not required, we recommend that
+you place tcl-dp3.2 in a sibling directory to tcl7.3 and tk3.6, and
+then make a symlink from tcl-dp3.2 to tcl-dp.
+
++) In the tcl-dp directory (i.e., where this README resides), edit
+"Makefile.in" to customize Tcl-DP for your site.
+
++) Type "./configure".  This runs a configuration script created by GNU
+autoconf, which configures Tcl for your system and creates a Makefile.
+
++) Type "make".  This will create a library archive called
+"libdpnetwork.a", a Tcl-DP extended wish called "dpwish," and
+a symbolic link to dpwish called "dptcl."
+
++) Type "make install" to install Tcl-DP's binaries, library files,
+and manual pages in standard places.  In the default configuration
+information will be installed in /usr/local so you'll need write
+permission on this directory.
+
+If you wish to make the dplite version of Tcl-DP:
+
++) In the dplite subdiretory, edit "Makefile.in" and run "configure."
+
++) Type "make".  This will create a library archive called
+"libdplite.a" and a Tcl-DP shell called "dpsh."
+
++) Type "make install" to install the DP-Lite's binary and library file
+in standard places.  In the default configuration information will be
+installed in /usr/local so you'll need write permission on this
+directory.
+
+To learn how to use Tcl-DP:
+
++) Read the README file in the examples subdirectory and play with
+the example applications.
+
++) Read the Tcl-DP man page (Tcl-DP.l), and the other man pages 
+in the doc subdirectory.
+
+To report bugs, bug fixes, descriptions of interesting Tcl-DP 
+applications, and suggested improvements:
+
++) Send email to tcl-dp@roger-rabbit.CS.Berkeley.EDU or
+tcl-dp-bugs@roger-rabbit.CS.Berkeley.EDU
+
+or
+
++) Post an article in the comp.lang.tcl newsgroup.
+
+We extend our thanks to everyone who helped to create, debug, and
+distribute this software.  Although there are too many people to
+mention at this point, the following people deserve special attention:
+
+  John Ousterhout, creator of Tcl/Tk; 
+  Pekka Nikander, creator of tcpConnect;
+  Tim MacKenzie, creator of tclRawTCP;
+  Lou Salkind, ported Tcl-DP to Tcl 7.0/Tk 3.3
+  R Lindsay Todd, developed security mechanism
+  Craig Federighi, developed extended name server code

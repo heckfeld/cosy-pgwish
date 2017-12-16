@@ -1,0 +1,94 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+#
+# Template for libraries
+
+AC_PREREQ([2.69])
+# EDIT
+AC_INIT([libtgtmgt], [1.0], [mi.simon@fz-jueich.de])
+AM_INIT_AUTOMAKE([foreign])
+AC_CONFIG_SRCDIR([tgtmgt.c])
+AC_CONFIG_HEADERS([config.h])
+
+# ----------------------------------------------------------------------
+# define --enable-scsr
+# ----------------------------------------------------------------------
+AC_ARG_ENABLE(scsr,
+   AC_HELP_STRING([--enable-scsr],[implement boot_linux_restart]),
+        [case "${enableval}" in
+          yes) build_scsr="yes";;
+          no)  build_scsr="no";;
+          *)   build_scsr="no";;
+        esac],
+        [build_scsr="no"])
+
+# ----------------------------------------------------------------------
+# define the default length (position) units
+# this MUST be declared (default is error message)
+# ----------------------------------------------------------------------
+
+AC_ARG_WITH(length,
+   AC_HELP_STRING([--with-length],
+                  [--with-length=MM or CM, no other values allowed]),
+   [HEPMC_DEFAULT_LEN_UNIT=${withval}],
+   [AC_MSG_ERROR([You MUST configure --with-length=YY, where YY is MM or CM])])
+AC_SUBST(HEPMC_DEFAULT_LEN_UNIT)
+
+# ----------------------------------------------------------------------
+# find CLHEP
+# this may be declared (default is " ")
+# ----------------------------------------------------------------------
+
+AC_ARG_WITH(CLHEP,
+   AC_HELP_STRING([--with-CLHEP],[--with-CLHEP=$CLHEP_DIR: CLHEP is used in the examples]),
+   [CLHEPdir=${withval}],[CLHEPdir=" "])
+AC_SUBST(CLHEPdir)
+
+
+# ----------------------------------------------------------------------
+# OS dependent differences:
+# ----------------------------------------------------------------------
+
+# copy
+case "$target" in
+*-*-win32*)
+  COPY_P="copy -p"
+  AC_MSG_WARN([we recommend using cmake instead of configure on Windows])
+  ;;
+*-*-darwin*)
+  COPY_P="cp -p"
+  AC_MSG_WARN([we recommend using cmake instead of configure on MacOSX])
+  ;;
+*)
+  COPY_P="cp -p"
+esac
+
+# diff
+DIFF_Q="diff -q -b"
+
+AC_SUBST(COPY_P)
+AC_SUBST(DIFF_Q)
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_LIBTOOL
+
+# Checks for libraries.
+
+# Checks for header files.
+# EDIT
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+
+# Checks for library functions.
+# EDIT
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([memset strtol])
+
+AM_CONDITIONAL(BUILD_SCSR, test x$build_scsr = xyes)
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([test/testHepMC.sh], [chmod +x test/testHepMC.sh])
+
+AC_OUTPUT

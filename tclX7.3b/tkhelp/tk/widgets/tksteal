@@ -1,0 +1,185 @@
+NAME
+       tksteal - Create and manipulate tksteal widgets
+
+SYNOPSIS
+       tksteal pathName ?options?
+
+STANDARD OPTIONS
+       background      foreground     height          width
+       borderwidth     font           relief
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:           command
+       Class:          Command
+       Command-Line Switch:           -command
+
+              Specifies the executable that is called.  The  com-
+              mand usually calls the program with a special name,
+              so that tksteal can wait for the appearance of this
+              window  (specified with -name and referenced by the
+              $name variable). There are several  variables  that
+              can  be  specified  in  the  command. The variables
+              width and height are replaced by the specified wid-
+              get  size. The variables windowid and stealwindowid
+              are expanded to the passed window id (-windowid) or
+              the  window  id of the tksteal widget. The standard
+              resources are referred to  by  their  corresponding
+              variable name (e.g. $background).
+
+       Name:           name
+       Class:          Name
+       Command-Line Switch:           -name
+
+              Specifies  the  name of the window that will appear
+              on the screen. This name is used to select the win-
+              dow for reparenting.
+
+       Name:           stealWindowId
+       Class:          WindowId
+       Command-Line Switch:           -stealwindowid
+
+              Specifies the window id of the tksteal widget. This
+              window id is used as the parent for reparenting.
+
+       Name:           windowId
+       Class:          WindowId
+       Command-Line Switch:           -windowid
+
+              Specifies the window id of  the  embedded  applica-
+              tion. This window id is reparented.
+DESCRIPTION
+       The  tksteal  command  creates  a new window (given by the
+       pathName argument) and makes it  into  a  tksteal  widget.
+       Additional  options,  as described above, may be specified
+       on the command line or in the option database to configure
+       aspects  of  the  tksteal  such  as its default background
+       color and relief.  The tksteal command  returns  the  path
+       name of the new window.
+
+       A  tksteal  widget  displays  a  reparented window from an
+       external X application. This widget may serve as a  proto-
+       type for the user's own developments in this area.
+
+
+WIDGET COMMAND
+       The  tksteal command creates a new Tcl command the name of
+       which is the same as the path name of the  tksteal's  win-
+       dow. This command may be used to invoke various operations
+       on the widget. It has the following general form:
+
+              pathName option ?arg arg ...?
+       PathName is the name of the command. It is the same as the
+       tksteal  widget's path name. Option and the args determine
+       the exact behavior of the command.  The following commands
+       are possible for tksteal widgets:
+
+       pathName buttonclick button ?modifier?
+              This  command  sends  a  button click (ButtonDown +
+              ButtonUp) to the embedded  application.  The  first
+              parameter  specifies  which  button is clicked, and
+              the optional second parameter specifies  the  Modi-
+              fier.
+
+       pathName buttonpress button ?modifier?
+              This  command  sends a button press to the embedded
+              application. The first  parameter  specifies  which
+              button  is pressed, and the optional second parame-
+              ter specifies the Modifier.
+
+       pathName buttonrelease button ?modifier?
+              This command sends a button release to the embedded
+              application.  The  first  parameter specifies which
+              button is released, and the optional second parame-
+              ter specifies the Modifier.
+
+       pathName configure ?option? ?value option value ...?
+              Queries  or  modifies  the configuration options of
+              the widget.  If no option is specified,  returns  a
+              list  describing all available options for pathName
+              (see Tk_ConfigureInfo for information on the format
+              of  this  list).   If  option  is specified with no
+              value, the command returns a  list  describing  the
+              one  named "option" (this list will be identical to
+              the corresponding sublist of the value returned  if
+              no   option   is   specified).    If  one  or  more
+              option-value pairs are specified, the command modi-
+              fies  the  given widget option(s) to have the given
+              value(s); in this  case,  the  command  returns  an
+              empty  string.   Option  may have any of the values
+              accepted by the tksteal command.
+
+       pathName keyclick keysym ?modifier?
+              This command sends a key click (KeyDown + KeyUp) to
+              the embedded application. The first parameter spec-
+              ifies which key is clicked, and the optional second
+              parameter specifies the Modifier. The keysym can be
+              every keysym specified in <X11/keysymdef.h>.
+
+       pathName keypress keysym ?modifier?
+              This command sends a  key  press  to  the  embedded
+              application.   The  first parameter specifies which
+              key is pressed, and the optional  second  parameter
+              specifies  the  Modifier.  The  keysym can be every
+              keysym specified in <X11/keysymdef.h>.
+
+       pathName keyrelease keysym ?modifier?
+              This command sends a key release  to  the  embedded
+              application.  The  first  parameter specifies which
+              key is released, and the optional second  parameter
+              specifies  the  Modifier.  The  keysym can be every
+              keysym specified in <X11/keysymdef.h>.
+
+       pathName sendstring string ?interval?
+              This command sends a complete string to the  embed-
+              ded  application. The string can contain a standard
+              character (e.g. "abCDde+-?"), modifiers enclosed in
+              <> (e.g. "ab<Control>n") , keysyms also enclosed in
+              <> (e.g. "ab<Enter>") , and  the  special  modifier
+              extensions  "Press"  and "Release" (e.g. "ab<Press-
+              Shift>aaa<Release-Shift>").  The  escape  sequences
+              '\t'  (for tabulator), '\r' (for return), '\n' (for
+              return),  and  '\b'  (for   backspace)   are   also
+              accepted.  The  optional interval value can be used
+              to add a delay to the keypress events  (to  emulate
+              some kind of user speed typing). The value is given
+              in seconds.
+
+       pathName motion x y
+              This command places the mouse pointer to the speci-
+              fied position.
+
+       pathName redisplay
+              This command redisplays the widget.
+
+       pathName stoptksteal
+              This  command  terminates the running embedded pro-
+              cess.
+BINDINGS
+       The tksteal widget does not allow special  bindings.  This
+       is because reparenting is used which means that the events
+       are passed directly to the child widget.
+
+
+IMPLEMENTATION
+       I tried to keep the changes to Tk as  small  as  possible.
+       The  changes  to  Tk  only add one new command to Tk (xac-
+       cess(n)). If you don't use the new command, you  will  not
+       notice   any   changes  compared  to  the  standard  wish.
+       Ghostscript is not modified.
+
+
+PERFORMANCE ISSUES
+       Performance is a critical point with the  tksteal  widget.
+       Each  created  widget  has a complete process . This means
+       you should be careful with the number of widgets.
+
+
+BUGS
+       o      Surely, there are many bugs.
+
+
+KEYWORDS
+       widget, xaccess

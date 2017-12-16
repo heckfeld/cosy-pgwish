@@ -1,0 +1,86 @@
+NAME
+       tixLabelFrame  - Create and manipulate TIX LabelFrame wid-
+       gets
+
+SYNOPSIS
+       tixLabelFrame pathName ?options?
+
+STANDARD OPTIONS
+       anchor          background     cursor
+       relief          borderWidth    geometry
+
+
+       See the ``options'' manual entry for details on the  stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          label
+       Class:                         Label
+       Command-Line Switch:           -label
+
+              Specifies  the  desired  label  on  the  top of the
+              LabelFrame.
+
+DESCRIPTION
+       The tixLabelFrame command creates a new window  (given  by
+       the pathName argument) and makes it into a LabelFrame wid-
+       get.  Additional options, described above, may  be  speci-
+       fied on the command line or in the option database to con-
+       figure aspects of the LabelFrame such  as  its  background
+       color and relief.
+
+       LabelFrames are used to group related items under the same
+       heading.  A LabelFrame consists of a few sub-frames.  Nor-
+       mally  you  should  pack into the innermost sub-frame of a
+       LabelFrame. The tixLabelFrame  command  returns  the  path
+       name of the innermost sub-frame.
+
+WIDGET COMMAND
+       The  LabelFrame  command  creates  a new Tcl command whose
+       name is the same as the path name of the  frame's  window.
+       This  command  may be used to invoke various operations on
+       the widget.  It has the following general form:
+
+              pathName option ?arg arg ...?
+
+       PathName is the name of the command, which is the same  as
+       the  frame widget's path name.  Option and the args deter-
+       mine the exact behavior of  the  command.   The  following
+       commands are possible for frame widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Query  or  modify  the configuration options of the
+              widget.  If no option is specified, returns a  list
+              describing   all   of  the  available  options  for
+              pathName (see Tk_ConfigureInfo for  information  on
+              the  format  of this list).  If option is specified
+              with no value, then  the  command  returns  a  list
+              describing  the one named option (this list will be
+              identical to the corresponding sublist of the value
+              returned  if  no  option  is specified).  If one or
+              more option-value pairs  are  specified,  then  the
+              command modifies the given widget option(s) to have
+              the given  value(s);   in  this  case  the  command
+              returns  an  empty  string.  Option may have any of
+              the values accepted by the frame command.
+
+BINDINGS
+       When a new labelFrame is created, it has no default  event
+       bindings:  LabelFrames are not intended to be interactive.
+
+EXAMPLE
+       The following example  creates  a  group  of  button  that
+       belongs to the group "Nations"
+
+       set f [tixLabelFrame .lbf -label Nations -bd 2 -padx 2 -pady 2]
+       button $f.b1 -text "America"
+       button $f.b2 -text "Canada"
+       button $f.b3 -text "Mexico"
+       pack $f.b1 $f.b2 $f.b3 -fill x
+       pack .lbf
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       frame, widget, LabelFrame, TIX

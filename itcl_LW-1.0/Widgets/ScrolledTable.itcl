@@ -1,0 +1,130 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: ScrolledTable.itcl,v 1.1.5.2 1994/06/13 10:33:21 mark Exp $
+#
+# itcl_class: ScrolledTable
+#---------------------------------------------------------------
+# Description: ScrolledCanvas with placement algorithm
+#	Places it's children in a table
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : ScrolledCanvas
+#
+# PUBLIC ATTRIBUTES:
+#	-columns ......... number of columns in the table to create
+#	-x_step .......... x distance between object in table (in pixels)
+#	-y_step .......... y distance between object in table (in pixels)
+#	
+# METHODS:
+#	place_children ... place the given children in table
+#	enclosed ......... virtual, called by rubber band selection
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : 10 Mar 1994
+#
+# Last check-in date: $Date: 1994/06/13 10:33:21 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+ScrolledCanvas
+
+itcl_class ScrolledTable {
+    inherit ScrolledCanvas
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new ScrolledTable
+    #---------------------------------------------------------------
+    constructor {config} {
+ 	ScrolledCanvas::constructor 
+	set c [get_canvas]
+	set w [expr $x_step - 10]
+	set h [expr $y_step - 10]
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: place_children - place the given children in table
+    #---------------------------------------------------------------
+    method place_children {list} {
+	set children $list
+	set num [llength $list]
+
+	if { $columns == 1 } {
+	    set w [expr [lindex [$c config -w] 4] -6 ]
+	}
+
+	# create canvas items (window) and put children there
+	set rows [expr ($num+$columns-1)/$columns]
+
+	$c delete cells
+	set y 4
+	set i 0
+	for { set row 0 } { $row < $rows } { incr row } { 
+	    set x 4
+	    for { set col 0 } { $col < $columns } { incr col } {
+		$c create window $x $y \
+		    -window [lindex $children $i] -anchor nw -tag cells \
+		    -width $w -height $h
+		incr x $x_step
+		incr i
+	    }
+	    incr y $y_step
+	}
+	if { "$children" != "" } adjust
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: enclosed - virtual, called for rubber band selection
+    #---------------------------------------------------------------
+    method enclosed {{list ""}} {
+	foreach i $list {
+	    set obj [lindex [$c itemc $i -window] 4]
+	    if { "$obj" != "" } {
+		$obj toggle_select
+	    }
+	}
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public columns 10
+    public x_step 70
+    public y_step 60
+
+    #
+    # PROTECTED DATA
+    #	rows ....... number of rows in the table
+    #	c .......... canvas for use in scrolling widgets table
+    #	children ... list of children to put in table
+    #	num ........ number of children
+    #	w,h ........ width/height of the elements
+    #
+    protected rows 0
+    protected c
+    protected children ""
+    protected num
+    protected w
+    protected h
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: ScrolledTable.itcl,v $
+# Revision 1.1.5.2  1994/06/13  10:33:21  mark
+# Added -width/-height for adjusting table cells
+#
+# Revision 1.1.5.1  1994/06/05  17:32:26  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:32:25  mark
+# Initial revision
+#
+#
+#

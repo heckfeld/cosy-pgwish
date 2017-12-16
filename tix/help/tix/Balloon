@@ -1,0 +1,83 @@
+NAME
+       tixAddBalloon - Add balloon help to a widget.
+
+SYNOPSIS
+       tixAddBalloon pathName message ?initWait??
+
+       tixDisableBalloon
+
+       tixEnableBalloon
+
+DESCRIPTION
+       tixAddBalloon  will add a popup Balloon Help Window to the
+       widget specified by pathName. When the mouse cursor  moves
+       into  the widget, a popup window will appear on top of the
+       window showing the message specified by the message  argu-
+       ment. The optional initWait argument, in millisconds, con-
+       trols how long the balloon window should  wait  before  it
+       pops up. The default value is 200 milliseconds.
+
+       Balloon windows can be used to tell the user what a widget
+       does. This is particular useful for icon buttons.
+
+       tixDisableBalloon disables all the balloon windows  inside
+       an application.
+
+       tixEnableBalloon enables all the balloon windows inside an
+       application.
+
+
+CONFIGURATION OPTIONS
+       The following options can be used to control  the  appear-
+       ance of the balloon windows.
+
+
+
+       Name:          tixBalloonBg
+       Class:         TixBalloonBg
+
+              Specifies the background of all the balloon windows
+              in an application.
+
+       Name:          tixBalloonFg
+       Class:         TixBalloonFg
+
+              Specifies the foreground of all the balloon windows
+              in an application.
+
+       Name:          tixBalloonWidth
+       Class:         TixBalloonWidth
+
+              Specifies  the  width of of all the balloon windows
+              in an application.  (The height of the balloon win-
+              dows  is  determined  by  the length of the message
+              displayed in the balloon).
+NOTE
+       To use these options, you must add  them  to  the  options
+       database  before  you  create any balloon windows. All the
+       balloons in the same application will use the same  option
+       values.  Only  the  options applied to the root window "."
+       will take effect.
+
+
+EXAMPLE
+       option add *tixBalloonWidth 100
+
+       button .b1 -text hello
+       button .b2 -text hello
+       button .b3 -text hello
+
+       tixAddBalloon .b1 {This button prints the string "hello"}
+       tixAddBalloon .b2 {This button says the word "hello"}
+       tixAddBalloon .b3 {This button executes the program "hello"}
+
+
+FILES
+       The      file      /usr/local/tcl/Tix3.6/demos/balloon.tcl
+       demostrates the use of balloon windows.
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       Balloon Help, TIX

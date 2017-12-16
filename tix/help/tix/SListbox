@@ -1,0 +1,152 @@
+NAME
+       tixScrolledListbox    -    Create   and   manipulate   TIX
+       ScrolledListbox widgets
+
+SYNOPSIS
+       tixScrolledListbox pathName ?options?
+
+STANDARD OPTIONS
+       anchor          background     cursor
+       relief          borderWidth    geometry
+
+
+       See the ``options'' manual entry for details on the  stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          anchor
+       Class:                         Anchor
+       Command-Line Switch:           -anchor
+
+              Specifies  the  alignment  of  the items inside the
+              listbox subwidget.  Only the values "w" and "e" are
+              allowed.  When  set  to is automatically aligned to
+              the beginning of the items. When set to
+
+              Automatically  alignment  only  happens  when   the
+              ScrolledListbox changes its size.
+
+
+       Name:                          font
+       Class:                         Font
+       Command-Line Switch:           -font
+
+              Specifies  the  font  used  the  listbox  subwidget
+              inside the ScrolledListbox widget.
+
+       Name:                          foreground
+       Class:                         Foreground
+       Command-Line Switch:           -foreground
+
+              Specifies the foreground color of the listbox  sub-
+              wdget.
+
+       Name:                          geometry
+       Class:                         Geometry
+       Command-Line Switch:           -geometry
+       Alias:                         -geom
+
+              Specifies the geometry of the listbox subwidget.
+
+       Name:                          listboxBg
+       Class:                         Background
+       Command-Line Switch:           -listboxbg
+              Specifies  the background color of the listbox sub-
+              widget.
+
+       Name:                          scrollbar
+       Class:                         Scrollbar
+       Command-Line Switch:           -scrollbar
+
+              Specifies the display  policy  of  the  scrollbars.
+              Only the following four values are recognized: "x":
+              only the horizontal scrollbar is shown.  "y":  only
+              the  vertical  scrollbar  is  shown.   "both": both
+              scrollbars are shown.  "auto": The  scrollbars  are
+              shown when needed.
+
+       Name:                          scrollbarBg
+       Class:                         ScrollbarBg
+       Command-Line Switch:           -scrollbarbg
+
+              Specifies  the  background  color  of the scrollbar
+              subwidget.
+
+       Name:                          scrollbarFg
+       Class:                         ScrollbarFg
+       Command-Line Switch:           -scrollbarfg
+
+              Specifies the foreground  color  of  the  scrollbar
+              subwidget.
+
+       Name:                          scrollbarWidth
+       Class:                         ScrollbarWidth
+       Command-Line Switch:           -scrollbarwidth
+       Alias:                         -scbwidth (Obsolete!)
+
+              Specifies the width of the scrollbar subwidget.
+
+DESCRIPTION
+       The tixScrolledListbox command creates a new window (given
+       by  the  pathName  argument)   and   makes   it   into   a
+       ScrolledListbox  widget.   Additional  options,  described
+       above, may be specified on the  command  line  or  in  the
+       option  database to configure aspects of the ScrolledList-
+       box such as its cursor and relief.
+
+       The ScrolledListbox widget is a "convenience  widget".  It
+       combinds two scrollbar widgets with the listbox widget and
+       sets their behavior and appearance accordingly.
+
+WIDGET COMMANDS
+       The ScrolledListbox command  creates  a  new  Tcl  command
+       whose   name   is  the  same  as  the  path  name  of  the
+       ScrolledListbox's window.  This command  may  be  used  to
+       invoke  various  operations on the widget. It has the fol-
+       lowing general form:
+              pathName option ?arg arg ...?
+
+       PathName is the name of the command, which is the same  as
+       the  frame widget's path name.  Option and the args deter-
+       mine the exact behavior of  the  command.   The  following
+       commands are possible for ScrolledListbox widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Query  or  modify  the configuration options of the
+              widget.  If no option is specified, returns a  list
+              describing  all  of the available options for path-
+              Name (see Tk_ConfigureInfo for information  on  the
+              format  of this list).  If option is specified with
+              no value, then the command returns a list  describ-
+              ing the one named option (this list will be identi-
+              cal to  the  corresponding  sublist  of  the  value
+              returned  if  no  option  is specified).  If one or
+              more option-value pairs  are  specified,  then  the
+              command modifies the given widget option(s) to have
+              the given  value(s);   in  this  case  the  command
+              returns  an  empty  string.  Option may have any of
+              the values accepted by the frame command.
+
+       pathName listbox ?options?
+              When no additional options  are  supplied,  returns
+              the pathname of the listbox subwidget.
+
+              When  additional  options are supplied, invokes the
+              widget command of the listbox subwidget with  these
+              options.
+
+              The  listbox widget command provides a quick way to
+              access the listbox subwidget. For example, you  can
+              use  it to add items or delete items from the list-
+              box subwidget. However,  please  don't  abuse  this
+              command  and change the behavior of listbox subwid-
+              get arbitrarily.
+
+BINDINGS
+       ScrolledListbox widgets have no default bindings.
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       TIX

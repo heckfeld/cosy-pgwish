@@ -1,0 +1,32 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# ScrolledCanvas test
+#
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+    wm withdraw .
+}
+
+DialogShell .s -title "Scrolled Canvas test" -geometry 300x300
+.s raise
+ScrolledCanvas .s.c
+set c [.s.c get_canvas]
+
+set pixmaps "stop.xpm exit.xpm no_entry.xpm question.xpm question"
+set num 15
+
+for { set i 0 } { $i<$num} {incr i} {
+    set bitmap [lindex $pixmaps [expr $i%5]]
+    $c create bitmap [expr 30 + $i*20 ] [expr 30 + $i*40] \
+	-bit $bitmap -tag e$i
+    $c bind e$i <1> "puts \"$i: $bitmap\""
+}
+if { !$tcl_interactive } {
+    bind $c <Destroy> {after 500 exit}
+} 
+
+pack .s.c -fill both -exp yes
+
+

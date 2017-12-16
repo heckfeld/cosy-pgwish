@@ -1,0 +1,46 @@
+NAME
+       Utils - Utility commands in Tix 3.6.
+
+SYNOPSIS
+       tixDescendants pathName
+
+       tixDisableAll pathName
+
+       tixEnableAll pathName
+
+       tixListGetSingle pathName
+
+       tixSetEntry pathName string
+
+       tixStdDlgBtns pathName ?options?
+
+
+DESCRIPTION
+       tixDescendants  returns  a list of all the descendant wid-
+       gets of pathName plus pathName itself.
+
+       tixDisableAll disables pathName and all its descendants.
+
+       tixEnableAll enables pathName and all its descendants.
+
+       tixListGetSingle returns the  first  selected  item  in  a
+       listbox  widget.  If no items are selected, it returns the
+       empty string.
+
+       tixSetEntry sets the string inside the entry widget  path-
+       Name.
+
+       tixStdDlgBtns creates a DlgBtns widget with the name path-
+       Name. Additional options are also used  to  configure  the
+       DlgBtns widget. It contains four standard buttons
+
+       in  turn  be  configured using the normal subwidget access
+       mechanism.
+
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+
+KEYWORDS
+       TIX, DlgBtns, Container Widgets.

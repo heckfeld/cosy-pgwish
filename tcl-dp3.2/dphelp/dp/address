@@ -1,0 +1,42 @@
+NAME
+       dp_address - internet address record manipulation
+
+       dp_address option ?arg arg ...?
+
+              The dp_address command provides access to an inter-
+              nal  array  of  internet  address  records.   These
+              address  records  are  appropriate for use as argu-
+              ments to the dp_sendTo and receiveFrom network com-
+              munication commands of Tcl-DP (Tcl Distributed Pro-
+              gramming).  The argument option specifies the oper-
+              ation to be performed.  The valid options are:
+
+              dp_address create host port
+
+                     Creates an internal address record that rep-
+                     resents the  given  host  address  and  port
+                     internet  information.  Returns an addr han-
+                     dle that is appropriate for use as an  argu-
+                     ment  to  the  dp_sendTo  and dp_receiveFrom
+                     commands and as the  addr  argument  in  the
+                     commands  below.   Port  can be specified by
+                     number or by service name  (see  services(5)
+                     for more information).  If specified by ser-
+                     vice name, it must be a UDP service.
+
+              dp_address delete addr
+
+                     Delete  the  previously   created   internal
+                     address  record that has the given addr han-
+                     dle.
+
+              dp_address info addr
+
+                     Return a list of the form {host port}, which
+                     is  the internet information stored with the
+                     given addr handle.
+
+AUTHOR
+       Brian Smith (bsmith@cs.berkeley.edu)
+       Steve Yen (syen@cs.berkeley.edu)
+       Stephen Tu (tus@roger-rabbit.cs.berkeley.edu)

@@ -1,0 +1,68 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: InfoLine.itcl,v 1.1.5.1 1994/06/05 17:31:34 mark Exp $
+#
+# itcl_class: InfoLine
+#--------------------------------------------------------------
+# Description: A simple envelope for label widget 
+#	used as an info line
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-message ........... text to put in the line
+#	-variable .......... (global) variable to link to the line
+#
+# METHODS:
+#	none
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:34 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+#
+
+# Force  auto-loading of base class(es)
+Widget
+
+itcl_class InfoLine {
+    inherit Widget
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new InfoLine
+    #---------------------------------------------------------------
+    constructor {config} {	
+ 	Widget::constructor label -bd 0 -relief flat
+
+	#
+	#  Explicitly handle config's that may have been ignored earlier
+	#
+	foreach attr $config {
+	    config -[lindex [split $attr :] 2] [set $attr]
+        }
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public message "" {
+	if { [exists] } {
+	    $this configure -text $message
+	}
+    }
+    
+    public variable "" {
+	if { [exists] } {
+	    $this configure -textvariable $variable
+	}
+    }
+    
+}
+
+    

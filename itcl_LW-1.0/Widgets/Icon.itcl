@@ -1,0 +1,315 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Icon.itcl,v 1.1.5.3 1994/06/21 12:12:32 mark Exp $
+#
+# itcl_class: Icon
+#---------------------------------------------------------------
+# Description : Selectable labeled icon with D&D and behavior
+#
+# TCL/TK extensions required: itcl blt
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-bitmap ........... bitmap to use in the icon 
+#	-text ............. text to put down the icon
+#	-side ............. side to put the icon and label
+#
+# METHODS:
+#	select ................. makes the object selected
+#	unselect ............... makes the object unselected
+#	is_selected ............ returns select status of the object
+#
+#	config_widgets ......... configures all internal widgets 
+#
+#	double_click ........... virtual, called on double-click
+#	toggle_select .......... virtual, called on single-click, 
+#			     ... changes select status of the object
+#	dd_send_by_handler ..... virtual, sends d&d data on drop operation
+#	dd_get_info ............ virtual, returns info to be passed on d&d
+#	dd_set_target .......... virtual, called to change target object on "drop" 
+#
+# STATIC METHODS (proc) :
+#	no_entry_icon .......... gets/sets the icon shown when drop is prohibited
+#
+#
+# SETTABLE DATA MEMBERS:
+#   The following data members are supposed to be changed from dervied
+#   classes constructor *before* calling Icon::constructor
+# 	bitmap ......... bitmap to show
+#	dd_source ...... list of d&d types for source operation
+#	dd_target ...... list of d&d types for target operation
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 16, 1994
+#
+# Last check-in date: $Date: 1994/06/21 12:12:32 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget 
+
+itcl_class Icon {
+    inherit Widget
+    #---------------------------------------------------------------
+    # CONSTRUCTOR: Creates new Icon
+    #---------------------------------------------------------------
+    constructor {config} {
+ 	Widget::constructor frame -bd 3 -relief $r_default
+	set icon_w $this.icon
+	set text_w $this.text
+
+	label $icon_w -bitmap $bitmap -anc center
+	label $text_w -text   $text   -anc center
+	config -side $side
+
+	foreach w "$icon_w $text_w "  {
+	    
+	    # register Drag & drop source & target
+	    blt_drag&drop source $w config \
+		-packagecmd "$this _package_token $w" \
+		-tokencursor hand2 -tokena nw -tokenborderw 1 \
+		-sitecmd "$this _site_text" -self yes  -button 2
+	    
+	    foreach i  $dd_source {
+		blt_drag&drop source $w \
+		    handler [lindex $i 0] "$this [lindex $i 1]"
+	    }
+	    
+	    foreach i $dd_target {
+		blt_drag&drop target $w \
+		    handler [lindex $i 0] "$this [lindex $i 1]"
+	    }
+	    
+	    # set bindings
+	    bind $w <Button-1> "$this toggle_select"
+	    bind $w <Double-1> "$this double_click"
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: config_widgets - configures all internal widgets 
+    #		according to args
+    #---------------------------------------------------------------
+    method config_widgets { args } {
+	foreach i { $icon_w $text_w $this } {
+	    catch { 
+		eval $i configure $args
+	    }
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: is_selected - returns select status of the object
+    #---------------------------------------------------------------
+    method is_selected {} {return $selected}
+
+    #---------------------------------------------------------------
+    # METHOD: select - makes the object selected
+    #---------------------------------------------------------------
+    method select {}   { 
+	if { $selected } {
+	    return
+	}
+
+	set bg_normal [lindex [$text_w configure -bg] 4]
+	$this configure -relief $r_selected 
+	foreach i "$this $text_w $icon_w " {
+	    $i configure -bg $bg_selected
+	}
+	set selected 1
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: unselect - makes the object unselected
+    #---------------------------------------------------------------
+    method unselect {} { 
+	if { !$selected } {
+	    return
+	}
+
+	$this configure -relief $r_default 
+	foreach i "$this $text_w $icon_w" {
+	    $i configure -bg $bg_normal
+	}
+	set selected 0
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: toggle_select - changes select status of the object
+    #---------------------------------------------------------------
+    method toggle_select {} {
+	if $selected {
+	    unselect
+	} else {
+	    select
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: double_click - pure virtual method for double-clicking
+    #---------------------------------------------------------------
+    method double_click {} {
+	pure_virtual double_click
+    }
+
+    
+    #
+    # DRAG & DROP SUPPORT
+    #
+
+    #---------------------------------------------------------------
+    # METHOD: dd_send_by_handler - sends d&d data on drop operation
+    #---------------------------------------------------------------
+    method dd_send_by_handler {handler interp ddwin data} {
+	::send $interp "
+		global DragDrop
+		set DragDrop($handler) [list $data]
+	"
+	::send $interp "blt_drag&drop target $ddwin handle $handler"
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _package_token - fills&packs d&d token window
+    #---------------------------------------------------------------
+    method _package_token {src token} {
+	if {[winfo children $token] == ""} {
+	    label $token.label 
+	    label $token.info -text $text
+	    pack $token.label 
+	    pack $token.info
+	}
+	#	$token.label config -bitmap $bitmap
+	_site_text 0 $token
+	return [virtual dd_get_info]
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: dd_get_info - returns info to be passed on d&d
+    #---------------------------------------------------------------
+    method dd_get_info {} { 
+	return $bitmap
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: dd_set_target - called to change target object on "drop"
+    #---------------------------------------------------------------
+    method dd_set_target {handler} {
+	global DragDrop
+	$this config -bitmap $DragDrop($handler)
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _site_text - called when d&d token enters/leaves a valid target
+    #---------------------------------------------------------------
+    method _site_text {state token} {
+	if {$state} {
+	    $token.label config -bitmap $bitmap
+	} else {
+	    $token.label config -bitmap $no_entry_icon
+	}
+    }
+
+    #---------------------------------------------------------------
+    # PROC: no_entry_icon - gets/sets no_entry_icon
+    #---------------------------------------------------------------
+    proc no_entry_icon { { name "" } } {
+	if { "$name" == "" } {
+	    return $no_entry_icon
+	} else {
+	    set no_entry_icon $name
+	}
+    }
+
+    #
+    #  PUBLIC DATA
+    #
+    public bitmap question {
+	if {[exists]} {$icon_w config -bitmap $bitmap}
+    }
+
+    public text noname  {
+	if [exists] {$text_w config -text $text}
+    }
+
+    public side  top {
+	if [exists] {
+	    if { $side == "top" } {
+		set side_lab "bottom"
+	    } else {
+		set side_lab $side
+	    }
+	    ::pack $icon_w -side $side
+	    ::pack $text_w -side $side_lab
+	}
+    }
+    
+    #
+    # COMMON DATA
+    #	no_entry_icon ...... bitmap for d&d token when drop is prohibited
+    #	r_default .......... default relief for the object
+    #	r_selected ......... relief for "selected" state of the object
+    # 
+    common no_entry_icon error
+    common r_default  groove
+    common r_selected sunken
+
+    #
+    #  PROTECTED DATA
+    #
+    #	dd_source ........ list of d&d source types & handlers
+    #	dd_target ........ list of d&d target types & handlers
+    #	icon_w ........... name of the "icon keeper" widget
+    #	text_w ........... name of the "text keeper" widget
+    #	bg_selected ...... background of the object in "selected" state
+    #	bg_normal ........ background of the object in "normal" state
+    #	selected ......... current "selected" status
+    #
+
+    # to change d&d behavior derived class constructor should
+    # redefine those variables *before* calling Icon::constructor
+    protected dd_source { 
+	{text "dd_send_by_handler text" }
+    }
+    protected dd_target {
+	{text "dd_set_target text" }
+    }
+
+    protected icon_w {}
+    protected text_w {}
+
+    protected bg_selected gray
+    protected bg_normal {}
+
+    protected selected 0
+
+}
+
+# configure pixmap cache
+if { "[info command pinfo]" == "pinfo" } {
+    pinfo cacheconfig -defaultstatus 1
+    Icon :: no_entry_icon no_entry.xpm
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Icon.itcl,v $
+# Revision 1.1.5.3  1994/06/21  12:12:32  mark
+# fixed -side public option
+#
+# Revision 1.1.5.2  1994/06/13  10:32:11  mark
+# removed -expand from internal packing
+#
+# Revision 1.1.5.1  1994/06/05  17:31:30  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:28  mark
+# Initial revision
+#
+#

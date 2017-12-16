@@ -1,0 +1,12 @@
+tix/Balloon	Add balloon help to a widget.
+tix/Combobox	Create and manipulate TIX \fBCombobox\fR widgets
+tix/Control	Create and manipulate TIX \fBControl\fR widgets
+tix/DlgBtns	Create and manipulate TIX \fBDialog Buttons\fR widgets
+tix/Filebox	Create and manipulate TIX FileSelectbox widgets
+tix/LabelFrame	Create and manipulate TIX LabelFrame widgets
+tix/MkFileDialog	Convenience function for creating standard file
+tix/PupMenu	Convenience function for creating a popup menu in TK.
+tix/SListbox	Create and manipulate TIX \fBScrolledListbox\fR widgets
+tix/Select	Create and manipulate TIX \fBSelect\fR widgets
+tix/Tix	Summary of the TIX widget set
+tix/Utils	Utility commands in Tix 3.6.

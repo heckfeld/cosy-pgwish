@@ -1,0 +1,55 @@
+1.5b	CheckButton
+	RadioButton
+	   New
+
+	Dialog
+	   Looks and behaves more like Tk's tk_dialog. Incorporates changes
+	   suggested by Lou Salkind <Lou-Salkind@com.deshaw>.
+
+	   New -auto option for control over popping up and deletion.
+
+	MenuBar
+	   New.
+
+	MenuButton
+	   Now derived from menubutton, with bitmap a button.
+
+	   Added support for mouse scanning and keyboard traversal.
+
+	Paned
+	   Improved behaviour (see comments in implementation file).
+
+	   Removed relgrip variable and added gripIndent.
+
+	   Added -after and -before insert options.
+
+	   Added children and forget methods.
+
+	Window
+	   Now derived from itcl_window.
+
+	itcl_wrapper
+	   New. Split out configure and initializeItclWidget into abstract
+	   base class to avoid duplicating code in itcl_widget/window.
+
+	   `object configure' now produces more correct output.
+
+	   Introduced subconfigure method.
+
+	itcl_widget
+	   Now derived from itcl_wrapper
+
+	itcl_window
+	   New. Wrapper class for Window objects - derived from itcl_wrapper.
+
+	version.tcl
+	   New. Implements wigwam_version proc.
+
+	demo
+	   Provide menu10 bitmap.
+
+	   paned.tcl modified to use -before.
+
+	   viewport.tcl modified to use RadioButtons.
+
+	   wigwam.tcl modifed to use MenuBar and MenuButton.

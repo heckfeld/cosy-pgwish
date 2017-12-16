@@ -1,0 +1,373 @@
+NAME
+       dp_connect,  dp_shutdown,  dp_accept  -  Tcl-DP connection
+       management
+
+       dp_send, dp_receive - Stream transmission over TCP sockets
+
+       dp_packetSend,  dp_packetReceive  -  Message  transmission
+       using TCP sockets
+
+       dp_sendTo, dp_receiveFrom - Message transmission using UDP
+       sockets
+
+DESCRIPTION
+       This  manual  page describes the Tcl commands for managing
+       basic network connections provided by the Tcl-DP (Tcl Dis-
+       tributed Programming) extension to Tcl/Tk.  These commands
+       provide basically the same level of service to  Tcl/Tk  as
+       the UNIX C socket(2) related system calls. The manual page
+       is divided into two sections.  The first section describes
+       the  commands  needed to set up and shut down connections.
+       The second section describes various commands  for  trans-
+       mitting data between machines.
+
+       All  connection  management  commands  return  and take as
+       arguments identifiers called sockId's.  (A  sockId  repre-
+       sents a UNIX file descriptor, which UNIX uses to represent
+       both open files and open sockets.  A socket is an endpoint
+       of  network communication.)  SockId's are identical to the
+       identifiers manipulated by the read, gets, puts, eof,  and
+       close file management commands of Tcl.
+
+
+CONNECTION SETUP AND TEAR DOWN
+       Three  basic  commands are useful for connection setup and
+       tear  down:  dp_connect,   dp_accept,   and   dp_shutdown.
+       Dp_connect  is  used  to  create either internet (INET) or
+       unix domain TCP/IP sockets, or INET based UDP/IP  sockets.
+       If  given the -server flag, dp_connect creates a listening
+       socket which other clients can connect to.  When a  remote
+       machine  attempts  to connect to this listening socket, it
+       becomes readable.  Servers use the  dp_accept  command  to
+       accept  the  connection,  which  creates a new sockId con-
+       nected to the client as a side effect while the  listening
+       socket  continues  to  listen for new connections.  Client
+       may  close  half  of  a  duplex   connection   using   the
+       dp_shutdown  command.   When  clients  wish to terminate a
+       connection, the tcl close command should be used.
+
+       The rest of this sections describes  the  various  options
+       for dp_connect, dp_accept, and dp_shutdown.
+
+
+       dp_connect -server port ?-linger? ?-reuseAddr?
+              In   this  form,  dp_connect  creates  a  listening
+              (server) socket.  This listening socket will listen
+              for client connections on the specified port number
+              and will become readable whenever a client  process
+              attempts  a connection.  The creator of the listen-
+              ing socket may then dp_accept  the  client  connec-
+              tion.   (See the dp_accept command below.  Also see
+              the dp_filehandler and dp_isready manual pages  for
+              testing when a socket becomes readable.)
+
+              The port argument, which can be a number or service
+              name (see services(5) for more  information),  must
+              specify  an unused port number.  If the port number
+              argument is empty or 0, the dp_connect command will
+              automatically select an unused port number.
+
+              The  -linger flag changes the behavior of the close
+              function on this socket.  By  default,  the  socket
+              will  close  and any unsent data in the socket will
+              be discarded.  If -linger is specified, close  will
+              return  immediately  and the system will attempt to
+              deliver any data remaining in the socket.
+
+              The -reuseAddr, if specified, instructs the  system
+              to allow reuse of the specified port number.
+
+              This  form of the dp_connect command returns a list
+              of two values.  The first value is the sockId  that
+              represents  the created listening socket.  The sec-
+              ond value is the port number  that  the  socket  is
+              listening to.
+
+
+       dp_connect -server path
+
+              This  command  creates  up  a UNIX domain listening
+              socket.  This command is identical to the one above
+              except  that  a UNIX domain socket is created using
+              an address specified by path.
+
+
+       dp_connect host port
+
+              This command creates a TCP protocol INET socket and
+              connects it to a remote server process.  The remote
+              server process should be  running  on  the  machine
+              given  by  the  host  network address and should be
+              listening for and accepting client  connections  on
+              the given port.  Port can be specified by number or
+              by service name (see services(5) for more  informa-
+              tion).   This command returns a list of two values:
+              a sockId to represent the newly created socket  and
+              the port number used for the connection.
+       dp_connect path
+
+              This  command  creates  a  TCP protocol UNIX domain
+              socket and connects it to the  UNIX  domain  socket
+              specified  by  path.   It is otherwise identical to
+              dp_connect host port.
+
+
+       dp_connect -udp ?port?
+
+              In this form, dp_connect  creates  a  UDP  protocol
+              INET  socket (a connectionless socket).  Since this
+              socket is connectionless, only  the  dp_sendTo  and
+              dp_receiveFrom commands described below may be used
+              with this socket to transmit and receive data.
+
+              Port can be specified by number or by service  name
+              (see  services(5)  for  more  information).  If the
+              port argument is missing  or  0,  the  system  will
+              select an unused port number for you.  This command
+              returns a list containing a sockId (that represents
+              the  created socket) and the port number (where the
+              socket will receive and transmit data using the UDP
+              protocol).
+
+
+       dp_accept sockId
+
+              The  sockId  argument  must  represent  a listening
+              (server) socket (i.e., a  sockId  returned  by  the
+              dp_connect command that was called with the -server
+              flag).  If this listening socket is readable (i.e.,
+              a  client  process  is  attempting to connect), the
+              dp_accept command creates a new socket that is con-
+              nected  to  the  client  process.  If the listening
+              socket is not readable, th dp_accept  command  will
+              block until a client process attempts to connect to
+              the listening socket.  The listening socket (repre-
+              sented  by  the sockId argument) will remain a lis-
+              tening socket.  This command returns a  new  sockId
+              to  represent the newly created socket that is con-
+              nected to the  accepted  client  process,  and  the
+              internet  address  of  the  connecting  party  (eg,
+              "128.32.149.117").  If the connection occurs  on  a
+              Unix  domain  socket,  the  second  element  of the
+              return value will be "0.0.0.0"
+
+
+       dp_shutdown sockId code
+
+              Shutdown a socket for reading,  writing,  or  both.
+              This  command  is  not the same as close, which you
+              should use  for  truly  closing  the  socket.   The
+              sockId  argument  must  represent a file descriptor
+              that represents a socket, not an open file.
+
+              If code is "0", "read" or "receives"  then  further
+              reception of data from sockId will be disabled.
+
+              If  code  is  "1", "write" or "sends", then further
+              sending of data using sockId will be disabled  (and
+              an EOF will be automatically sent down the socket).
+
+              If code is  "2",  "all"  or  "both",  then  further
+              reception  and  sending  of  data on sockId will be
+              disabled.
+
+              As a side effect, the appropriate filehandlers pre-
+              viously  installed  on  the sockId will be deleted.
+              (See the dp_filehandler man page.)
+
+
+TRANSMITTING DATA
+       Four pairs of commands are useful for sending and  receiv-
+       ing  data on sockets.  The Tcl functions gets and puts can
+       be used to read and write string data to and from sockets.
+       These  functions  are  appropriate  for communicating with
+       text based  programs  (e.g.,  telnet).   Applications  can
+       detect  closed  connection when the Tcl command eof sockId
+       returns 1.
+
+       Dp_send and dp_receive are similar to gets and  puts,  but
+       have  the  side  effect  of automatically detecting closed
+       connections.  When these functions detect a closed connec-
+       tion,  they  remove  any previously instantiated file han-
+       dlers for sockId and close the socket.   Applications  can
+       install  callbacks associated with this "close-file" event
+       using the dp_atclose command.  Dp_send and dp_receive also
+       support  non  blocking  input  and are more efficient than
+       gets and puts.
+
+       Dp_sendTo and dp_receiveFrom are used to send and  receive
+       data  on  connectionless  sockets (i.e., created using the
+       dp_connect command using the -udp option).  Dp_receiveFrom
+       also  supports non blocking input and peeking (i.e., read-
+       ing  data  from  a  socket  without  advancing  the   file
+       pointer).
+
+       Dp_packetSend and dp_packetReceive provide a message based
+       protocol for TCP sockets.  The extra protocol is necessary
+       since  TCP provides a stream interface which does not pre-
+       serve message boundaries.  The protocol attaches an 8 byte
+       binary header on the message containing a magic number and
+       the length of the message.  Due to the  presence  of  this
+       header,  applications  should be careful about intermixing
+       calls to dp_packetSend  and  dp_packetReceive  with  other
+       data transmission calls.
+       The options for each command are described below.
+
+
+       dp_send sockId message ?nonewline?
+
+              Writes  the  string  message to a connected socket.
+              Like the Tcl puts command, dp_send normally outputs
+              a newline character after message, but this feature
+              may  be  suppressed  by  specifying  the  nonewline
+              switch.
+
+              If  insufficient  buffer  space exists to send mes-
+              sage, this command  will  block  until  message  is
+              transmitted  unless  the  socket is in non-blocking
+              mode (see dp_socketOption).   In  this  case,  only
+              part  of  message is transmitted.  The return value
+              is the number of characters sent.  The rest of  the
+              message  can be sent when the socket becomes write-
+              able.  See the manual pages for the  dp_filehandler
+              and  dp_isready  commands for testing when a socket
+              becomes writeable.
+
+              The sockId  argument  must  represent  a  connected
+              (i.e.,  TCP protocol) socket.  If the connection is
+              broken,  dp_send  will  automatically   close   the
+              socket,  delete  any  previously  created file han-
+              dlers, and return a value of 0.
+
+
+       dp_receive sockId ?numBytes? ?-peek?
+
+              This command reads the immediately  available  data
+              from  sockId.   If  numBytes  is specified, at most
+              this many bytes of the immediately  available  data
+              on will be returned.  If the socket is non-blocking
+              (see dp_socketOption), all data  available  on  the
+              socket  will  be  returned   --  should  no data be
+              available, dp_receive will return a null string.
+
+              If the socket is in blocking  mode  (the  default),
+              dp_receive  will block until input is received.  If
+              -peek is specified, the data present on the  socket
+              is  returned but not consumed, so that a subsequent
+              dp_receive call will see the same data.
+
+              The sockId  argument  must  represent  a  connected
+              (i.e.,  TCP protocol) socket.  If the connection is
+              broken,  dp_send  will  automatically   close   the
+              socket,  delete  any  previously  created file han-
+              dlers, and return a null string.
+
+
+       dp_packetSend sockId message
+              Sends  the  string  message  through   the   socket
+              (sockId)  to  the  connected, remote process.  This
+              command is similar to  dp_sendTo,  except  that  it
+              works  with  TCP  sockets,  so  message delivery is
+              reliable.  It differs from dp_send in that  message
+              boundaries  are  preserved.  When the remote socket
+              calls dp_packetReceive, it  will  never  receive  a
+              partial    message.     The   receiver   must   use
+              dp_packetReceive to read the message.
+
+              Notes: Message boundaries are preserved by  attach-
+              ing  an 8 byte binary header onto the message, half
+              of which is a magic number indicating a packet, and
+              half  of  which  indicates the size of the message.
+              Because this header represents  binary  data,  care
+              must  be  taken if puts or dp_send calls are inter-
+              mixed with dp_packetSend on the same channel.
+
+              If dp_packetSend is used with non-blocking I/O mode
+              and  the  send  would  have  blocked, dp_packetSend
+              returns the number of bytes transmitted.  It is  up
+              to  the caller to transmit the remaining characters
+              in the string  using  dp_send  with  the  nonewline
+              option  (not dp_packetSend) when the socket becomes
+              writeable.  See dp_filehandler and dp_isready  man-
+              ual  pages for testing when a socket becomes write-
+              able.)
+
+
+       dp_packetReceive sockId ?-peek?
+
+              Receives a single message from the connection (rep-
+              resented  by  the  sockId).   The connected, remote
+              process  which  sent  the  message  must  use   the
+              dp_packetSend  command.   Dp_packetReceive  differs
+              from dp_receive in that message boundaries are pre-
+              served.   If  the  entire message is available, the
+              return value is the message received.  If only part
+              of the packet is available when dp_packetReceive is
+              called, a zero length string is returned.  See  the
+              note    in    dp_packetSend   above   about   using
+              dp_packetReceive and gets on the same channel.
+
+              If -peek is specified,  the  data  present  on  the
+              socket is returned but not consumed, so that a sub-
+              sequent dp_packetReceive calls will see   the  same
+              data.
+
+              If  no  data  is  available  at  the socket and the
+              socket is in  non  blocking  mode,  a  zero  length
+              string  is  returned.   Otherwise,  this  operation
+              blocks until at least some data (but  possibly  not
+              the entire packet) is received.
+       dp_sendTo sockId message addr
+
+              Sends the string message to the process at the des-
+              tination address specified by the addr handle.  The
+              addr  handle  must  be created using the dp_address
+              command or taken  from  the  return  value  of  the
+              dp_receiveFrom  command.   The sockId argument must
+              represent a connectionless  socket  (i.e.,  created
+              using   the   dp_connect  command  using  the  -udp
+              option).  Dp_sendTo uses sockId as the transmitting
+              socket.
+
+
+       dp_receiveFrom sockId ?numBytes? ?-peek? ?-noaddr?
+
+              Receives  a message that was sent from another pro-
+              cess that used the dp_sendTo command.  Normally,  a
+              list of two values is returned.  The first value is
+              the address (an addr handle) of  the  sending  pro-
+              cess,   and  the  second  element  is  the  message
+              received.  If the -noaddr flag  is  specified,  the
+              address of the sending process is ommitted.  If the
+              socket    is    in    non-blocking    mode     (see
+              dp_socketOption)  and  not  readable,  -1  will  be
+              returned.  Otherwise, this command will block until
+              a message arrives.  If -peek is specified, the mes-
+              sage is read from the socket but not  removed  from
+              the  queue.  If numBytes is specified, at most this
+              many bytes of the message is returned.  Because  of
+              the  way  connectionless  sockets work, the rest of
+              the datagram will  be  discarded  from  the  queue,
+              regardless  of  the value of numBytes, unless -peek
+              is specified.
+
+              The sockId argument must represent a connectionless
+              socket  (i.e., created using the dp_connect command
+              using the -udp option).  The dp_receiveFrom command
+              uses  the  connectionless  socket,  sockId,  as the
+              reception socket.
+
+
+SEE ALSO
+       Tcl-DP,  socket(2),  accept(2),   connect(2),   listen(2),
+       dp_address(n), Tcl, dp_filehandler(n), dp_socketOption(n)
+
+
+AUTHOR
+       Pekka          Nikander,          Telecom          Finland
+       (Pekka.Nikander@ajk.tele.fi)
+       Extended by Tim MacKenzie (tym@dibbler.cs.monash.edu.au)
+       Further      enhancements       by       Brian       Smith
+       (bsmith@cs.berkeley.edu),
+       Steve Yen (syen@cs.berkeley.edu), and
+       Lou Salkind (salkind@deshaw.com)

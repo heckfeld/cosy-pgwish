@@ -1,0 +1,113 @@
+'\" te
+.TH tgt_mkfc "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgt_mkfc
+\- Ver\(:andern der pmf-Datenbank, die die Beschreibung der Targetkonfiguration enth\(:alt
+.sp
+.SH SYNOPSIS
+.br
+.B tgt_mkfc -[i|-f file|d|l|a]
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgt_mkfc 
+greift auf die Datenbank
+.B $TMDB/
+.B fc
+zu, in der
+.br
+.in 8
+- der Targetname
+.br
+- die Nodeadresse (dezimale Zahl) und
+.br
+- der CPU-Typ
+.br
+- die Slotnummer (dezimale Zahl)
+.br
+.in 5
+festgehalten sind.
+.sp
+In Abh\(:angigkeit von dem \(:ubergebenen Argument werden folgende Funktionen ausgef\(:uhrt :
+.br
+.sp
+.in 8
+.B -i 
+: Daten werden eingetragen. Sie werden interaktiv vom Stdinput eingelesen.
+.br
+.B -f file
+: Die in
+.B file
+enthaltenen Daten werden in die Datenbank eingetragen (Reihenfolge : Targetname,
+Nodeadresse, CPU-Typ und Slotnummer,  
+alle Angaben in einer Zeile und durch ein Blank getrennt). Es d\(:urfen auch Leerzeilen und Kommentare (beginnend mit #) enthalten sein. Ist kein
+. B file
+angegeben, werden die Daten vom Stdinput gelesen.
+.br
+.B -d 
+: Daten zum interaktiv eingegebenen Target und der eingegebenen Nodeadresse werden gel\(:oscht
+.br
+.B -l 
+: der Eintrag zu dem eingegebenen Target und der Nodeadresse werden ausgegeben
+.br
+.B -a 
+: der Inhalt der Datenbank wird ausgegben        
+.br
+.in 5
+.sp
+Bei den Optionen
+.B -d
+und
+.B -l
+mu\[ss] der Benutzer den Targetnamen und die Nodeadresse interaktiv eingeben.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbank mu\[ss] sich in dem Directory
+.B $TMDB
+befinden.
+Ist die Variable TMDB nicht initialisiert, wird sie auf $PWD gesetzt.
+.sp
+.SH R\(:UCKGABEWERT
+- 0 : fehlerfreie Ausf\(:uhrung
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.sp
+.SH FEHLER
+.sp
+- es wird kein oder ein falsches Argument an 
+.B tgt_mkfc
+\(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.sp
+.SH SIEHE AUCH
+fc(1)
+.sp
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberpr\(:uft nicht, ob die Nodeadresse im angegebenen Target in 
+der Datenbank schon enthalten ist.
+In diesem Fall wird der erste Eintrag \(:uberschrieben.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.sp
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+3692
+
+Dirk R\(:utten
+<dirk@cecs.cc.kfa-juelich.de>
+1394

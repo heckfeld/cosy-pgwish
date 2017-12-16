@@ -1,0 +1,373 @@
+.TH wigwam n "July 1994" "Wigwam Release 1.5b"
+.SH NAME 
+wigwam \- treat Tk widgets as [incr tcl] classes
+.SH SYNOPSIS 
+itcl_button \fIpathName ?options?\fR
+.sp
+itcl_class BetterButton {
+.ti +0.3i
+inherit itcl_button
+.sp
+.ti +0.3i
+constructor {\fIargs\fR} {
+.ti +0.6i
+eval itcl_button::constructor $\fIargs\fR
+.ti +0.6i
+\fIremainder of body\fR
+.ti +0.3i
+}
+.ti +0.3i
+destructor \fIbody\fR
+.sp
+.ti +0.3i
+method \fIname args body\fR
+.ti +0.3i
+proc \fIname args body\fR
+.sp 
+.ti +0.3i
+public \fIvarName\fR ?\fIinit\fR? ?\fIconfig\fR?
+.ti +0.3i
+protected \fIvarName\fR ?\fIinit\fR?
+.ti +0.3i
+common \fIvarName\fR ?\fIinit\fR?
+.br
+}\fR
+.LP
+And similarly for itcl_canvas, itcl_checkbutton, etc.
+.SH DESCRIPTION 
+Wigwam (\fBW\fRrappers for [\fBI\fRncr tcl] \fBG\fRraphics by
+\fBW\fRight \fBA\fRnd \fBM\fRarshall) is a collection of scripts that
+enables Tk's widgets (and the widgets of any Tk compatible toolkit) to
+be treated as [incr tcl] classes, and hence be capable of being
+subclassed. This version is for version 1.5 of [incr tcl].
+
+Wigwam transparently creates wrapper classes for the widgets on
+demand. A wrapper features public variables and methods corresponding
+to the options and commands respectively of the wrapped widget.
+There is a small problem in the case of \fIdelete\fR in that [incr
+tcl] already defines a delete method. Wigwam gets round this by naming
+the generated method \fItk_delete\fR.
+
+The wrappers are constructed on the fly by itcl_wish when it
+encounters the names \fIitcl_button\fR, \fIitcl_canvas\fR, etc.
+The latter may be used directly to instantiate objects having the same
+semantics as the equivalent Tk widgets, but are more likely to appear
+in inherit statements in order to create new types with enhanced
+functionalty, including so-called mega-widgets.
+.SH INHERITANCE
+When subclassing a wrapper or existing derived class there is one simple
+convention that should be observed: the constructor should specify
+an \fIargs\fR argument and it should explicitly call, usually early,
+the constructor of the immediate base class, as follows, "eval
+base_class::constructor $args". Doing so means that the constructors
+are executed in order from least to most specific and ensures
+that window creation and the configuration of variables are carried out
+first, allowing the constructor bodies to proceed on the basis that these 
+operations have been done.
+.SH USAGE
+In order to use \fIwigwam\fR it is sufficient for the scripts to be
+auto-loadable, e.g. by adding the pathname of the directory containing
+them (i.e. the lib subdirectory of the installation directory) to the 
+auto_path global variable.  Simply referencing one of the wrapper names
+itcl_button, itcl_canvas, etc. will cause auto-loading to swing into
+action.
+
+In order to apply wigwam to a Tk compatible widget all that is
+necessary is, taking the BLT toolkit's blt_barchart widget as an
+exmaple, to create a file along the lines of the following
+
+\fC
+.nf
+# \\
+itcl_class itcl_blt_barchart
+
+ItclClassFromWidget blt_barchart
+.fi
+\fR
+
+in a directory that will be added to your auto_load path, and apply
+itcl_mkindex to the directory in order to create a tclIndex file. The
+continued comment tricks itcl_mkindex into believing that the
+continuation line begins the definition of an [incr tcl] class, and
+hence into generating an auto_load entry that results in the file
+being sourced when itcl_blt_barchart is referenced. During sourcing
+the comment is ignored, so all that happens is that the
+ItclClassFromWidget statement is executed. ItclClassFromWidget is the
+procedure that creates a wrapper for a widget. Although it could be
+called explicitly before the first instance of the wrapper is required
+it is more convenient to let auto-loading do the work.
+
+In order to tidy up correctly when objects are destroyed \fIwigwam\fR
+binds to the Destroy event. Therefore users wishing to bind to Destroy
+should ensure that they use the "+command" notation.
+
+There is a known incompatability problem associated with calling the
+destructors of ordinary [incr tcl] mega-widgets. The recommended way
+round this is to destroy the object rather than delete it. The version
+of destroy that \fIwigwam\fR uses ensures that the destructor is
+called. However, that destroy won't be available until a wrapper has
+been created. If you want to ensure that \fIwigwam\fR's destroy is
+present from the beginning then you can force it to be auto-loaded
+by executing
+\fC
+.nf
+auto_load destroy
+.fi
+\fR
+near the top of your script after having modified `auto_path' to contain
+the \fIwigwam\fR lib directory.
+
+The following example usages demonstrate: using a wrapper as if it
+were a widget (unlikely to be done); subclassing a widget to provide
+specific behaviour; creating a compound widget.
+
+\fC
+.nf
+itcl_button .b -text hello -command "puts hello"
+\&.b invoke
+
+
+itcl_class FileDisplayer {
+    inherit itcl_text
+
+    constructor {args} {
+	eval itcl_text::constructor $args
+    }
+
+    public file {} {
+	if {$file != "" && ![catch {open $file r} fd]} {
+	    tk_delete 1.0 end
+	    insert end [read $fd]
+	    close $fd
+	}  
+    }
+}
+FileDisplayer .fd -height 40 -file README
+\&.fd configure -file INSTALL
+
+
+itcl_class Control {
+    inherit itcl_frame
+
+    constructor {args} {
+	eval itcl_frame::constructor $args
+
+	label $this.value
+	scale $this.slider -showvalue false
+	switch $orient {
+	    vertical {pack $this.value $this.slider -side left -fill y}
+	    default  {$this.slider configure -orient horizontal
+                      pack $this.value $this.slider -fill x}
+	}
+	bind $this.slider <Button1-Motion> "$this update"
+	update
+    }
+    
+    method update {} {
+	$this.value configure -text [$this.slider get]
+    }
+
+    public orient {horizontal}
+}
+Control .c -orient vertical
+.fi
+\fR
+The procedure wigwam_version returns the version of wigwam that is being
+used. Please obtain the value and mention it if reporting problems.
+.SH CLASSES
+The distribution provides a number of derived classes. These are:
+.sp
+BasicEntry
+.in +0.3i
+An entry widget with an option for specifying a command to be executed when
+the \fBReturn\fR key is entered, and a method for invoking the command.
+.in -0.3i
+.sp
+EmacsEntry
+.in +0.3i
+A version of the above that uses Emacs key bindings. The bindings exist as an
+abstract base class that may be combined under multiple inheritance with any
+subclass of BasicEntry.
+.in -0.3i
+.sp
+FormEntry
+.in +0.3i
+A BasicEntry that supports tabbing between instances with the same parent.
+.in -0.3i
+.sp
+SecretEntryBindings
+.in +0.3i
+An abstract base class for combining under multiple inheritance with a
+subclass of BasicEntry to yield an entry widget that does not display its
+input.
+.in -0.3i
+.sp
+CheckButton
+.in +0.3i
+A derivative of checkbutton that can be queried directly about its state. 
+.in -0.3i
+.sp
+RadioButton
+.in +0.3i
+A derivative of radiobutton that provides extra functionality and hides
+access to global variables.
+.in -0.3i
+.sp
+FileNominator
+.in +0.3i
+A file selector that is similar to that in the Xaw editor aXe by
+one (JKW) of the authors.
+.in -0.3i
+.sp
+MenuButton
+.in +0.3i
+A menubutton overlaid with a bitmap at the left. The combination has the
+appearance of an Athena Widget Set MenuButton widget with its leftBitmap
+resource set to the X bitmap menu10.
+.in -0.3i
+.sp
+MenuBar
+.in +0.3i
+A container for menubuttons and MenuButtons that supports keyboard traversal
+and mouse scanning.
+.in -0.3i
+.sp
+Paned
+.in +0.3i
+A layout widget inspired by the Athena Widget Set Paned widget.
+.in -0.3i
+.sp
+Scanvas
+.in +0.3i
+A canvas widget with scan scrolling enabled.
+.in -0.3i
+.sp
+Viewport
+.in +0.3i
+Implements scrolling of an arbitrary scrollable widget.
+.in -0.3i
+.sp
+Window
+.in +0.3i
+Implements a toplevel window with popup and popdown callbacks, and with wm 
+commands as both public variables and methods. May be applied to ".".
+.in -0.3i
+.sp
+Dialog
+.in +0.3i
+Modal dialog Window similar to Tk's tk_dialog procedure.
+.in -0.3i
+.sp
+FileNominatorWindow
+.in +0.3i
+A FileNominator in a Window with gridded geometry.
+.in -0.3i
+.LP
+More detailed information about each of the classes can be obtained by
+reference to the implementation files in the \fIlib\fR subdirectory of
+the installation directory. A simple viewer application for displaying
+them, wigwam.tcl, is provided in the demo subdirectory. Unless it is
+executed from within the demo directory with the class files in ../lib
+then the location of the class files should be communicated via the
+WIGWAMLIB environment variable.
+
+Some simple examples of the distributed classes being used follow in the 
+next section.
+.SH EXAMPLES
+\fC
+.nf
+
+# Hitting Return outputs the current text
+#
+set emacs 12345
+EmacsEntry .e -command puts -textvariable emacs
+pack .e
+.e invoke
+
+
+# The canvas can be scrolled using Button 2
+#
+Scanvas .c -width 200 -height 100 -scrollregion {0 0 400 200}
+\&.c create rectangle 50 50 150 100
+pack .c
+
+
+# Add scrolling to a listbox
+# Demonstrate reconfiguration of Viewport scrollbars
+#
+Viewport .v {listbox .l -geometry 20x4} -scroll right
+\&.l insert end one
+\&.l insert end two
+\&.l insert end three
+\&.l insert end four
+\&.l insert end five
+\&.l insert end six
+pack .v
+\&.l tk_delete end
+
+
+# CheckButtons and RadioButtons
+#
+CheckButton .c
+pack .c
+\&.c isSelected
+RadioButton .r1 -text aaa -group one
+RadioButton .r2 -text bbb -group one
+RadioButton .r3 -text ccc -group two
+pack .r1 .r2 .r3
+\&.r1 group
+RadioButton :: members one
+\&.r2 isSelected
+RadioButton :: chosen two
+\&.r3 configure -group one
+\&.r3 group
+
+
+# Clicking select outputs the selected file
+# Clicking cancel unpacks the widget
+# 
+FileNominator .f -select puts -cancel {pack forget $this}
+pack .f
+# press the cancel button here
+pack .f
+
+
+# Demonstrates wm commands as Window methods and variables
+#
+Window .w -title help -maxsize {200 100} -withdraw {} \\
+          -popup {puts "Popping up"}
+button .w.b -text help
+pack .w.b
+\&.w deiconify
+
+
+# Shows Window being applied to "."
+#
+Window . -title Main -minsize {10 10}
+\&. configure -maxsize {300 300}
+
+
+# Demonstrates a Dialog instance
+#
+Dialog .d -title Help \\
+          -text {Click a button or hit Return} \\
+          -buttons {up down left right dismiss} \\
+          -default dismiss \\
+          -auto false \\
+          -popdown {$this delete}
+.d.dismiss configure -text cancel
+.d deiconify
+puts "You selected button $d"
+
+
+.fi
+\fR
+.LP
+More elaborate examples can be found in the \fIdemo\fR subdirectory of
+the installation directory.
+.SH AUTHORS
+Jim Wight <j.k.wight@newcastle.ac.uk>
+.br
+Lindsay Marshall <lindsay.marshall@newcastle.ac.uk>
+.br
+Department of Computing Science, University of Newcastle, Newcastle upon Tyne, UK, NE1 7RU

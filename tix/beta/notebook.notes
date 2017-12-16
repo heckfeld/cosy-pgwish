@@ -1,0 +1,53 @@
+From chaffee@plateau.cs.Berkeley.EDU  Thu Aug 18 19:57:39 1994
+Posted-Date: Thu, 18 Aug 1994 16:59:36 -0700
+Received-Date: Thu, 18 Aug 1994 19:57:39 +0500
+Received: (chaffee@localhost) by elmer-fudd.cs.berkeley.edu (8.6.9/8.3) id QAA02960; Thu, 18 Aug 1994 16:59:36 -0700
+Date: Thu, 18 Aug 1994 16:59:36 -0700
+From: Gordon Chaffee <chaffee@plateau.cs.Berkeley.EDU>
+Message-Id: <199408182359.QAA02960@elmer-fudd.cs.berkeley.edu>
+
+To: ioi@stipple.seas.upenn.edu
+Subject: Re: [Poll] Request your favorite compound widget
+content-length: 65006
+Status: RO
+
+>>  I wrote a notebook sort of widget based on your Tix toolkit.  It is not
+>>  perfect, but it does seem to work pretty well for what I was using it
+>>  for.  You may not like the code (I did make a couple small mods to the
+>>  intrinsic code to support a couple things), but I feel it works pretty
+>>  well.  There are a couple bad things about it, the worst has to do with
+>>  the update command.  It determines the notebook size based on the biggest
+>>  page in the notebook.  To do this, is has to do an update, which forces
+>>  a window to be created before everything is packed.  Anyway, if you want
+>>  me to send you the code, I'd be happy to give you a starting point.
+>
+>        Thanks for letting me know. Please send me a copy of it and
+>I'll try to put it into the next release (possibly with some changes,
+>I hope you don't mind).
+>
+>        Also, send me your changes in the intrinsics so maybe I can
+>incorporate them in a future release, too.
+
+The only change that I made to the intrinsics was a way to check all
+options before commiting them.  For example, in tk, if I have a button
+.b, and I do the following
+
+   .b config -fg red -bg badcolor
+
+Nothing will occur because one of the options is bad.  What I put it was
+a way to say, "Check if all the arguments are OK.  If they are, commit them."
+The other advantage this gave me was if I changed two options that affected
+the same item, the changes would occur at once, not individually.
+
+There are three files I have included:
+  tix/Notebook.tcl, tix/Intrinsc.tcl, and test.tcl, a program to test it.
+
+To test:
+% source test.tcl
+% mkCall "Make Call"
+
+
+Gordon Chaffee
+chaffee@bugs-bunny.cs.berkeley.edu
+
+

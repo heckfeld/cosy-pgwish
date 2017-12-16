@@ -1,0 +1,28 @@
+It is intended that these scripts be executed from within the demo
+directory with the class files in ../lib. If the class files are
+elsewhere then the location should be communicated via the WIGWAMLIB
+environment variable.
+
+
+wigwam.tcl
+    Displays wigwam's sample class implementation files (or any other
+    files for that matter, courtesy of a FileNominator). Defines a
+    simple class derived from itcl_text for displaying files.
+
+formentry.tcl
+    Subclasses FormEntry and demonstrates tabbing amongst peers. 
+
+login.tcl
+    Demonstrates combining SecretEntryBindings with EmacsFormEntry to
+    construct a login window in which the password is not displayed.
+
+paned.tcl
+    Demonstrates the Paned widget.
+
+viewport.tcl
+    Shows the scrolling of a canvas via scrollbars or mouse button 2
+    by placing an Scanvas inside a Viewport, and demonstrates dynamic
+    configuration of the Viewport's scrollbars.
+
+
+To be continued - maybe.

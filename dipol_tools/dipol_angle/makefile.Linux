@@ -1,0 +1,127 @@
+CFLAGS	      = -g -I/usr/local/pgsql/include \
+		-I$(DATABASE)/h \
+                $(DEFINES)
+
+DEFINES	      =
+#-DTEST
+
+SYSTEM	      = Linux
+
+#DEST	      = $(COSMO)/bin/$(SYSTEM)
+DEST	      = .
+
+EXTHDRS	      =
+
+HDRS	      =
+
+INSTALL	      = /etc/install
+
+CXX	      = g++
+
+CXXFLAGS      = $(CFLAGS)
+
+LD	      = g++
+
+LDFLAGS	      = -g -L/usr/local/pgsql/lib
+
+LIBS	      = $(DATABASE)/lib/$(SYSTEM)/libcalib.so \
+		$(DATABASE)/lib/$(SYSTEM)/libcosmocalib.so \
+		$(DATABASE)/lib/$(SYSTEM)/libpmf.so
+
+LOPT	      = -lm -lpq
+
+MAKEFILE      = makefile.$(SYSTEM)
+
+OBJS	      = main.o
+
+PRINT	      = pr
+
+PROGRAM       = dipol_angle
+
+SHELL	      = /bin/sh
+
+SRCS	      = main.cpp
+
+SYSHDRS	      =
+
+all:;		@echo
+		rm -f *.o
+		@$(MAKE) -f $(MAKEFILE) SPX
+
+SPX:		$(PROGRAM)
+		@if [ $(DEST) != . ]; then \
+		(mv $(PROGRAM) $(DEST)/$(PROGRAM)); else \
+		(mv $(PROGRAM) $(PROGRAM).$(SYSTEM));fi
+
+$(PROGRAM):	$(OBJS) $(LIBS) $(MAKEFILE)
+		@echo "Linking $(PROGRAM) ..."
+		$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $(PROGRAM) $(LOPT)
+		@echo "done"
+
+#############
+# UNTER LINUX
+#############
+#
+# .cpp als Endung nicht bekannt, daher zufuegen (-> .SUFFIXES)
+# .o-File so aus .cpp-File kreieren, wie bei Endung .C oder .cc
+# (vgl. make -p -f/dev/null)
+#
+
+.SUFFIXES:	.cpp
+
+.cpp.o:		$(SRCS) $(HDRS) $(EXTHDRS) $(MAKEFILE)
+		$(CXX) $(CXXFLAGS) -c $< -o $@
+
+#############
+
+clean:;		@rm -f $(OBJS) core
+
+clobber:;	@rm -f $(OBJS) $(PROGRAM) core tags
+
+depend:;	makedepend -f$(MAKEFILE) $(CFLAGS) $(SRCS)
+
+echo:;		@echo $(HDRS) $(SRCS)
+
+index:;		@ctags -wx $(HDRS) $(SRCS)
+
+install:	$(PROGRAM)
+		@echo Installing $(PROGRAM) in $(DEST)
+		@-strip $(PROGRAM)
+		@if [ $(DEST) != . ]; then \
+		(rm -f $(DEST)/$(PROGRAM); $(INSTALL) -f $(DEST) $(PROGRAM)); fi
+
+print:;		@$(PRINT) $(HDRS) $(SRCS)
+
+tags:		$(HDRS) $(SRCS); @ctags $(HDRS) $(SRCS)
+
+update:		$(DEST)/$(PROGRAM)
+
+#$(DEST)/$(PROGRAM): $(SRCS) $(LIBS) $(HDRS) $(EXTHDRS)
+#		@$(MAKE) -f $(MAKEFILE) ROOT=$(ROOT) DEST=$(DEST) install
+
+###
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+main.o: /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h
+main.o: /usr/include/sys/cdefs.h /usr/include/stdlib.h
+main.o: /usr/include/features.h /usr/include/errno.h
+main.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+main.o: /usr/include/alloca.h /usr/include/math.h /usr/include/huge_val.h
+main.o: /usr/include/endian.h /usr/include/bytesex.h /usr/include/nan.h
+main.o: /usr/include/values.h /usr/include/ieee754.h /usr/include/ieee854.h
+main.o: /mnt/cc-l4/ccp/database/h/pgcosmocalib.h
+main.o: /mnt/cc-l4/ccp/database/h/pgcalib.h
+main.o: /mnt/cc-l4/ccp/database/h/pgdbif.h
+main.o: /mnt/cc-l4/ccp/database/h/pgpatch.h
+main.o: /usr/local/pgsql/include/libpq-fe.h
+main.o: /usr/local/pgsql/include/postgres_ext.h
+main.o: /usr/local/pgsql/include/libpq/pqcomm.h /usr/include/sys/types.h
+main.o: /usr/include/linux/types.h /usr/include/linux/posix_types.h
+main.o: /usr/include/asm/posix_types.h /usr/include/asm/types.h
+main.o: /usr/include/sys/bitypes.h /usr/include/sys/socket.h
+main.o: /usr/include/linux/socket.h /usr/include/asm/socket.h
+main.o: /usr/include/asm/sockios.h /usr/include/linux/sockios.h
+main.o: /usr/include/linux/uio.h /usr/include/sys/un.h
+main.o: /usr/include/linux/un.h /usr/include/netinet/in.h
+main.o: /usr/include/linux/in.h /usr/include/asm/byteorder.h
+main.o: /usr/local/pgsql/include/c.h /usr/local/pgsql/include/lib/dllist.h

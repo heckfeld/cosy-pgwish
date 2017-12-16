@@ -1,0 +1,249 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Widget.itcl,v 1.1.5.1 1994/06/05 17:33:06 mark Exp $
+#
+# itcl_class: Widget
+#--------------------------------------------------------------
+# Description: Widget - abstract base classes for compound widgets.
+#	Provides constructor/destructor/config making all derived classes
+#	transparent to tk (and tkinspect). If the widget is based on frame
+#	or toplevel, sets the class to be itcl_class name. Provides 
+#	basic support for flashing, widget confguring, etc.
+#
+# Usage: Widget <widget-class> <widget-class-args>
+#
+# eg:	itcl_class mywidget {
+#	   inherit Widget
+#		:
+#	   constructor {config} {
+#	      Widget::constructor frame -bd 2 -relief groove 
+#		:
+#	   }
+#	}
+#
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Object
+#
+# PUBLIC ATTRIBUTES:
+#	none
+#
+# METHODS:
+#
+#	exists ........ true after constructor
+#	configure ..... config the 1st widget in object
+#	flash ......... make a visual cue where the object is
+#	option ........ set variable value from options database
+# 	help .......... virtual function for providing context-sensitive help
+#
+# STATIC METHODS (proc) :
+#	FindParent .... find closest parent which is itcl_class 
+#	Help .......... context-sensitive help.
+#	  Usage:
+#	    bind all <F1> {
+#		set widget [winfo containing %X %Y]
+#		Widget :: Help $widget
+#	    }
+#
+# WARNING: 
+#	   All objects derived from Widget may be destroyed with
+#	"$object delete"  or "destroy $object" . However , in the second
+#	case the object should take care of desroying non-widget member objects 
+#	manually (i.e. bind $this <Destroy> "+$this.o1 delete; $this.o2 delete..."
+#	in costructor) , because in this case destructor will not be called
+#	If all the member objects have correspondent tk widget, nothing
+#	special should be done. 
+#	   You can avoid all those problems using "destroy" from itcl library.
+#	itcl-1.5 and upper replaces destroy with "smart destroy" which 
+#	for itcl_object calls "$object delete"
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  (mark@lannet.com)
+# Creation date : Mar 30, 1993
+#
+# Based on the version posted by Nat Pryce (np2@doc.ic.ac.uk)
+#	Copyright (c) 1994, Nat Pryce
+#	
+# Last check-in date: $Date: 1994/06/05 17:33:06 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Object
+
+itcl_class Widget {
+    inherit Object
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new widget
+    #---------------------------------------------------------------
+    constructor {widget args} {
+	#
+	# for frame & toplevel set window class 
+	# to be the itcl class name
+	#
+	if { [lsearch "toplevel frame" $widget] != -1 } {
+	    set class_opt "-class [$this info class]"
+	} else {
+	    set class_opt ""
+	}
+	
+	# hide the object's command
+	set tmp "_${this}_tmp"
+	::rename $this $tmp
+	
+	# create a widget with the same name as the object
+	eval ::$widget $this $args $class_opt
+	
+	# save the window's command and restore the object's command
+	set window "_${this}_win"
+	::rename $this $window
+	::rename $tmp $this
+	
+	
+	# catch destroy and remove the object's command, therefore
+	# removing the object
+	bind $this <Destroy> "\
+		[bind [winfo class $this] <Destroy>] ;
+		[bind $this <Destroy>] ;
+		rename $window {}"
+	
+    }   
+    
+    #--------------------------------------------------------------------------
+    # DESTRUCTOR - Destroys a widget. *NOT* getting called on <Destroy> binding
+    #--------------------------------------------------------------------------
+    destructor {
+	if { [exists] } {
+	    destroy $this
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: exists - Returns 1 if the window exists for the object
+    #---------------------------------------------------------------
+    method exists {} {
+	return [winfo exists $this]
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: configure - widget's configure (not object)
+    #	this permits setting parameters directly 
+    #	to the object's TK widget
+    #---------------------------------------------------------------
+    method configure {args} {
+	eval ::$window configure $args
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: flash - flash is used for visual cue - were is the widget
+    #---------------------------------------------------------------
+    method flash {} {
+	
+	# select color for flashing
+	if {[tk colormodel $this] == "color" } {
+	    set color $flash_color
+	} else {
+	    set color white
+	}
+
+	# create window for flashing
+	set win "$this. tmp flush_label_only"
+	label $win -bg $color
+
+	# flash !
+	for { set i 0 } { $i < $flash_count } { incr i } { 
+	    place $win -x 0 -y 0 -relw 1 -relh 1
+	    update; after $flash_delay
+	    place forget $win
+	    update; after $flash_delay
+	}
+	destroy $win
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: help - context-sensitive help for the object
+    #---------------------------------------------------------------
+    method help {args} {
+	tk_dialog .tmp_dialog "Help" \
+	    "Here will be context-sensitive help\n[$this info class]\n$this" \
+	    info 0 Dismiss
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: option - Set the value of a variable from the X options database, 
+    #	as long as it's value is an empty string
+    #---------------------------------------------------------------
+    method option {varname opt class default} {
+	upvar $varname var
+	if [string match {} $var] {
+	    set value [::option get $this $opt $class]
+	    if [string match "" $value] {
+		set var $default
+	    } else {
+		set var $value
+	    }
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # PROC: FindParent - Searchs from $w's the closest parent 
+    #	which is itcl_class
+    #---------------------------------------------------------------
+    
+    proc FindParent { w } {
+	set classes [itcl_info class]
+	while {"$w" != "" && [lsearch -exact $classes [winfo class $w]] == -1} {
+	    set w [winfo parent $w]
+	}
+	return $w
+    }
+    
+    #---------------------------------------------------------------
+    # PROC: Help - context-sensitive help for a tk/itcl widget
+    #---------------------------------------------------------------
+    proc Help { w args } {
+	set p [FindParent $w]
+	if { "$p" != "" } {
+	    $p help
+	} else {
+	    tk_dialog .tmp_dialog "Help" \
+		"Here will be common help index" info 0 Dismiss
+	}
+    }
+    
+    #
+    # COMMON DATA
+    # 
+    #	flash_delay ........ delay (in usec) for flashing
+    #	flash_color ........ default flash color for color displays
+    #	flash_count ........ # of flashes
+    #
+    common flash_delay 100
+    common flash_color yellow
+    common flash_count 3
+
+    #
+    #  PROTECTED DATA
+    #
+    # window ........ The widget this object is built upon
+    #
+    protected window {}
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Widget.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:33:06  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:33:05  mark
+# Initial revision
+#
+#
+#

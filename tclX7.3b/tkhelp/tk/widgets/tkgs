@@ -1,0 +1,138 @@
+NAME
+       tkgs - Create and manipulate tkgs widgets
+
+SYNOPSIS
+       tkgs pathName ?options?
+
+STANDARD OPTIONS
+       background      height         width
+       borderwidth     relief
+
+       See  the ``options'' manual entry for details on the stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:           bbox
+       Class:          Bbox
+       Command-Line Switch:           -bbox
+
+              This is a list with  four  numbers  specifying  the
+              bounding   box   to   be  displayed  (this  is  the
+              postscript bounding box).
+
+       Name:           command
+       Class:          Command
+       Command-Line Switch:           -command
+
+              Specifies  the  ghostscript  executable   that   is
+              called.   The   default  command  is  ''gs  -dQUIET
+              -dNOPAUSE -g${width}x${height} ${file}''. There are
+              several variables that can be specified in the com-
+              mand. The variables width and height  are  replaced
+              by  the specified widget size. The variable file is
+              replaced by the filename that should be  displayed.
+
+       Name:           file
+       Class:          File
+       Command-Line Switch:           -file
+
+              Specifies   the   file   that   is  loaded  in  the
+              ghostscript when the widget is created.
+
+       Name:           orient
+       Class:          Orientation
+       Command-Line Switch:           -orient
+
+              Specifies  the   orientation   of   the   displayed
+              postscript  file.   This  is an integer with one of
+              the following values: 0, 90, 180, or 270.
+
+       Name:           xDpi
+       Class:          XDpi
+       Command-Line Switch:           -xdpi
+
+              Specifies the x resolution of the display.
+       Name:           yDpi
+       Class:          YDpi
+       Command-Line Switch:           -ydpi
+
+              Specifies the y resolution of the display.
+
+
+DESCRIPTION
+       The tkgs command creates a new window (given by the  path-
+       Name  argument)  and  makes  it into a tkgs widget.  Addi-
+       tional options, as described above, may  be  specified  on
+       the  command  line  or in the option database to configure
+       aspects of the tkgs such as its default  background  color
+       and relief.  The tkgs command returns the path name of the
+       new window.
+
+       A tkgs widget displays a postscript document.
+
+
+WIDGET COMMAND
+       The tkgs command creates a new Tcl  command  the  name  of
+       which  is  the same as the path name of the tkgs's window.
+       This command may be used to invoke various  operations  on
+       the widget. It has the following general form:
+
+              pathName option ?arg arg ...?
+       PathName is the name of the command. It is the same as the
+       tkgs widget's path name. Option and the args determine the
+       exact behavior of the command.  The following commands are
+       possible for tkgs widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Queries or modifies the  configuration  options  of
+              the  widget.   If no option is specified, returns a
+              list describing all available options for  pathName
+              (see Tk_ConfigureInfo for information on the format
+              of this list).  If  option  is  specified  with  no
+              value,  the  command  returns a list describing the
+              one named "option" (this list will be identical  to
+              the  corresponding sublist of the value returned if
+              no  option  is  specified).    If   one   or   more
+              option-value pairs are specified, the command modi-
+              fies the given widget option(s) to have  the  given
+              value(s);  in  this  case,  the  command returns an
+              empty string.  Option may have any  of  the  values
+              accepted by the tkgs command.
+
+       pathName redisplay
+              This command redisplays the widget.
+
+
+BINDINGS
+       The  tkgs  widget does not allow special bindings. This is
+       because reparenting is used which means  that  the  events
+       are passed directly to the child widget.
+
+
+IMPLEMENTATION
+       I  tried  to  keep the changes to Tk as small as possible.
+       The changes to Tk only add  a  new  command  to  Tk  (xac-
+       cess(n)).  If  you don't use the new command, you will not
+       notice  any  changes  compared  to  the   standard   wish.
+       Ghostscript is not modified.
+
+       The  basic  concept of this widget is that the tkgs widget
+       provides a pixmap id that ghostscript uses  for  its  dis-
+       playing instead of making a new window.
+
+
+PERFORMANCE ISSUES
+       Performance is a critical point with the tkgs widget. Each
+       created widget has a complete  ghostscript  process.  That
+       means you should be careful with the number of widgets.
+
+
+BUGS
+       o      It  is  only  possible to display the first page in
+              the postscript document.
+
+       o      Surely, there are many bugs.
+
+
+KEYWORDS
+       ghostscript, widget, xaccess

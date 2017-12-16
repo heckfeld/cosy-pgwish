@@ -1,0 +1,58 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Dial.test,v 1.1.5.3 1994/06/07 16:43:17 mark Exp $
+#
+# Dial.test
+#--------------------------------------------------------------
+# Description: Test for Dial
+#--------------------------------------------------------------
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+wm maxsize . 1000 1000
+wm geometry . 550x390
+
+Dial .d \
+    -label1 "Dial test" -label2 "mile/uSec" \
+    -green_zone 130 -yellow_zone 170
+
+pack .d -fill both -expand yes 
+
+button .e -text Exit -command exit
+pack .e -fill x -side bottom
+
+set val 1
+.d config -value $val
+
+Scheduler s -count 90  -interval 100 \
+    -command {
+	global val
+	.d config -value $val
+	update
+	incr val 2
+    } 
+s start
+
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Dial.test,v $
+# Revision 1.1.5.3  1994/06/07  16:43:17  mark
+# Added resize support
+#
+# Revision 1.1.5.2  1994/06/07  14:35:12  mark
+# test for real Dial
+#
+# Revision 1.1.5.1  1994/06/05  17:34:57  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:34:56  mark
+# Initial revision
+#
+#
+#

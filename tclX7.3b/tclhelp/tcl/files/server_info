@@ -1,0 +1,13 @@
+       server_info addresses hostname
+              server_info   official_name   hostname  server_info
+              aliases_name hostname
+              Optain information about a TCP/IP server.
+
+              If the addresses option is specified, the  list  of
+              IP addresses for the hostname is returned.
+
+              If the official_name option is specified, the offi-
+              cial name for hostname is returned.
+
+              If the aliases  option  is  specified,  a  list  of
+              aliases for hostname is returned.

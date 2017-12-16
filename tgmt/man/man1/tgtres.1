@@ -1,0 +1,75 @@
+'\" te
+.TH tgtres "1" "" "(TM)"
+.ds)H Cosy-Control
+.ad b
+.SH NAME
+.br
+.B tgtres
+\- gibt alle zu einem Target enthaltenen Daten aus den Tgt-Datenbanken aus      
+.sp
+.SH SYNOPSIS
+.br
+.B tgtres 
+.I Filename
+.sp
+.SH BESCHREIBUNG
+.br
+.B tgtres 
+liest den Targetnamen und den Namen einer 'Param'-Datenbank vom Standard Input 
+ein.
+.br
+Alle Angaben zu diesem Target werden auf das File
+.I Filename
+ausgegeben. Folgende Datenbanken werden auf Eintr\(:age abgefragt:
+.br
+.in 8
+- $TMDB/thost
+.br
+- $TMDB/fc
+.br
+- $TMDB/cpus
+.br
+- $TMDB/param-db (param-db ist der Name der interaktiv eingegebenen Datenbank)
+.in 5
+.br
+.sp
+Au\[ss]erdem wird 
+.I tinfo
+aufgerufen.
+.sp 2
+Die Environment Variablen
+.B CPC
+und
+.B TMDB
+m\(:ussen gesetzt sein.
+Die Datenbank mu\[ss] sich in dem Directory 
+.B $TMDB
+befinden.
+.SH R\(:UCKGABEWERT
+.br
+- 1 : kein oder ein falsches Argument ist \(:ubergeben worden
+.br
+- 2 : fehlerhafter Zugriff auf die Datenbank
+.SH FEHLER
+.sp
+- es wird kein oder ein falsches Argument \(:ubergeben
+.br
+- Fehler beim Zugriff auf die Datenbank
+.SH SIEHE AUCH
+alle Target-Datenbank-Manualpages
+.br
+TgtIntro(1)
+.SH WARNUNGEN 
+.sp
+Das Programm \(:uberschreibt das File
+.I Filename
+nicht, sondern h\(:angt alle Daten an.
+.sp
+.SH FILES
+Die pmf-Programme stehen in dem Directory
+.B /ccP/cos/pmf/bin.
+.SH AUTOR
+.nf
+Ursula Hilgers,
+<ulla@cecs.cc.kfa-juelich.de>
+1892

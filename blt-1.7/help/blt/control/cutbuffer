@@ -1,0 +1,43 @@
+NAME
+       blt_cutbuffer - manipulate X cut buffer properties
+
+SYNOPSIS
+       blt_cutbuffer get ?bufNum?
+       blt_cutbuffer rotate ?count?
+       blt_cutbuffer set value ?bufNum?
+
+
+DESCRIPTION
+       The  blt_cutbuffer  command  allows  you to get or set the
+       values  of  the  eight  X  cut  buffer   properties.   The
+       blt_cutbuffer command also allows you to rotate the values
+       of the cut buffer  properties.   Buffer  numbers  (bufNum)
+       range from 0 to 7 inclusive and default to 0 if not speci-
+       fied.
+
+CUTBUFFER COMMANDS
+       The   following   commands   are   available    for    the
+       blt_cutbuffer:
+
+       blt_cutbuffer get ?bufNum?
+              Returns  the  value of a cutbuffer.  BufNum must be
+              in the range from 0 to 7 inclusive and defaults  to
+              0  if not specified.  The cutbuffer is returned as-
+              is except, NUL bytes are converted to the '@' char-
+              acter.   If the specified cut buffer does not exist
+              the empty string is returned.
+
+       blt_cutbuffer rotate ?count?
+              Rotates the cut buffers by count. Count is an inte-
+              ger  number in the range from -7 to 7 inclusive and
+              defaults to 1 if it is not specified.
+
+       blt_cutbuffer set value ?bufNum?
+              Sets the specified cutbuffer to value.  BufNum must
+              be  an integer number in the range 0 to 7 inclusive
+              and defaults to zero if not specified.   This  com-
+              mand returns the empty string.
+
+
+KEYWORDS
+       cut buffer, property

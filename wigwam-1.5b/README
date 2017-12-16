@@ -1,0 +1,97 @@
+wigwam is a bundle of tricks for itcl_wish that magically enables the
+Tk widgets to be regarded as [incr tcl] classes. The illusion is
+accomplished by transparently creating wrapper classes that are
+functionally equivalent to the widgets. The use of a wrapper name,
+viz. itcl_button, itcl_canvas, etc., as a command or in an inherit
+statement is sufficient to spark auto-loading into life and cause
+generation on the fly.
+
+While it would be possible, with no advantage, to use the wrappers in
+place of the widgets, e.g.
+
+    itcl_button .b -text help -command "puts help"
+
+the real gain comes from the potential for subclassing, e.g.
+
+    itcl_class FileDisplayer {
+        inherit itcl_text
+
+        constructor {args} {
+            eval itcl_text::constructor $args
+        }
+    
+        public file {} {
+            if {$file != "" && ![catch {open $file r} fd]} {
+                tk_delete 1.0 end
+                insert end [read $fd]
+                close $fd
+            }  
+        }
+    }
+    FileDisplayer .fd -height 40 -file README
+    .fd configure -file INSTALL
+
+Of even greater interest is likely to be the possibility of creating
+compound widgets by subclassing itcl_frame, e.g.
+
+    itcl_class Control {
+        inherit itcl_frame
+        
+        constructor {args} {
+            eval itcl_frame::constructor $args
+        
+            label $this.value
+            scale $this.slider -showvalue false
+            switch $orient {
+                vertical {pack $this.value $this.slider -side left -fill y}
+                default  {$this.slider configure -orient horizontal
+                          pack $this.value $this.slider -fill x}
+            }
+            bind $this.slider <Button1-Motion> "$this update"
+            update
+        }
+            
+        method update {} {
+            $this.value configure -text [$this.slider get]
+        }
+
+        public orient {horizontal}
+    }
+    Control .c -orient vertical
+
+
+This release is compatible with itcl-1.5 and is available as the file
+wigwam-1.5<letter>.tar.gz in /pub/tcl/code at harbor.ecn.purdue.edu,
+and in /packages/tcl-archive/code at the src.doc.ic.ac.uk mirror site.
+<letter> progresses through a, b, c etc. as new versions are released.
+
+The distribution contains some sample classes that have been written
+using the wrappers. Examples belonging to the first category are:
+
+    BasicEntry
+        A base class for entry widgets that adds provision for the
+        specification of a command to be executed when Return is 
+        pressed.
+    
+    Scanvas
+        A canvas with scan scrolling enabled.
+
+and to the second 
+
+    FileNominator
+        A file selector similar to the one in JKW's Xaw aXe editor.
+    
+    Viewport
+        A container that adds scrolling to an arbitrary scrollable
+        widget. 
+
+
+Nautilus, the [incr tcl] browser/debugger by LFM, is written using
+wigwam techniques.
+
+Wigwam is an acronym of "wrappers for [incr tcl] graphics by Wight and
+Marshall".
+
+-------
+       Jim Wight <j.k.wight@newcastle.ac.uk>
+Lindsay Marshall <lindsay.marshall@newcastle.ac.uk>

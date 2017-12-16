@@ -1,0 +1,199 @@
+NAME
+       tixFileSelectbox - Create and manipulate TIX FileSelectbox
+       widgets
+
+SYNOPSIS
+       tixFileSelectbox pathName ?options?
+
+STANDARD OPTIONS
+       FileSelectbox supports all the standard options of a frame widget.
+
+       See the ``options'' manual entry for details on the  stan-
+       dard options.
+
+WIDGET-SPECIFIC OPTIONS
+       Name:                          background
+       Class:                         background
+       Command-Line Switch:           -background
+
+              Specifies the background color of the FileSelectbox
+              widget. This option will  *not*  affect  the  back-
+              ground of the entry and listbox subwidgets, though.
+
+       Name:                          browsecmd
+       Class:                         browseCmd
+       Command-Line Switch:           -browsecmd
+
+              Specifies the command  to  execute  when  the  user
+              browses  through  the  files.  By  default,  if the
+              -browsecmd is specified, the browse command will be
+              executed  when the user clicks on a filename in the
+              Files listbox.
+
+       Name:                          command
+       Class:                         Command
+       Command-Line Switch:           -command
+
+              Specifies the command to execute when  the  FileSe-
+              lectbox  is  invoked. This command is executed with
+              one parameter : the filename selected by the  user.
+
+       Name:                          entryBg
+       Class:                         Background
+       Command-Line Switch:           -entrybg
+
+              Specifies the background color of the entry subwid-
+              gets.
+
+       Name:                          entryFont
+       Class:                         Font
+       Command-Line Switch:           -entryfont
+
+              Specifies the font of the entry subwidgets.
+
+       Name:                          filter
+       Class:                         Filter
+       Command-Line Switch:           -filter
+
+              Specifies the filtering string used in  the  Filter
+              entry widget of the FileSelectbox. It specifies the
+              directory in which the FileSelectbox works  in  and
+              the matching pattern of the desired file names. The
+              default value of -filter  is  the  current  working
+              directory  of  the  program  concatenated  with the
+              matching pattern of the file names.
+
+       Name:                          foreground
+       Class:                         Foreground
+       Command-Line Switch:           -foreground
+
+              Specifies the foreground color of all  the  subwid-
+              gets.
+
+       Name:                          grab
+       Class:                         Grab
+       Command-Line Switch:           -grab
+
+              Specifies  the  grabbing  policy  the FileSelectbox
+              when  it  is  reading  a  directory.  Only   values
+              "global", "local" or "none" are allowed.
+
+       Name:                          listboxBg
+       Class:                         Background
+       Command-Line Switch:           -listboxbg
+
+              Specifies  the background color of the listbox sub-
+              widgets.
+
+       Name:                          listboxFont
+       Class:                         Font
+       Command-Line Switch:           -listboxfont
+
+              Specifies the font of the listbox subwidgets.
+
+       Name:                          pattern
+       Class:                         Pattern
+       Command-Line Switch:           -pattern
+
+              Specifies the matching pattern of  the  file  names
+              that should be listed in the Files listbox.
+
+       Name:                          selection
+       Class:                         Selection
+       Command-Line Switch:           -selection
+
+              Specifies  the file name that appears in the Selec-
+              tion entry in the FileSelectbox. You can  use  this
+              option to indicate a default filename.
+DESCRIPTION
+       The  tixFileSelectbox  command creates a new window (given
+       by the pathName argument) and makes it into a  FileSelect-
+       box  widget.   Additional options, described above, may be
+       specified on the command line or in the option database to
+       configure  aspects of the FileSelectbox such as its cursor
+       and relief.
+
+       Note that the TIX FileSelectbox is a compound  widget.  It
+       consists  of  several  sub-widgets.  Some  of  the general
+       options used by the sub-widgets,  such  as  background  or
+       font,  may  not  be  readily  configured by specifying the
+       ?options? arguments. Please refer to the TIX man page  for
+       more  details of general configuration of the TIX compound
+       widgets.
+
+       The TIX FileSelectbox is similar to the standard Motif(TM)
+       file-selection  box. It is generally used to select a file
+       to operate on.  It  archives  the  files  mostly  recently
+       selected  so  that  they  can be quickly selected again. A
+       FileSelectbox is normally packed in a file dialog box. The
+       convinence  function tixMkFileDialog will provides a quick
+       way of creating such a dialog.  Please read the  man  page
+       of tixMkFileDialog for more details.
+
+WIDGET COMMAND
+       The  tixFileSelectbox  command  creates  a new Tcl command
+       whose name is the same as the path name of the FileSelect-
+       box's  window.  This command may be used to invoke various
+       operations on the widget. It  has  the  following  general
+       form:
+
+              pathName option ?arg arg ...?
+
+       PathName  is the name of the command, which is the same as
+       the FileSelectbox widget's path name.  Option and the args
+       determine  the exact behavior of the command.  The follow-
+       ing commands are possible for FileSelectbox widgets:
+
+       pathName configure ?option? ?value option value ...?
+              Query or modify the configuration  options  of  the
+              widget.   If no option is specified, returns a list
+              describing all of the available options  for  path-
+              Name  (see  Tk_ConfigureInfo for information on the
+              format of this list).  If option is specified  with
+              no  value, then the command returns a list describ-
+              ing the one named option (this list will be identi-
+              cal  to  the  corresponding  sublist  of  the value
+              returned if no option is  specified).   If  one  or
+              more  option-value  pairs  are  specified, then the
+              command modifies the given widget option(s) to have
+              the  given  value(s);   in  this  case  the command
+              returns an empty string.  Option may  have  any  of
+              the   values   accepted   by  the  tixFileSelectbox
+              command.
+
+       pathName filter
+              Update  the  files  listed  in  the   FileSelectbox
+              according to the filtering pattern sepcified in the
+              Filter entry widget.
+
+       pathName invoke
+              Execute  the  command  specified  by  the  -command
+              option in the Filter entry widget.
+
+DEFAULT BINDINGS
+       TIX  automatically  creates class bindings for FileSelect-
+       boxes that give them the following default behavior:
+
+       [1]    Mouse button 1 in the Directory listbox will change
+              the filter string to the selected directory.
+
+       [2]    Mouse button 1 in the Files listbox will change the
+              filename that appears in the  Selection  entry.  It
+              will  also trigger the -browsecmd if the option has
+              been specified.
+
+       [3]    The current directory will be changed by (1) double
+              clicking  the Directory listbox or (2) invoking the
+              Filter Combobox. Please refer to the  man  page  of
+              tixCombobox  for  the  default bindings of the Com-
+              boboxes and how they can be invoked.
+
+       [4]    The command specified by the option  -command  will
+              be invoked by (1) double clicking the Files listbox
+              or (2) invoking Selection Combobox.
+
+AUTHOR
+       Ioi Kim Lam - ioi@graphics.cis.upenn.edu
+
+KEYWORDS
+       FileSelectbox, Combobox, TIX,

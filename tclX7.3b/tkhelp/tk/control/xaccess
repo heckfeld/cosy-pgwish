@@ -1,0 +1,192 @@
+NAME
+       xaccess - Access to various X functions from Tcl
+
+SYNOPSIS
+       xaccess command ?options?
+
+DESCRIPTION
+       The xaccess command provides access to certain X functions
+       like sending events, manipulation of  properties,  reading
+       of  the  X  window  structure and the X bell. The commands
+       were written to allow the embedding of  external  applica-
+       tions into Tk.
+
+       For  almost  all xaccess commands, the user has to specify
+       an X window id (with the -windowid option) or a Tk  widget
+       pathname (with the -widget option).
+
+       The following commands can be specified:
+
+       eventbuttonpress ?options?
+              A  buttonpressed  event  is sent, where the -button
+              parameter specifies which button should be pressed.
+              Accepted values are numbers from 1 to 5. The -state
+              parameter selects a certain button mask. The  value
+              of  this  paramter  is  one  of the usual Modifiers
+              (Control, Shift, Lock, Button?, Mod?).
+
+       eventbuttonrelease ?options?
+              A buttonreleased event is sent, where  the  -button
+              parameter   specifies   which   button   should  be
+              released. The parameters are the same  as  for  the
+              buttonpressed event.
+
+       eventclientmessage ?options?
+              When  sending  a  clientmessage event, the user can
+              define the format of the message with  the  -format
+              option. The -messagetype or -messagetypename speci-
+              fies an atom id or atom name that should  be  sent.
+              For  a detailed description of the parameters, take
+              a look at the X event description.
+
+       eventconfigure ?options?
+              A configure event allows the setting of the follow-
+              ing options: the -x, -y, -width, -height dimensions
+              of the window. The -borderwidth option  allows  the
+              setting of the window's borderwidth. The selected X
+              window is stacked above the X window selected  with
+              the  -abovewindowid  or  -abovewidget  options. The
+              option -overrideredirect allows the  specifying  of
+              the  overrideredirect  attribute  of the selected X
+              window. For a detailed description of  the  parame-
+              ters, take a look at the X event description.
+       eventexpose ?options?
+              For  the expose event the user can specify the fol-
+              lowing options (with the same meaning  as  for  the
+              configure event): -x, -y, -width, -height.
+
+       eventkeypress ?options?
+              A  keypressed  event  is  sent,  where  the -keysym
+              parameter specifies which key  should  be  pressed.
+              Accepted values are all keysyms that are defined in
+              <X11/keysymdefs.h>. The  -state  parameter  selects
+              the  a certain key mask. The value of this paramter
+              is one of  the  usual  Modifiers  (Control,  Shift,
+              Lock, Button?, Mod?).
+
+       eventkeyrelease ?options?
+              A  keyreleased  event  is  sent,  where the -keysym
+              parameter specifies which key should  be  released.
+              The  parameters  are the same as for the keypressed
+              event.
+
+       eventmap ?options?
+              The map event knows the following options (with the
+              same meaning as for the configure event): -overrid-
+              eredirect.
+
+       eventmotion ?options?
+              With this  event,  the  user  can  move  the  mouse
+              pointer  to a new location. Settable parameters are
+              -x, -y, -xroot, -yroot and -relative. The -relative
+              option  specifies  whether or not the mouse pointer
+              is placed referring to the current position or with
+              absolute coordinates. When the -windowid or -widget
+              options are set, the mouse pointer is placed  rela-
+              tive  to  that  window. The -interval option can be
+              used to specify a move distance for the mouse.  The
+              mouse  pointer  will  be  moved the given amount of
+              pixels, until the final position  is  reached.  The
+              value  is  given  as a float (although only integer
+              positions are displayed). With values smaller  than
+              1, the mouse pointer motion is slowed down.
+
+       eventreparent ?options?
+              With  the  reparent  event, the specified window is
+              reparented to the window specified with the -paren-
+              twindowid or -parentwidget option.
+
+       propget ?options?
+              If  the  user  does not specify any options for the
+              propget  command  besides  the  window  id  (widget
+              name), all property ids attached to that window are
+              returned. To retrieve the  value  of  one  specific
+              property, the user can specify the property id with
+              the option -property, or the property name with the
+              option -propertyname. Only properties with the type
+              string can be retrieved. The returned  value  is  a
+              list with three or more elements. The first element
+              is the name of the property, the second element  is
+              the  type  of  the property, and the following ele-
+              ments are the values of the property (usually  only
+              one  value, but if there are '\0' characters in the
+              string, the value is split into separate elements).
+              The  following  options can be optionally specified
+              (take a look at the specification of  the  XGetWin-
+              dowProperty(3X)   function):   -longoffset,   -lon-
+              glength, -delete, -type.
+
+       propchange ?options?
+              To change the value of a property (or to  create  a
+              new  property), the propchange command is used. The
+              specified property (-property or -propertyname)  is
+              created or changed. The user can define how the new
+              data is attached to the  property  with  the  -mode
+              option.     Possible    values    are   ''append'',
+              ''prepend'' or ''replace''.  The data  that  should
+              be attached is specified with the -data option. The
+              -numelements defaults to the  length  of  the  data
+              string,  but can also be set directly.  The default
+              type  (STRING)  can  be  changed  with  the   -type
+              resource.  All types that are available for proper-
+              ties can be specified  (well,  almost  all...).  By
+              default,  the format of the data is 8 bit, but this
+              can be changed with the -format option. Take a look
+              at  the  specification  of  the XChangeProperty(3X)
+              function to  get  a  complete  description  of  the
+              parameters.
+
+       propdelete ?options?
+              The  propdelete  command deletes the named property
+              (-property or -propertyname) from the  specified  X
+              window.
+
+       sendstring ?options?
+              The  sendstring  command sends a complete string to
+              the specified X window.  The  string  is  specified
+              with  the  -data option, and can contain a standard
+              character (e.g. "abCDe+-?"), modifiers enclosed  in
+              <>  (e.g. "ab<Control>n"), keysyms also enclosed in
+              <> (e.g. "ab<Enter>"),  and  the  special  modifier
+              extensions  "Press"  and "Release" (e.g. "ab<Press-
+              Shift>aaa<Release-Shift>").  The  escape  sequences
+              '\t'  (for tabulator), '\r' (for return), '\n' (for
+              return),  and  '\b'  (for   backspace)   are   also
+              accepted. The -interval option can be used to add a
+              delay to the keypress events (to emulate some  kind
+              of  user  speed typing). The value is given in sec-
+              onds.
+       xbell ?options?
+              With the xbell command, the X  bell  is  rung.  The
+              option  -volume  allows  it  to set the volume. The
+              option -interval can be used to specify a  list  of
+              integer  values  (seconds)  that form a sequence of
+              bell rings.
+
+       xwinchilds ?options?
+              With the xwinchilds command, the X window ids  that
+              are   children  of  the  passed  X  window  id  are
+              returned.
+
+       xwinname ?options?
+              With the xwinname command, the name attached to  an
+              X window is retrieved (if there is one).
+
+       xwinparent ?options?
+              With  the  xwinparent command, the X window id that
+              is  the  parent  of  the  passed  X  window  id  is
+              returned.
+
+       xwinroot ?options?
+              With  the xwinroot command, the X window id that is
+              the root of the passed X window id is returned.
+
+
+BUGS
+       o      Surely, there are many bugs.
+
+
+KEYWORDS
+       X,  XSendEvent(3X),  XReparentWindow(3X),  XQueryTree(3X),
+       XFetchName(3X),    XGetWindowProperty(3X),    XChangeProp-
+       erty(3X), XWarpPointer(3X)

@@ -1,0 +1,17 @@
+Source: tcl7.3
+Section: libs
+Priority: optional
+Maintainer: Michael Simon <mi.simon@fz-juelich.de>
+Build-Depends: debhelper (>=9),autotools-dev
+Standards-Version: 3.9.6
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://anonscm.debian.org/collab-maint/tcl7.3.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/tcl7.3.git
+
+Package: tcl7.3
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Tcl (the Tool Command Language) v7.3 - shell
+ Tcl is a powerful, easy to use, embeddable, cross-platform interpreted
+ scripting language.  This package contains the Tcl shell which you need
+ to run Tcl scripts.  This version includes thread support.

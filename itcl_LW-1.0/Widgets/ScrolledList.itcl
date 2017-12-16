@@ -1,0 +1,362 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: ScrolledList.itcl,v 1.1.5.1 1994/06/05 17:32:23 mark Exp $
+#
+# itcl_class: ScrolledList
+#--------------------------------------------------------------
+# Description: A list withscroll , title, automatic scrollbar & drag&drop
+#
+# TCL/TK extensions required: itcl blt
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-list .............. list of items to show
+#	-title ............. title of the list
+#	-filter ............ wildcards for filtering output
+#	-mode .............. One of: multi,single or passive. Default: single
+#	-action ............ function called as 
+#			 ... "$action object type selected item(s)..."
+#		         ... where type is select, unselect, double_click
+#	-height ............ height (in lines). default is 20
+#	-width ............. width  (in chars). default is 20
+#
+# METHODS:
+#	config_widgets ..... config all widgets in ScrolledList
+#	get ................ returns selected items or all items 
+#                        ... (default selected)
+#	add ................ adds item to list
+#	select ............. select all/clear/list
+#
+#--------------------------------------------------------------
+#
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : 24 Mar 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:32:23 $
+#
+# (c) Lannet Ltd.  1994
+#
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget
+
+itcl_class ScrolledList {
+    inherit Widget
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new ScrolledList
+    #---------------------------------------------------------------
+    constructor {config} {
+ 	Widget::constructor frame -bd 2 -relief groove
+	set title_w  $this.title
+	set list_w   $this.list
+	set scroll_w $this.scroll
+
+	label   $title_w -text $title -anchor center
+	listbox $list_w \
+	    -yscrollcommand "$scroll_w set" \
+	    -cursor top_left_arrow -relief sunken -bd 2
+	scrollbar $scroll_w -command "$list_w yview" -relief sunken 
+
+	if { "$mode" == "single" } {
+	    tk_listboxSingleSelect $list_w
+	}
+
+	#
+	# Assemble parts
+	#
+	::pack $title_w -fill x                -side top  -padx 3 -pady 2 \
+	    -ipadx 4 -ipady 2 -anchor center 
+	::pack $list_w  -fill both -expand yes -side left -padx 2 -pady 2  \
+	    -ipadx 2 -ipady 2 
+
+	set scroll_visible 0
+	_pack_scroll
+	_add_action
+
+	# drag&drop
+
+	#
+	#  Register the source to use "package_text" and "site_text" routines,
+	#  and have it transfer text using the "dd_send_text" protocol routine.
+	#
+	blt_drag&drop source $list_w config \
+	    -packagecmd "package_text $this" \
+	    -sitecmd "site_text" -button 2
+	blt_drag&drop source $list_w handler text dd_send_text
+
+	#  Explicitly handle config's that may have been ignored earlier
+	set_config $config
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: config_widgets - config all widgets in ScrolledList
+    #---------------------------------------------------------------
+    method config_widgets { args } {
+	foreach i { $title_w $list_w $scroll_w $this } {
+	    catch { 
+		eval $i configure $args
+	    }
+	}
+    }
+
+    #---------------------------------------------------------------------
+    # METHOD: get - returns selected items or all items (default selected)
+    #---------------------------------------------------------------------
+    method get { {type selected}} {
+	case $type in {
+	    all {
+		set list ""
+		set size [$list_w size]
+		for {set i 0} {$i<$size} {incr i} {
+		    lappend list $i
+		}
+	    }
+	    
+	    selected {
+		set list [$list_w curselection]
+	    }
+	    
+	    default{
+		set list [$list_w curselection]
+	    }
+	}
+	set result ""
+	foreach i $list {
+	    lappend result [$list_w get $i]
+	}
+	return $result
+    }
+	
+    #---------------------------------------------------------------
+    # METHOD: add - adds item to list
+    #---------------------------------------------------------------
+    method add { new } {
+	config -list "[get all] $new"
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: select - select all/clear/list
+    #---------------------------------------------------------------
+    method select {type {append 0}} {
+	case $type in {
+	    all {
+		$list_w select from 0
+		$list_w select to end
+	    }
+	    clear {
+		$list_w select clear
+	    }
+	    default {
+		if {!$append} {
+		    select reset
+		}
+		error "Not implemented yet"
+	    }
+	}
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _get_height - returns current height
+    #---------------------------------------------------------------
+    method _get_height {} {
+	return [lindex [split [lindex [$list_w configure -geometry] 4] x] 1]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _get_width - returns current width
+    #---------------------------------------------------------------
+    method _get_width {} {
+	return [lindex [split [lindex [$list_w configure -geometry] 4] x] 0]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _pack_scroll - hides/shows scrollbar 
+    #---------------------------------------------------------------
+    method _pack_scroll {} {
+	set size [$list_w size]
+	set h [_get_height]
+
+	if { $size > $h } {
+	    set new_scroll_visible 1
+	} else {
+	    set new_scroll_visible 0
+	}	    
+	if {$new_scroll_visible != $scroll_visible} {
+	    if { $new_scroll_visible } {
+		pack $scroll_w -fill y -side right
+	    } else {
+		pack forget $scroll_w
+	    }
+	    set scroll_visible $new_scroll_visible
+	}
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _set_multi_bindings - set bindings for "-mode multi"
+    #---------------------------------------------------------------
+    method _set_multi_bindings {} {
+	# Button 1 does select stuff
+	bind $list_w <1> {%W select clear; %W select from [%W nearest %y]}
+	bind $list_w <B1-Motion> {%W select to [%W nearest %y]}
+	bind $list_w <Shift-1> {%W select invert [%W nearest %y]}
+	bind $list_w <Shift-B1-Motion> {%W select to [%W nearest %y]}
+	#bind $list_w <Control-1> {%W select from [%W nearest %y]}
+	#bind $list_w <Control-B1-Motion> {%W select to [%W nearest %y]}
+	#bind $list_w <Control-Shift-1> {%W select set}
+	
+	# Button 3 does unselect and invert stuff
+	#bind $list_w <3> {%W select clear [%W nearest %y]}
+	#bind $list_w <B3-Motion> {%W select clear [%W nearest %y]}
+	#bind $list_w <Control-3> {%W select invert [%W nearest %y]}
+	#bind $list_w <Control-Shift-3> {%W select clear}
+	
+	# Button Shift-2 is reserved for scanning
+	bind $list_w <Shift-2> {%W scan mark %x %y}
+	bind $list_w <Shift-B2-Motion> {%W scan dragto %x %y}
+	
+    }
+
+    #-----------------------------------------------------------------
+    # METHOD: _set_passive_bindings - set bindings for "-mode passive"
+    #-----------------------------------------------------------------
+    method _set_passive_bindings {} {
+	bind $list_w <1> { }
+	bind $list_w <B1-Motion> { }
+	bind $list_w <Double-1> { }
+	bind $list_w <Triple-1> { }
+	bind $list_w <Shift-1> { }
+	bind $list_w <Shift-B1-Motion> { }
+	bind $list_w <Any-Key> { }
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _add_action - adds action to list's bindings
+    #---------------------------------------------------------------
+    method _add_action {} {
+	if { "$action" != "" } {
+	    bind $list_w <1> "[bind Listbox <1>]; 
+		eval $action $this \[ScrolledList :: _check %W %y\] \[$this get\]"
+	    bind $list_w <Shift-1> "[bind Listbox <Shift-1>]; 
+		eval $action $this \[ScrolledList :: _check %W %y\] \[$this get\]"
+	    bind $list_w <Double-1> "[bind ListBox <Double-1>]; 
+		eval $action $this double_click \[$list_w get \[%W nearest %y\]\]"
+	}
+    }
+    
+    #--------------------------------------------------------------------
+    # METHOD: _show_list - filters the list and puts items to the screen
+    #--------------------------------------------------------------------
+    method _show_list {list} {
+	$list_w delete 0 end
+	foreach i $list { 
+	    if { [string match $filter $i] } {
+		$list_w insert end $i 
+	    }
+	}
+	_pack_scroll
+    }
+
+    #---------------------------------------------------------------
+    # PROC: _check - returns status of the closest to $y line in $w
+    #---------------------------------------------------------------
+    proc _check {w y} {
+	set selected [$w curselection]
+	set current [$w nearest $y]
+	if { [lsearch $selected $current] != -1 } {
+	    return select
+	} else {
+	    return unselect
+	}
+    }
+
+    #
+    # PUBLIC DATA
+    #
+
+    public list {} {
+	if { "$list_w" != "" } {
+	    _show_list $list
+	}
+    }
+    
+    public filter * {
+	if { "$list_w" != "" } {
+	    _show_list $list
+	}
+    }
+
+    # mode - multi/single/passive
+    public mode single {
+	if { "$list_w" == "" } return
+	case $mode in {
+	    multi   {
+		$list_w configure -multi 1
+		select clear
+		_set_multi_bindings
+		_add_action
+	    }
+	    single  {
+		$list_w configure -multi 0
+		select clear
+		tk_listboxSingleSelect $list_w
+		_add_action
+	    }
+	    passive {
+		select clear
+		_set_passive_bindings
+	    }
+	}
+    } 
+
+    public action "" { 
+	if { "$list_w" != "" } {
+	    _add_action
+	}
+    }
+    
+    public title "List of elements: " {
+	if { "$title_w" != "" } {
+	    $title_w configure -text $title
+	}
+    }
+    public height 20 {
+	if { "$list_w" != "" } {
+	    $list_w configure -geometry ${height}x[_get_width]
+	}
+    }
+    public width 20 {
+	if { "$list_w" != "" } {
+	    $list_w configure -geometry [_get_height]x${width}
+	}
+    }
+
+    #
+    # PROTECTED DATA
+    #	scroll_visible .... visibility of the the scrollbar
+    #	title_w ........... widget keeping the title
+    #	list_w ............ listbox keeping the list itself
+    #	scroll_w .......... scrollbar widget
+    #
+    protected scroll_visible 
+    protected title_w {}
+    protected list_w {}
+    protected scroll_w {}
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: ScrolledList.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:32:23  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:32:22  mark
+# Initial revision
+#
+#
+#

@@ -1,0 +1,336 @@
+NAME
+       tcp - TCP server code for Tcl interpreters
+
+SYNOPSIS
+       tcp server ?options?
+
+       tcp connect hostname port
+
+       tcp mainloop
+
+       tcp poll
+
+       tcp wait
+
+       tcp login client
+
+       tcp eval client command
+
+       tcp client
+
+       tcp servers
+
+
+       Copyright  (C) 1992 General Electric. All rights reserved.
+
+       Permission to use, copy, modify, and distribute this soft-
+       ware and its documentation for any purpose and without fee
+       is hereby  granted,  provided  that  the  above  copyright
+       notice  appear  in all copies and that both that copyright
+       notice and this permission  notice  appear  in  supporting
+       documentation,  and  that the name of General Electric not
+       be used in advertising or publicity pertaining to  distri-
+       bution  of  the  software  without specific, written prior
+       permission.  General  Electric  makes  no  representations
+       about  the  suitability  of this software for any purpose.
+       It is provided "as is" without  express  or  implied  war-
+       ranty.
+
+       This work was supported by the DARPA Initiative in Concur-
+       rent   Engineering   (DICE)   through    DARPA    Contract
+       MDA972-88-C-0047.
+
+
+DESCRIPTION
+       The  tcp  server command allows a Tcl interpreter to func-
+       tion as a server in a TCP/IP network.  The tcp client com-
+       mand  allows another Tcl interpreter, on the same network,
+       to access the functions of the server.
+
+
+TCP SERVER
+       The tcp server command is the first command to be executed
+       to  establish  a  network of Tcl applications.  It is exe-
+       cuted in an interpreter that wants to accept requests from
+       a client.  It has the following general form:
+
+              tcp server ?option value?...
+       The options are:
+
+       -port number
+              Specifies  that  the server should listen at a par-
+              ticular  IP  port  number  for  connections.    The
+              default  is to accept whatever port number the sys-
+              tem assigned.
+
+       -command string
+              Specifies the prefix for a command to  be  executed
+              whenever  a  connection  request is received.  This
+              string will have appended to it the  ``client  ID''
+              that  identifies  the  client accepting the connec-
+              tion.  See ``Client Objects'' below for a  descrip-
+              tion of the operations that may be performed on the
+              client.  The default command is tcp login (q.v.).
+
+       Any of the above keywords may be abbreviated.
+
+       The tcp server command creates a new Tcl command  to  con-
+       trol the operations of the server, and returns the name of
+       the command.  The server command has the following general
+       form:
+
+              serverName option ?arg arg ...?
+       The  following  server  commands  are  possible  for these
+       server objects:
+
+       serverName accept
+              Requests that the server accept a request for  con-
+              nection,  and delays until it does.  When a connec-
+              tion request is  accepted,  a  client  object  (see
+              ``Client  Objects''  below)  is created to describe
+              the client, and the do command is  invoked  on  the
+              client object.  This command should not normally be
+              used  by  an  application.   It  will  normally  be
+              invoked  by tcp poll, tcp mainloop, or the applica-
+              tion's own event manager.
+
+       serverName clients
+              Returns a list of the clients currently  active  at
+              the specified server.
+
+       serverName configure ?-option? ?value? ?-option value ...?
+              Query or modify the configuration  options  of  the
+              server.   If  no  option  is specified, the command
+              returns a list of the available options.  If a sin-
+              gle  option is specified with no value, the command
+              returns a string giving the current  value  of  the
+              named  option.   If  one or more option-value pairs
+              are specified, the command modifies  the  specified
+              server option(s) to have the specified value(s); in
+              this case, the command  returns  the  name  of  the
+              server  object.  The available options are the same
+              as on the tcp server command.
+
+       serverName start
+              Requests that the server start listening  for  con-
+              nection  requests.   This  command returns an empty
+              string immediately.  Connection  requests  will  be
+              accepted  as they are detected by tcp mainloop, tcp
+              poll, or the application's event handler.
+
+       serverName stop
+              Requests that the server shut down.  Currently con-
+              nected  clients are disconnected, currently pending
+              requests are ignored, and the TCP socket  on  which
+              the server listens is closed.
+
+       Normally,  a  server  will be created and initialized by a
+       Tcl sequence like:
+
+              set server [tcp server -port 2323 -command mylogin]
+
+              $server start
+
+              tcp mainloop # if the application doesn't have an event handler
+       The server will then be in  control  of  the  application,
+       calling  the  mylogin  Tcl  procedure  to  initialize  new
+       clients and process their requests.  See ``Login and  Com-
+       mand  Procedures''  below  for  further  discussion of the
+       -command procedures.
+
+TCP MAINLOOP, TCP POLL, and TCP WAIT
+       The  tcp  mainloop  procedure  is  intended  for  managing
+       servers in an application where no other event handling is
+       provided nor required.  Once all servers associated with a
+       given  interpreter have been created using tcp server, and
+       the servers have been initialized with serverName start, a
+       call  to  tcp  mainloop will start to poll the servers for
+       connections, and once connections are established, to poll
+       the clients for requests.  The tcp mainloop procedure will
+       not return until all  active  clients  have  been  discon-
+       nected,  and  all active servers have been terminated with
+       serverName stop.
+
+       Instead of using this main loop, an application may choose
+       to  implement  its own main loop in Tcl.  In this case, it
+       will periodically call the tcp poll  procedure.   The  tcp
+       poll procedure polls all servers and clients for activity,
+       and executes all pending requests.  It then returns to its
+       caller the number of requests that were processed.  A zero
+       return indicates that no requests were pending.
+
+       In order that the main loop have a way to  await  traffic,
+       the  tcp  wait  procedure is provided.  A call to tcp wait
+       delays execution until a server or client has work to  do.
+       It  returns  a  count of pending requests.  If all clients
+       are disconnected, and all servers have been shut down  via
+       serverName stop, tcp wait returns zero.
+
+       A sample main loop for an application would be:
+
+              while {[tcp wait] > 0} {
+                      tcp poll
+                   ...do other, application-specific event handling
+              }
+
+       If  an  application uses another package (such as the Tcl-
+       FrameMaker interface) that uses the  simpleEvent  library,
+       its  mainloop,  poll,  and  wait  functions  may  be  used
+       instead.  In other words, tcp poll is synonymous  with  fm
+       poll, and so on.
+
+TCP SERVERS AND THE X WINDOW TOOLKITS
+       If  an application uses the Tk or Xt toolkits, there is no
+       need for a call to tcp mainloop, tcp poll, and  tcp  wait.
+       Instead,  the  server requests are processed automatically
+       by the toolkit's main event loop. A  Tk  application  will
+       terminate  when all windows are destroyed.  An Xt applica-
+       tion will terminate upon request.
+
+       If a Tk or Xt application calls tcp mainloop, nothing will
+       happen.   If it calls tcp poll or tcp wait, the procedures
+       will report that no servers are known to  the  event  man-
+       ager.  This error message is only slightly misleading: the
+       servers are registered with the Tk or  Xt  event  manager,
+       and not the one that processes the tcp requests.
+
+TCP INFORMATIONAL COMMANDS
+       The  tcp  client  command  returns  the name of the client
+       whose command is currently being processed.   It  gets  an
+       error if no client's command is being processed.
+
+       The tcp servers command returns a list of all servers that
+       have been created in the current process.
+
+CLIENT OBJECTS
+       Whenever a server accepts a client's  connection  request,
+       it creates a new Tcl command, called the client object, to
+       control the connection.  The command that it  creates  can
+       be invoked with one of the following forms:
+
+       clientObject close
+              Requests  that  the  connection  to  the  requested
+              client be closed.  If the Tcl interpreter  is  cur-
+              rently processing the client's request, the request
+              processing will be finished and the result returned
+              to the client before the connection is shut down.
+       clientObject command ?command?
+              Changes  the  Tcl  command  that is used to process
+              requests from the client.  See ``Login and  Command
+              Procedures'' below for a description of how this is
+              used.
+
+       clientObject do ?arg arg ...?
+              Processes a  request  originating  from  a  client.
+              This is the internal procedure invoked by tcp poll,
+              tcp mainloop, or the application's main event  loop
+              to  start  a  client  request.   It should never be
+              invoked by the application directly.
+
+       clientObject hostname
+              Returns the name of the host on which the specified
+              client is running.
+
+       clientObject server
+              Returns  the  server  object  to  which  the client
+              object originally connected.
+
+LOGIN AND COMMAND PROCEDURES
+       Managing the procedures that process commands  originating
+       from  a client is perhaps the most complex part of writing
+       a TCP-based server.  The problem is maintaining the  secu-
+       rity of the system, while still allowing useful work to be
+       done.
+
+       When a client first connects, the server must first  vali-
+       date  that  the  client is authorized to use its services.
+       Following this, it may present the  entire  suite  of  Tcl
+       commands  to  the  client,  or  may want to present only a
+       restricted subset of operations, perhaps  with  a  non-Tcl
+       syntax.  The -command option to the tcp server command and
+       the command option to the client  object  command  address
+       these requirements.
+
+       When  a  client  first connects, the client object is cre-
+       ated, and its command is set to the string that was speci-
+       fied  on  the  -command  option to the tcp server command.
+       The client's name is appended  to  this  string,  and  the
+       resulting  command  is evaluated.  Thus, if the server was
+       created with tcp login as its  command  (the  default),  a
+       connection request will cause the interpreter to execute:
+
+              tcp login clientName
+
+       This procedure is responsible for starting the login nego-
+       tiation.  The default tcp login command does  the  follow-
+       ing:
+
+       o      It  calls  ``$clientName hostname'' to get the name
+              of the client's machine.  It verifies that the host
+              is the local host.
+       o      If  the  host  is not the local host, it signals an
+              error,  and  returns   the   message,   `Permission
+              denied.'
+
+       o      If  the  host  is  the  local  host, it changes the
+              client command to tcp eval, and returns a  greeting
+              message.
+
+       Subsequent  commands are processed through tcp eval client
+       command .  This procedure just calls eval  on  its  second
+       argument,  allowing  the  client  full  access  to the Tcl
+       interpreter.
+
+       This protocol is perhaps the simplest possible negotiation
+       that  preserves  any  semblance  of security.  An enhanced
+       protocol might be done in Tcl:
+
+       1.     Set the server's initial command to ``mylogin''.
+
+       2.     When the client connects, the interpreter  executes
+              ``mylogin clientName''.  This procedure changes the
+              client command to  ``userPrompt'',  and  returns  a
+              login prompt.
+
+       3.     The  client's  first  request  should  consist of a
+              username.  The ``userPrompt'' procedure  is  called
+              with  the client name and user name.  It stores the
+              user name away, and  sets  the  client  command  to
+              ``passwordPrompt.''  It then returns a message con-
+              sisting of a password prompt.
+
+       4.     The client's second request consists of a password.
+              The  ``passwordPrompt  procedure is called with the
+              client name and password.  It retrieves  the  saved
+              username,  and validates the username/password com-
+              bination.  If the combination is good, it sets  the
+              client command to `tcp eval' as before, and returns
+              a greeting message.  If the combination is bad,  it
+              calls  ``$clientName  close''  and returns an error
+              message.
+
+TCP CONNECT
+       The tcp connect command takes the following form:
+
+              tcp connect hostName portNumber
+       where hostName is the name of the host on which  a  server
+       (created  by tcp server) is running, and portNumber is the
+       port number at which the server is listening.
+
+       If the  connection  request  is  successful,  tcp  connect
+       returns a ``connection object'' that describes the connec-
+       tion.  This connection object is installed as a  Tcl  com-
+       mand, and may be invoked with one of the following forms:
+       connectionObject send arg ?arg...?
+              Executes  a  remote procedure call on the connected
+              server.  The arguments are concatenated,  and  exe-
+              cute  as  a  Tcl command in the remote application;
+              the result of the send command is the result of the
+              remote command.
+
+
+       connectionObject close
+              Closes  a  connection  and  destroys the associated
+              connection object.  This command should be executed
+              when  the  application  no  longer  has need of the
+              server.

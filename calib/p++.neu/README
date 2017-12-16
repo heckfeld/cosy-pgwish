@@ -1,0 +1,19 @@
+================================================================================
+                                    README
+              
+                  /mnt/cc-x4/ccp/database/src/cosmo/calib/p++.neu
+================================================================================
+
+Abgeleitet von ../p++
+
+Es wird folgende Library erzeugt:
+
+   /mnt/cc-l4/ccp/database/lib/Linux/libcosmocalib.neu.so
+
+Es gibt einen neuen Headerfile fuer die pgcosmocalib-Klasse.
+Die Funktionalitaet der pgcosmocalib-Klasse ist erweitert worden bzgl.
+des Zugriffs auf die Ruhemassen verschiedener Teilchen.
+
+
+Thu Jan 17 10:35:47 MET 2002
+================================================================================

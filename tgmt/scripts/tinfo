@@ -1,0 +1,59 @@
+#!/bin/bash
+
+PGHOST=${PGHOST:-134.94.224.10}
+
+TEMP=`getopt -o a -n 'tinfo.sh' -- "$@"`
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+psqlall () {
+psql --no-readline --quiet --tuples-only --host=$PGHOST --dbname=tgmt --command="SELECT * from thosts;" | \
+while read target P ip mac wkc; do
+    echo $target
+done
+}
+
+while true ; do
+        case "$1" in
+                -a) echo "Option a" ; set `psqlall` ; break ; shift ;;
+                --) shift ; break ;;
+                *) echo "Internal error!" ; exit 1 ;;
+        esac
+done
+
+
+##################################
+
+dopsql () {
+psql --no-readline --quiet --tuples-only --host=$PGHOST --dbname=tgmt --command="SELECT rtrim(t.name,' '), rtrim(t.data,' '), rtrim(c.data,' '), f.node, rtrim(c.la,' '), rtrim(c.name,' ') from thosts t, cpus c, fc f WHERE t.name='$1' and f.name=t.name and c.name=f.cput"
+}
+
+fun_tinfo () {
+
+tuples=`dopsql $1`
+if [ "x$tuples" = "x" ] ; then
+    exit 2
+else
+    dopsql $1| \
+    while read target P ip mac wkc P  kernel appl P slot P vmeaddr P type; do
+	if [ "x$ip" != "x" ] ; then
+	    echo "$target $ip $mac $wkc $kernel $appl $slot $vmeaddr $type"
+	fi
+    done
+fi
+
+}
+
+
+##################################
+
+for arg do
+
+fun_tinfo $arg
+
+done
+
+exit 0

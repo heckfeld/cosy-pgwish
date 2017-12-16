@@ -1,0 +1,23 @@
+NAME
+       blt_bell - ring the bell
+
+SYNOPSIS
+       blt_bell ?percent?
+
+
+DESCRIPTION
+       This command is used to ring the keyboard bell. percent is
+       relative to the base volume of the keyboard bell  and  can
+       range from -100 to 100 inclusive.
+
+       If percent is nonnegative then the bell volume is:
+
+              base - [(base * percent) / 100] + percent
+       If percent is negative then the bell volume is:
+
+              base + [(base * percent) / 100]
+       percent defaults to 50 if it is not specified.
+
+
+KEYWORDS
+       bell, beep

@@ -1,0 +1,393 @@
+# PanedWindow-1.3.tcl
+# ----------------------------------------------------------------------
+# Implements a paned window widget using primitive widgets as the
+# building blocks.  The PanedWindow command creates mutiple panes
+# (each one a frame) that can be resized by the user.  A widget
+# command exists to retrieve the names of the created panes.  See the
+# USEAGE section for an example.  [incr tcl] is required to use this
+# widget.
+#
+#   PUBLIC ATTRIBUTES:
+#
+#     -fraction ...... initial percentages of panes (default ".5")
+#     -min ........... minimum fraction of the entire window to which
+#                      a pane can shrink (default .1)
+#     -width ......... width of displayed list
+#     -height ........ height of displayed list
+#     -number ........ number of panes (default: 2)
+#     -orientation ... direction of panes [x|y] (default: y)
+#     -handleSide .... end of sash upon which to place handle [begin|end]
+#                      "begin" means "top" when the orientation is "x"
+#                      (default: end)
+#
+#   METHODS:
+#
+#     config ....... used to change public attributes
+#     panes ........ return the list of panes created
+#     fractions .... return the current list of fractions
+#
+#   USAGE:
+#
+#     #!/usr/local/bin/itcl_wish -f
+#     source PanedWin.tcl
+#     PanedWindow .pw -width 300 -height 300 -min .15 -number 4 \
+#         -handleSide begin
+#     # OR
+#     # PanedWindow .pw -width 300 -height 300 -fraction ".2 .5 .7" \
+#     #     -orientation x
+#
+#     foreach pane [.pw panes] {
+#        button $pane.b -text $pane -command {puts "[.pw fractions]"}
+#        pack $pane.b -fill both -expand yes
+#     }
+#     pack .pw -fill both -expand yes
+#     wm minsize . 0 0
+#
+#
+#   X11 OPTION DATABASE ATTRIBUTES
+#
+#     ...and the rest of the usual widget attributes
+#
+#   KNOWN PROBLEMS:
+#
+#   If you set the initial fractions in conflict with the min size,
+#   the initial fractions win.  This can cause problems if the main
+#   paned window is smaller than $number*$min.
+#
+#
+#   ACKNOWLEDGEMENTS:
+#     James Noble
+#       1993 - unknown
+#     Jay Schmidgall
+#       1994 - base logic posted to comp.lang.tcl
+#     Mark L. Ulferts <mulferts@spd.dsccc.com>
+#       1994 - added additional features and made it a class.
+#     Joe Hidebrand <hildjj@fuentez.com>
+#       07/25/94 - posted first multipane version to comp.lang.tcl
+#       07/28/94 - added support for vertical panes
+#
+# ----------------------------------------------------------------------
+#   AUTHOR:
+#
+#   Joe Hildebrand                  Fuentez Systems Concepts
+#   hildjj@fuentez.com              11781 Lee-Jackson Hwy, Suite 700
+#   Software Engineer               Fairfax, VA 22033
+#                                   Phone:    (703)273-1447
+#                                   Fax:      (703)273-2972
+#                                   PGPprint: 0x06C96661
+# ----------------------------------------------------------------------
+
+
+
+itcl_class PanedWindow {
+   # ------------------------------------------------------------------
+   #  CONSTRUCTOR - create new paned window
+   # ------------------------------------------------------------------
+   constructor {config} {
+      set class [$this info class]
+      ::rename $this $this-tmp-
+      ::frame $this -class $class
+      ::rename $this $this-win-
+      ::rename $this-tmp- $this
+
+      frame $this.pw
+
+      #
+      # Make the windows
+      #
+      for {set i 0} {$i < $number} {incr i} {
+         if {$i != 0} {
+            #
+            # Make the sash button
+            #
+            frame $this.handle$i -geometry 10x10 -borderwidth 2 \
+                -relief raised  \
+                -cursor crosshair
+
+            if {$orientation == "y"} {
+               bind $this.handle$i <Button-1> "$this start-grip %y $i"
+               bind $this.handle$i <B1-Motion> "$this handle-grip %y $i"
+               bind $this.handle$i <B1-ButtonRelease-1> "$this end-grip %y $i"
+            } {
+               bind $this.handle$i <Button-1> "$this start-grip %x $i"
+               bind $this.handle$i <B1-Motion> "$this handle-grip %x $i"
+               bind $this.handle$i <B1-ButtonRelease-1> "$this end-grip %x $i"
+            }
+
+            #
+            # Make the separator
+            #
+            frame $this.sep$i -height 2 -width 2 -borderwidth 1 \
+                -relief sunken
+
+         }
+
+         frame $this.pane$i -borderwidth 2 -relief raised
+
+      }
+
+      pack $this.pw -fill both -expand yes -anchor w
+
+
+      #
+      #  Explicitly handle configs that may have been ignored earlier
+      #
+      foreach attr $config {
+         config -$attr [set $attr]
+      }
+
+      #
+      # also _ensure_ that the number routine is called
+      #
+      set frac(0) 0
+      if {[array size frac] < [expr $number + 1]} {
+         config -number $number
+      } elseif {[array size frac] > [expr $number + 1]} {
+         config -fraction $fraction
+      }
+
+      replace
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD:  config - used to change public attributes
+   # ------------------------------------------------------------------
+   method config {config} {}
+
+   # ------------------------------------------------------------------
+   #  DESTRUCTOR - destroy window containing widget
+   # ------------------------------------------------------------------
+   destructor {
+      ::rename $this-win- {}
+      destroy $this
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD calc-fraction - determines the fraction for the sash
+   # ------------------------------------------------------------------
+   method calc-fraction {where num} {
+
+      if {$orientation == "y"} {
+         set frac($num) \
+             [expr (($where.0 - $drag_start.0) / \
+                        [winfo height $this]) + $frac($num)]
+      } {
+         set frac($num) \
+             [expr (($where.0 - $drag_start.0) / \
+                        [winfo width $this]) + $frac($num)]
+      }
+
+      if {$frac($num) < [expr $frac([expr $num - 1]) + $min]} {
+         set frac($num) [expr $frac([expr $num - 1]) + $min]
+      }
+      if {$frac($num) > [expr $frac([expr $num + 1]) - $min]} {
+         set frac($num) [expr $frac([expr $num + 1]) - $min]
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD start-grip - Starts the sash drag and drop operation
+   # ------------------------------------------------------------------
+   method start-grip {where num} {
+      grab  $this.handle$num
+      raise $this.sep$num
+      raise $this.handle$num
+      $this.handle$num configure -relief sunken
+      set drag_start $where
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD end-grip - Ends the sash drag and drop operation
+   # ------------------------------------------------------------------
+   method end-grip {where num} {
+      calc-fraction $where $num
+      $this.handle$num configure -relief raised
+      grab release $this.handle$num
+      replace
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD handle-grip - Motion action for sash
+   # ------------------------------------------------------------------
+   method handle-grip {where num} {
+      calc-fraction $where $num
+
+      if {$orientation == "y"} {
+         place $this.sep$num -in $this.pw -relx 0 -relwidth 1 \
+             -rely $frac($num) -anchor w
+         place $this.handle$num -in $this.pw -relx $handlePos \
+             -rely $frac($num) -anchor center
+      } {
+         place $this.sep$num -in $this.pw -rely 0 -relheight 1 \
+             -relx $frac($num) -anchor n
+         place $this.handle$num -in $this.pw -rely $handlePos \
+             -relx $frac($num) -anchor center
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD replace - Resets the panes of the window following
+   #                   movement of the sash
+   # ------------------------------------------------------------------
+   method replace {} {
+      if {[winfo exists $this.pane0]} {
+
+         if {$orientation == "y"} {
+            place $this.pane0 -in $this.pw -x 0 -rely 0 \
+                -relwidth 1 -relheight $frac(1)
+
+            for {set i 1} {$i < $number} {incr i} {
+               place $this.sep$i -in $this.pw -relx 0 -relwidth 1 \
+                   -rely $frac($i) -anchor w
+               place $this.handle$i -in $this.pw -relx $handlePos \
+                   -rely $frac($i) \
+                   -anchor center
+               place $this.pane$i -in $this.pw -x 0 -rely $frac($i) \
+                   -relwidth 1 \
+                   -relheight [expr $frac([expr $i + 1]) - $frac($i)]
+        
+               lower $this.sep$i
+               raise $this.handle$i
+            }
+         } {
+            place $this.pane0 -in $this.pw -y 0 -relx 0 \
+                -relheight 1 -relwidth $frac(1)
+
+            for {set i 1} {$i < $number} {incr i} {
+               place $this.sep$i -in $this.pw -rely 0 -relheight 1 \
+                   -relx $frac($i) -anchor w
+               place $this.handle$i -in $this.pw -rely $handlePos \
+                   -relx $frac($i) \
+                   -anchor center
+               place $this.pane$i -in $this.pw -y 0 -relx $frac($i) \
+                   -relheight 1 \
+                   -relwidth [expr $frac([expr $i + 1]) - $frac($i)]
+        
+               lower $this.sep$i
+               raise $this.handle$i
+            }
+         }
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD panes - Return the list of panes
+   # ------------------------------------------------------------------
+   method panes {} {
+      set panes ""
+      for {set i 0} {$i < $number} {incr i} {
+         lappend panes $this.pane$i
+      }
+      return $panes
+   }
+
+   # ------------------------------------------------------------------
+   #  METHOD fractions - Return the current list of fractions
+   # ------------------------------------------------------------------
+   method fractions {} {
+      set fracs ""
+      for {set i 1} {$i < $number} {incr i} {
+         lappend fracs $frac($i)
+      }
+      return $fracs
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE minimum - Minimum percentage of a pane
+   # ------------------------------------------------------------------
+   public min 0.1 {
+      if {[expr $min < 0.0 || $min > 1.0]} {
+         error "min size must be 0.0-1.0"
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE fraction - Initial percentage of visible area
+   # ------------------------------------------------------------------
+   public fraction {0.5} {
+      set i 0
+      set frac(0) 0
+      foreach f $fraction {
+         incr i
+         set frac($i) $f
+         if {$frac($i) <= $frac([expr $i-1])} {
+            error "fractions must be in ascending order"
+         }
+      }
+      incr i
+      set frac($i) 1
+
+      if {$number != $i} {
+         config -number $i
+      }
+      replace
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE width - Set the frame width
+   # ------------------------------------------------------------------
+   public width 50 {
+      if {[winfo exists $this]} {
+         $this.pw config -width $width
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE height - Set the frame height
+   # ------------------------------------------------------------------
+   public height 50 {
+      if {[winfo exists $this]} {
+         $this.pw config -height $height
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE number - Set the number of panes
+   # ------------------------------------------------------------------
+   public number 2 {
+      if {$number < 2} {
+         error "number of panes must be 2 or more"
+      }
+
+      set frac(0) 0
+
+      if {[array size frac] != [expr $number + 2]} {
+
+         #-fraction not called yet
+
+         set part [expr 1.0 / $number.0]
+         for {set i 1} {$i <= $number} {incr i} {
+            set frac($i) [expr $i * $part]
+         }
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE orientation - Set the pane orientation.  "y" means the
+   #  sashes are horizontal (the children are packed from top to
+   #  bottom).  "x" gives a vertical orientation.
+   # ------------------------------------------------------------------
+   public orientation y {
+      if {$orientation != "y" && $orientation != "x"} {
+         error "orientation must be x or y"
+      }
+   }
+
+   # ------------------------------------------------------------------
+   #  ATTRIBUTE handleSide - Side of the sash on which to put the
+   #  handle.
+   # ------------------------------------------------------------------
+   public handleSide end {
+      if {$handleSide == "begin"} {
+         set handlePos 0.05
+      } elseif {$handleSide == "end"} {
+         set handlePos 0.95
+      } else {
+         error "handleSide must be begin or end"
+      }
+   }
+
+   protected drag_start
+   protected frac
+   protected handlePos 0.95
+}

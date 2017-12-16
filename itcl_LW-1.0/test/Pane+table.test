@@ -1,0 +1,63 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Pane+table.test,v 1.1.5.1 1994/06/05 17:35:14 mark Exp $
+#
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+#
+wm withdraw .
+DialogShell .d \
+    -geometry 570x570+30+30 \
+    -maxsize  {1200 1000} \
+    -buttons { { exit Exit {do_exit} 1}}
+
+proc do_exit {args} {exit}
+.d raise
+
+Paned .d.a -fraction 0.7
+
+set a_win .d.a
+
+set pixmap tick.xpm
+pinfo get $pixmap 
+set w [expr [pinfo w $pixmap] + 40]
+set h [expr [pinfo h $pixmap] + 50]
+
+set p1 [ScrolledTable $a_win.c -columns 10 -x_step $w -y_step $h]
+set p2 [ScrolledTable $a_win.el]
+
+set c [$p1 get_canvas]
+$c conf -bg white 
+
+set num 80
+puts "Creating $num objects..."
+
+
+puts [time {
+for { set i 0 } { $i<$num} {incr i} {
+    lappend list [Icon $c.p$i -bitmap $pixmap]
+}
+$p1 place_children $list
+}]
+
+.d.a add_panes $p1  $p2
+
+#place .d.a -relw 1 -relh 1
+pack .d.a -fill both -expand yes
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Pane+table.test,v $
+# Revision 1.1.5.1  1994/06/05  17:35:14  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:35:13  mark
+# Initial revision
+#
+#
+#

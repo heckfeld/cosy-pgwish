@@ -1,0 +1,69 @@
+#!/bin/bash
+
+if [ $# -lt 1 -o $# -gt 2 ]; then
+    echo "Usage: tip workcel [target-ip]"
+    exit 1
+fi
+# get Interface List
+iflist () {
+ip -o -4 addr | while read X ifname X ip_mask X broadcast X ; do 
+    ip=`echo $ip_mask|cut -d "/" -f 1`
+    netmask=`echo $ip_mask|cut -d "/" -f 2`
+    mbits=`echo "b=(2^$netmask-1)*2^(32-$netmask);print b" | bc -q`
+    ibits=`echo $ip|tr "." " "|while read ip4 ip3 ip2 ip1; do echo "((((($ip4*256)+$ip3)*256)+$ip2)*256)+$ip1"|bc -q;done`
+    echo "$ifname $ip $ibits $mbits"
+done
+}
+# check Workcell Name. return IP
+wkcname () {
+host $1 | while read a b c d e ; do
+    if [ "$b" = "has" ] ; then
+	echo -n " $d"
+    elif [ "$b" = "domain" ] ; then
+	echo -n " $1"
+    fi
+done
+}
+ip2bit () {
+   for ip ;do
+	echo $ip|tr "." " "|while read ip4 ip3 ip2 ip1; do echo "b=((((($ip4*256)+$ip3)*256)+$ip2)*256)+$ip1;print b,\" \""|bc -q;done
+   done
+}
+# MAIN 
+wkc=$1
+if ! host $wkc >/dev/null ; then
+    echo "host not found $wkc"
+    exit 1
+fi
+# parameter wkc is OK
+wip=`wkcname $wkc`
+if [ $# -eq 1 ]; then
+    set $wip
+    echo $1
+    exit 0
+fi
+target=$2
+set `echo $target|tr "." " "`
+details=$#
+while [ $details -lt 4 ] ; do
+    target=$target".0"
+    details=`expr $details + 1`
+done
+tbits=`ip2bit $target`
+wbits=`ip2bit $wip`
+
+# echo "parameters so far: workcell $wkc ($wip) target bits $tbits workcell bits $wbits"
+
+# now lookup if
+iflist | while read ifname ip ibits netmask
+do
+  for wbit in  $wbits ; do
+     if echo if { \(\( $ibits \& $netmask \) == \( $tbits \& $netmask \)\) \&\& \(\( $ibits \& $netmask \) == \( $wbit \& $netmask \)\) } {exit 0} {exit 1} | tclsh ; then
+	echo $ip $ifname
+	break
+     fi
+  done
+done
+
+
+exit 0

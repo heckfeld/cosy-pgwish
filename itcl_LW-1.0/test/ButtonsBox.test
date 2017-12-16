@@ -1,0 +1,37 @@
+# -*-TCL-*-  TCL mode for Emacs
+
+if { !$tcl_interactive } {
+    set auto_path "$auto_path ../Widgets"
+}
+#
+# test proc
+proc addBox { name } {
+    toplevel .$name
+    wm geom .$name 400x300
+    wm maxs .$name 700 700
+    ButtonsBox .${name}.b \
+	-buttons { 
+	    {ok OK {ok} 0} 
+	    {cancel Cancel {cancel} 1} 
+	    { help Help {binfo} 0 right}
+	}
+}
+
+proc ok {t w } { 
+    puts -nonewline "(binfo) OK button - "
+    ButtonsBox :: binfo $t $w 
+}
+
+proc cancel {t w } { 
+    global tcl_interactive
+    puts -nonewline "(puts) CANCEL button - "
+    puts "[$t info class]::$t , button $w"
+    if { !$tcl_interactive} exit
+}
+
+if {!$tcl_interactive} { 
+    puts "Non-interactive test"
+    wm withdraw .
+    puts "Created : [addBox my_box ]"
+}
+

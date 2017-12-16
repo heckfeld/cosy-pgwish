@@ -1,0 +1,93 @@
+NAME
+       blt_bgexec - Run Unix commands in the background
+
+SYNOPSIS
+       blt_bgexec ?switches? varname arg ?arg ...?
+
+       blt_bgexec ?switches? arg ?arg ...?
+
+DESCRIPTION
+       This  command  executes  one  or more Unix commands in the
+       background as subprocesses, storing the output of the last
+       subprocess in the variable varname after it has completed.
+       This allows Unix commands to be  run  in  the  background,
+       while  still  collecting  their  output, to notify the Tcl
+       interpreter when they terminate.
+
+       This command, used in conjunction with tkwait, is particu-
+       larly  useful  for  handling Tk events while waiting for a
+       running UNIX program to finish.
+
+              blt_bgexec varname command args
+              tkwait variable varname
+
+       This allows expose events can be handled while waiting for
+       one or more Unix commands to finish.  The program may also
+       continue, possibly animating a busy cursor or icon,  while
+       waiting for the variable varname to be set.  After all the
+       subprocesses have completed, blt_bgexec will set  varname,
+       triggering  tkwait  to  return.   Varname will contain the
+       output of the last subprocess.
+
+       If the initial arguments to blt_bgexec start with  -  then
+       they are treated as command-line switches and are not part
+       of the variable name or pipeline specification.  The  fol-
+       lowing switches are currently supported:
+
+       -keepnewline Specifies  that  a trailing newline should be
+                    retained in the pipeline's output. Normally a
+                    trailing newline will be deleted.
+
+       -killsignal number
+                    Specifies the number of the signal to be sent
+                    to the Unix subprocesses when cleaning up. If
+                    number  is  0,  then no signals are sent.  By
+                    default,  subprocesses  are  sent  signal   1
+                    (SIGHUP).
+
+       -errorvar string
+                    Specifies the name of a global variable to be
+                    set with the contents of standard error after
+                    the last subprocess has completed.
+
+       -outputvar string
+                    Specifies the name of a global variable to be
+                    set with  the  contents  of  standard  output
+                    after  the last subprocess has completed.  If
+                    the  command-line  argument  varname  is  not
+                    specified, then this switch must be set.
+
+       -statusvar string
+                    Specifies the name of a global variable to be
+                    set with the status of the last subprocess to
+                    complete.   This  contents  will be a list of
+                    status information in the form status  token,
+                    exit code, and description.
+
+       -updatevar string
+                    Specifies the name of a global variable which
+                    is appended with the standard output  of  the
+                    last subprocess.  This variable is updated as
+                    data becomes available (i.e.  read  from  the
+                    pipeline),  unlike varname which is set after
+                    the last subprocess has completed.
+
+       --           Marks the end of switches.  The argument fol-
+                    lowing this one will be treated as the output
+                    variable name varName or the  start  of  Unix
+                    command even if it starts with a -.
+
+       Command  and  args  may be in any form accepted by the Tcl
+       exec command.  You can also prematurely terminate the sub-
+       processes  by  setting varname before the last command has
+       completed.  Each subprocess will  be  sent  a  termination
+       signal (see the -killsignal option).
+
+BUGS
+       Care must be taken to prevent an application from preempt-
+       ing itself by further user-interactions  (such  as  button
+       clicks).   The  blt_busy  command  is very useful in these
+       situations (see the blt_busy manual).
+
+KEYWORDS
+       exec, background

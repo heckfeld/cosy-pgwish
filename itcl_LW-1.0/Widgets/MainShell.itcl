@@ -1,0 +1,78 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: MainShell.itcl,v 1.1.5.1 1994/06/05 17:31:43 mark Exp $
+#
+# itcl_class: MainShell
+#------------------------------------------------------------------
+# Description : Shell with menubar (according to Motif Style Guide)
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Shell
+#
+# PUBLIC ATTRIBUTES:
+#	-menubar ...... menu definition in mm_MenuBar format (see menu_bar.tcl)
+#		    ... May be set on creation only 
+#
+# METHODS:
+#	none
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Apr 21, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:43 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Shell
+
+#
+# Define default panes
+#
+mm_Menu MainShell::File {
+    {command -label "Quit" -under 0 -command exit}
+}
+
+itcl_class MainShell {
+    inherit Shell
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new MainShell
+    #---------------------------------------------------------------
+    constructor {config} {
+	Shell::constructor
+	mm_MenuBar $this.menu $menubar
+    }
+    
+    #
+    # PUBLIC DATA
+    #
+
+    public menubar { 
+	{"File" 0 MainShell::file}
+    } {
+	if {[exists]} {
+	    # actually I can recreate MenuBar Frame contents, but for now ...
+	    puts stderr "MainShell: Warning: menubar is ReadOnly option"
+	}
+    }
+
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: MainShell.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:31:43  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:42  mark
+# Initial revision
+#
+#
+#

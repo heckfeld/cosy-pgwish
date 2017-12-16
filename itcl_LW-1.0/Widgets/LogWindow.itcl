@@ -1,0 +1,151 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: LogWindow.itcl,v 1.1.5.1 1994/06/05 17:31:40 mark Exp $
+#
+# itcl_class: LogWindow
+#---------------------------------------------------------------
+# Description : Keeps all messages in a separate window
+#	Pops up each time a new message arrives and it's severity >=
+#	"raising severity". Has "Hide" button, and a full set of File/Save,
+#	Edit/Clear, etc. menus. Has filter for seeng messages and message levels,
+#	and customizable colors for message levels & regexps
+#
+#	Only a single instance of LogWindow exists in an application, 
+#	and constructor	checks it. 
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : DialogShell
+#
+# PUBLIC ATTRIBUTES:
+#	-file .......... file id to save log contents (default stdout)
+#
+# METHODS:
+#	message ........ add message to log window, raise the log window
+#                    ... message "text" [level [type]] 
+#		     ... default: level == "info" , type == "common"
+#	error .......... add error message to log window, raise the log window
+#	save_to_file ... save log window contents to $file
+#
+# STATIC METHODS (proc):
+#	LogWindow :: Message
+#
+#--------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date :  4 Apr, 1994
+#
+# Last check-in date: $Date: 1994/06/05 17:31:40 $
+#
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+
+# Force  auto-loading of base class(es)
+DialogShell
+
+itcl_class LogWindow {
+    inherit DialogShell 
+    
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new LogWindow
+    #---------------------------------------------------------------
+    constructor {config} {
+	if { "$log" != "" } {
+	    error "LogWindow: already exists $log"
+	}
+	set log $this
+	
+	DialogShell::constructor \
+	    -buttons "
+		{ close   Close {$this hide}               0} 
+		{ clear   Clear {$this _clear}              0} 
+		{ save    Save  {$this save_to_file $file} 0} 
+		{ help    Help  {$this help}               0  right} 
+		" \
+	    -title "Messages Log" \
+	    -maxsize {1100 900}
+	FilteredBox $this.f -sorted 0 -wrap char -title "Messages" -filter *
+	pack $this.f -fill both -exp yes
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: message - add a message to log window
+    #---------------------------------------------------------------
+    method message {message {level info} {type common}} {
+	lappend list [format "%-5.5s: %s" [string toupper $level] $message]
+	$this.f config -list $list
+	raise
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: error - add an error message to log window
+    #---------------------------------------------------------------
+    method error {message } {
+	message $message error
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _clear - clear log window contents
+    #---------------------------------------------------------------
+    method _clear {args} {
+	set list ""
+	$this.f config -list $list
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: save_to_file -  save log window contents to fid $file
+    #---------------------------------------------------------------
+    method save_to_file { file args } {
+	puts "Saving LogWindow contents..."
+	foreach i $list {
+	    puts $file $i
+	}
+    }
+
+    #----------------------------------------------------------------------
+    # PROC: Message - put message to .logWindow or stderr
+    #-----------------------------------------------------------------------
+    proc Message {mess {sev info} {category common}} {
+	if { "[itcl_info object .logWindow]" != "" } {
+	    .logWindow message $mess $sev $category
+	} else {
+	    puts stderr $mess
+	}
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public file stdout
+
+    #
+    # COMMON DATA
+    #    log ......... id of log window. THERE SHOULD BE ONE INSTANCE
+    #			of LogWindow in the system
+    # 
+    common log ""
+
+    #
+    # PROTECTED DATA
+    #	list ..... list of messages in log window
+    #
+    protected list ""
+}
+
+#proc LogWindow::Message {args} { eval LogWindow :: Message $args }
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: LogWindow.itcl,v $
+# Revision 1.1.5.1  1994/06/05  17:31:40  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:39  mark
+# Initial revision
+#
+#
+#

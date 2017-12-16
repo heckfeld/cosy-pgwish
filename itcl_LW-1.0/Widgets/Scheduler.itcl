@@ -1,0 +1,116 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Scheduler.itcl,v 1.1.5.1 1994/06/05 17:32:10 mark Exp $
+#
+# itcl_class: Scheduler
+#---------------------------------------------------------------
+# Description : Scheduler for periodic command execution
+#
+# TCL/TK extensions required: itcl
+# INHERITS FROM             : Object
+#
+# PUBLIC ATTRIBUTES:
+#	-interval ....... interval for [re]scheduling  in uSec
+#	-count .......... how many times (-1 means forever)
+#	-command ........ command to be executed
+#
+# METHODS:
+#	start ........... start scheduling
+#	stop ............ stop -//-
+#	state ........... print out current state ("active" or "passive")
+#
+#--------------------------------------------------------------
+# Author       : Mark Sterin ($Locker:  $)
+# Creation Date: Aug 30, 1993
+#
+# Last check-in date: $Date: 1994/06/05 17:32:10 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+
+# Force  auto-loading of base class(es)
+Object
+
+itcl_class Scheduler {
+    inherit Object
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Scheduler
+    #---------------------------------------------------------------
+    constructor {config} {
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: start - start [re]-execution
+    #---------------------------------------------------------------
+    method start {} {
+	set active 1
+	$this _reschedule
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: stop - stop [re]-execution
+    #---------------------------------------------------------------
+    method stop {} {
+	set active 0
+	# reset counter
+	set count $times
+	return
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: state - return current object state
+    #---------------------------------------------------------------
+    method state {} {
+	if $active {
+	    return  "active"
+	} else {
+	    return "passive"
+	}
+    }
+    
+    #---------------------------------------------------------------
+    # METHOD: _reschedule - check  & rerun command if neccessary
+    #---------------------------------------------------------------
+    method _reschedule {} {
+	if {$count==0 || $active==0} {
+	    stop
+	    return
+	}
+	if {$count>0} {
+	    incr count -1
+	}
+	
+	if {$command!=""} {
+	    after $interval $command
+	} else {
+	    after $interval "puts \"Scheduler - empty command for $this\""
+	}
+	after $interval $this _reschedule
+    }
+    
+    #
+    # PUBLIC DATA
+    #
+
+    public interval 1000 {
+	if {$interval < 0} {
+	    error "invalid negative interval"
+	}
+    }
+    
+    # count < 0  means forever
+    public     count 1  {
+	set times $count
+    }
+
+    public command {}
+    
+    #
+    # PROTECTED DATA
+    #	times ............ keeps the original value for count
+    #	ative ............ boolean state of the object
+    #
+    protected  times 1
+    protected active 0    
+}

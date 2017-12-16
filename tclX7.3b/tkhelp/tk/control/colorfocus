@@ -1,0 +1,53 @@
+NAME
+       colorfocus - Control the colormap focus of an application
+
+SYNOPSIS
+       colorfocus window
+       colorfocus remove window
+
+
+DESCRIPTION
+       The  colorfocus  command is used to manage the Tk colormap
+       focus.  An application may have  windows  which  use  col-
+       ormaps  other than the default.  Each screen of an X work-
+       station has a limit, imposed by the hardware, on how  many
+       different  colormaps  may  be installed at one time; often
+       this limit is one.  If the windows on a  screen  use  more
+       colormaps  than  are  available  on  that  screen, then an
+       appropriate `colormap focus' policy  must  be  applied  to
+       determine which windows have their colormaps installed.
+
+       The  window manager ultimately controls the colormap focus
+       policy, but applications can express  a  preference  about
+       which  of  their  subwindows  should  have their colormaps
+       installed by means of  the  WM_COLORMAP_WINDOWS  property.
+       This  property  takes  the  form  of  a list of windows in
+       decreasing order of importance to the application of  hav-
+       ing the window's colormap installed.
+
+       Tk  automatically  creates and maintains such a list when-
+       ever any window in the application uses a  colormap  other
+       than  the default.  The colorfocus command allows the user
+       to manipulate this list.  Tk maintains  a  list  for  each
+       display  screen  used  by  the  application.  This gives a
+       global colormap focus over all top-level  windows  of  the
+       application  on  a  particular screen, rather than a local
+       focus for each top-level window.  This is consistent  with
+       the way that Tk manages the input focus.
+
+       The colorfocus command has two forms:
+
+       colorfocus window
+              This form moves window to the front of the list for
+              its screen (adding it if it is not already  in  the
+              list).   This  should  cause  the window manager to
+              install window's colormap whenever it  assigns  the
+              colormap  focus  to  any  top-level  window of this
+              application on the same screen.
+
+       colorfocus remove window
+              This form removes window  from  the  list  for  its
+              screen, in effect telling the window manager not to
+              install its colormap.
+KEYWORDS
+       colormap, focus, window manager

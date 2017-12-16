@@ -1,0 +1,129 @@
+
+Mo 14. Dez 09:07:02 CET 2015
+
+Neuanfang pgwish mit Umstellung auf autoconf
+--------------------------------------------
+	- shared libraries
+	- tclX7.3b als shared lib
+	- alle binaries in der Basiskonfiguration
+		werden auch installiert
+	- pgwish in build
+	-  Erweiterungen:
+		itcl
+		itcl-LW
+		wigwam
+		blt
+		tcl-dp
+		spd
+		tclX
+		postgres libpq libpgtcl
+	- 64bit
+		Ein kleiner Fehler in tk3.6/tkEvent.c:811
+		Die Konstante 1 (32bit) muss 1L (64bit) sein!
+
+	- configure und make sollten in einer gesonderten Ordner
+	  aufgerufen werden. Der dann gefahrlos gelöscht werden.
+	  Es kommt schon mal vor, dass man "suodo make install" auruft,
+	  und alles neu erstellt wird. Dann gehören viele Dateien
+	  und Ordner "root" Das ist nicht gut!
+
+Besonderheiten
+--------------
+tk3.6
+	Flags:	-DUSE_PINFO
+		-DUSE_XPM3
+		-DUSE_GIF
+		-DUSE_UXPM
+		-DLOAD_PIXMAPS
+		-DTK_NO_SECURITY
+	Der Aufruf von "$widget config" in allen library/*.tcl muss wegen der Doppelbelegung
+	durch itcl auf "$widget configure" geändert werden. Zumindest die Impulsumstellung
+	baut darauf.
+
+build
+	wehrt sich krampfhaft gegen libtoolize : ../ltmain.sh not found ...
+	AC_CONFIG_AUX_DIR([m4]) vor MA_INIT_AUTOMAKE hilft
+
+	mittlerweile
+
+Erkenntnisse
+------------
+Mit Pfad auf master/bin läuft zumindest bpm
+
+Erweiterungen
+-------------
+die itcl-LW und wigwam Pfade muessen in den auto_path gehen
+
+Mechanismus:
+	itcl_lw_library definieren und als variable erzeugen
+	wigwam_library definieren und als variable erzeugen
+in der tkXAppInit.c erzeugen un dem auto_path anhängen
+
+Installation
+------------
+immer noch und immer wieder so kleine Fehler bei "make distcheck"
+
+ERROR: files left in build directory after distclean:
+./missing
+./install-sh
+make[1]: *** [distcleancheck] Fehler 1
+make[1]: Verzeichnis »/home/mike/cosy/pgwish-autoconf/pgwish-autoconf-1.0/_build« wird verlassen
+make: *** [distcheck] Fehler 1
+
+das Produkt pgwish-autoconf-1.0.tar.gz ist aber lauffähig
+
+Kompatibilität
+--------------
+Die alte COSY Version verwendet für tclx die MASTER Installation. Dabei werden alle
+tcl, tk und tclx Dateien zusammengefasst in einer Index Datei tcl.tlib. Auch die Hilfe
+Dateien werden erzeugt. Eine wichtige Rolle spielt dabe der "info library" Befehl. Der ist jetzt
+eingebaut.
+
+Tix
+---
+Die Datei Tix.tcl abgeändert. libdir zeigt jetzt auf [info library]/../tix
+
+Probleme
+--------
+die pgwish bricht nach bdbpfc15 mit einem Verbindungsfehler ab. Bei bdbpfc16 wird der ust16 neu
+connected, weil ()ust16 getconnect kein Antwort erhält.  der prozess kommt dann nach bdbpfc20 zum
+stehen. Fängt man erst mit bdbpfc06 an, so tritt der Fehler erst bei ust17 auf!
+
+Unterschiede zur alte plisch Version
+------------------------------------
+	tcl-dp3.2
+		es fehlen die DEFINES:
+		-DHAVE_STDLIB_H=1 -DUNIX_SOCKET=1 -DHAVE_ERRNO_H=1 -DHAVE_SYS_TIME_H=1 \
+		-DHAVE_MALLOC_H=1 -DHAVE_TOLOWER=1 -DHAVE_NTOHL=1 -DHAVE_STRING_H=1
+
+		in config.h sind enthalten:
+		HAVE_STDLIB_H HAVE_ERRNO_H HAVE_SYS_TIME_H HAVE_MALLOC_H HAVE_NTOHL HAVE_STRING_H
+
+		ES FEHLEN:
+		UNIX_SOCKET HAVE_TOLOWER
+
+		Situation bereinigt: tolower wird abgefragt, UNIX_SOCKET wird durch HAVE_SYS_UN_H ergänzt
+
+COSY Tools, die auf die postgres library zugreifen
+--------------------------------------------------
+	calib
+	dipol_tools
+	coob_tx
+	tgmt
+
+
+
+Das Problem mit den WORKSPACES gelöst
+-------------------------------------
+Die Datei tclX7.3b/tksrc/tkWm.c war nicht im Makefile.am gelistet!
+Darin findet die Umschaltung des Workspace statt
+Die aktuelle Revision von tclX7.3b/tksrc/tkWm.c ist 141
+
+
+Mi 13. Apr 09:11:45 CEST 2016
+Es fehlten zwei Dateien aus der wigwam-Bibliothek: Windows.tcl und Dialog.tcl.
+Diese werden von bpm benötigt. Sind eingecheckt und auf plisch installiert!
+
+Do 2. Nov 11:56:03 CET 2017
+Einige Fehler bei "make distcheck" entdeckt: calib/h fehlte und DIST_EXTRA bei tclX-7.3b/tools
+Der Weg für debian-packe system ist jetzt frei

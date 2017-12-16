@@ -1,0 +1,542 @@
+#!/bin/bash
+#$Header$
+
+#
+# tload - lade kernel, application und configuration into target
+#
+# Autor: Michael Simon
+#        Forschungszentrum Juelich, COSY Control
+#
+# Usage:
+#	tload [-n] [-b] [-s] target
+#
+PROGNAME=${TLOAD_PROG:-tload}
+USAGE=${TLOAD_USAGE:-"$PROGNAME [-o interface name] [-n] [-b] [-r] [-s] target"}
+TINFO_CMD=${TLOAD_INFO:-tinfo}
+
+#
+# Einige Bemerkungen zur Shell (bash, ksh, sh, ...)
+# In diesem Script wird die "while"-Schleife benutzt zusammen mit einer "pipe"
+# In diesem Fall wird eine neue Shell gestartet, sodass statt einem break oder return
+# immer ein exit zu benutzen ist. Alle "functions" werden in dieser neuen Shell
+# aufgerufen und damit funktioniert nur ein "exit". Variablen koennen gesetzt werden
+# aber ihr Wert geht bei der Rueckkehr zur main-Shell VERLOREN.
+#
+
+###############################################################################
+# Variables and defaults
+#
+
+if [ "x$TMDB" = "x" ]
+then TMDB=`pwd`
+     export TMDB
+fi
+
+NULLDEV=/dev/null
+
+TMPFILE=`mktemp /tmp/tload.XXXXXX` || exit 1
+
+ACTION=doit
+doLOAD=load
+doSTART=
+doRESET=
+SORTKEY=-r
+DEV=eth0;		# LOOKPBACK Device
+
+PATCH_RESET=12345678
+PATCH_START=87654321
+
+export ACTION NULLDEV
+
+#
+# Functions
+#
+terminate () {
+    rm -f $TMPFILE
+    exit $1
+}
+###
+# binload file Message
+#
+binload () {
+    case $BOARD in
+LINUX*) return
+	;;
+    esac
+    if [ ! -r $1 ]
+  	then echo "Unknown file $1" ;  return 4
+    fi
+    echo -en "\n$2"
+    if [ "$ACTION" = "donot" ]
+	then echo ; return
+    fi
+    srecord $1 | sto -s3 | srec -o -$VMEBASE | \
+	download -r 3 $DEV $ETH || { echo binload 1>&2; return 1; };
+}
+###
+# confload Message
+#
+confload () {
+    if [ -z "$WIP" ]
+    then echo "Unknown host \"$WKC\"" ; return 6;
+    fi
+
+    echo -e "\tTarget:           $TARGET"
+    echo -e "\tInternet Adresse: $TIP"
+    echo -e "\tEthernet Adresse: $ETH"
+    echo -e "\tWorkcell:         $WKC [$WIP]"
+    echo -e "\tNode:             $NODE"
+    echo -e "\tKartentyp:        $BOARD"
+    echo -e "\tLoadaddress:      0x$VMEBASE"
+    echo -e "\tXXX:              0x$SHORTBASE"
+
+    echo -en $1
+
+    if [ "$ACTION" = "donot" ]
+	then echo -e "\n" ; return 0
+    fi
+    k_confload
+}
+
+k_confload () {
+#
+# BID ist octal !!!!!!
+#
+    case $BOARD in
+IOPTO*) OFFSET=0x3E00
+        BID=10
+        ;;
+E5*)    OFFSET=0xE00
+        BID=2
+        ;;
+E6*)    OFFSET=0xE00
+        BID=5
+        ;;
+IBAM*)  OFFSET=0xE00
+        BID=1
+        ;;
+CPU30*) OFFSET=0xE00
+        BID=3
+        ;;
+CPU37*) OFFSET=0xE00
+        BID=4
+        ;;
+SAC30*) OFFSET=0xE00
+        BID=6
+        ;;
+NETBOX2*) OFFSET=0xE00
+        BID=14
+        ;;
+NETBOX*) OFFSET=0xE00
+        BID=12
+        ;;
+LINUX*) return
+	;;
+*)	OFFSET=0xE00
+	;;
+    esac
+    prcofstr $TARGET $TIP $WKC $WIP $BOARD $NODE "$TMDB" "$LOGNAME" | \
+	tsrd $VMEBASE $OFFSET | download -r 2 $DEV $ETH || return 1;
+# die 0x10004 kann deutlich FALSCH sei, also besser nicht!!!!
+#    echo -en "\0$NODE\0$BID" | tsrd $VMEBASE 0x10004 | \
+#        download -r 2 $DEV $ETH || return 1;
+}
+
+###
+# various CPU start routines
+#
+vmod32Start() {
+echo "\
+S00F0000766D6F6433325F7374617200BC
+S2240004004EF90000040800004E560000207C123456785048584820BC8765432170016000FB
+S20C00042000024E5E4E7500005E
+S5030002FA
+S804000400F7";
+}
+
+ioptoStart() {
+echo "\
+S00F0000696F70746F5F73746172740038
+S2240004004EF90000040800004E56FFF02F022D7C87654321FFF82D7C12345678FFF4206E92
+S224000420FFF8D0FC18011010428112002D41FFFC2D7C87654321FFF0206EFFF03010024096
+S22400044007000C40070067162D7C00001388FFFC4AAEFFFC6F0653AEFFFC60F460DA2D7CE6
+S22400046000001388FFFC4AAEFFFC6F0653AEFFFC60F4206EFFF0D0FC2FFC202EFFF47410F0
+S224000480E4A83080206EFFF0D0FC2FFE30AEFFF6700160000002242EFFEC4E5E4E75000053
+S5030005F7
+S804000400F7";
+}
+
+sac30Start() {
+echo "\
+S00F000073616333305F737461727400C9
+S2240004004EF90000040800004E56FFF42D7C12345678FFF82D7C87654321FFF4727CD2AEDF
+S224000420FFF42041202EFFF87210E2A83080727ED2AEFFF4204130AEFFFA202EFFF4E0881E
+S22000044022000081MSNBFF00272D41FFFC206EFFFC42107001600000024E5E4E754D
+S5030003F9
+S804000400F7";
+}
+
+vmeStart() {
+echo "\
+S00F0000766D655F73746172740000001B
+S2240004004EF90000040800004E560000207C12345678D0FC007C20BC8765432170016000EB
+S20C00042000024E5E4E7500005E
+S5030002FA
+S804000400F7";
+}
+
+ioptoReset() {
+echo "\
+S00F0000696F70746F5F72657365740043
+S2240004004EF90000040800004E56FFF82D7C87654321FFF8206EFFF8D0FC180110104281AC
+S21400042012002D41FFFC7001600000024E5E4E750A
+S5030002FA
+S804000400F7";
+}
+
+sac30Reset() {
+echo "\
+S00F000073616333305F726573657400D4
+S2240004004EF90000040800004E56FFF42D7C12345678FFF82D7C87654321FFF4206EFFF4CC
+S224000420D0FC0160202EFFF87210E2A83080206EFFF4D0FC016230AEFFFA202EFFF4E08859
+S22000044022000081MSNBFF00212D41FFFC206EFFFC42107001600000024E5E4E7553
+S5030003F9
+S804000400F7";
+}
+
+###
+# cpustart message
+#
+cpustart() {
+# calculate the start address of the application
+#
+    echo -en "$1 "
+
+    if [ "$ACTION" = "donot" ]
+	then echo -e "\n" ; return 0
+    fi
+
+    if [ "$NODE" = "1" ]
+    then
+        srecord $ABIN | tail -2 | download -r 2 $DEV -S $ETH
+    else
+	STARTADR=`gentry $ABIN | awk '/ T [_]*start$/ {print $1}'`
+	case $BOARD in
+LINUX*) restart_linux_scsr $NODE $KBIN $TIP
+	;;
+VMOD32*)	vmod32Start | \
+	sed -e "s/$PATCH_RESET/$VMEBASE/g" -e "s/$PATCH_START/$STARTADR/g" | \
+	download -r 2 $DEV -S $ETH
+	;;
+IOPTO*)	ioptoStart | \
+	sed -e "s/$PATCH_START/$VMEBASE/g" -e "s/$PATCH_RESET/$STARTADR/g" | \
+	download -r 2 $DEV -S $ETH
+	;;
+SAC30*) sac30Start | sed -e "s/MSNB/$SHORTBASE/g" | \
+        sed -e "s/$PATCH_START/$VMEBASE/g" -e "s/$PATCH_RESET/$STARTADR/g" | \
+	download -r 2 $DEV -S $ETH
+	;;
+IBAM*)  vmeStart | \
+        sed -e "s/$PATCH_RESET/$VMEBASE/g" -e "s/$PATCH_START/$STARTADR/g" | \
+        download -r 2 $DEV -S $ETH
+	;;
+E[56]*) vmeStart | \
+        sed -e "s/$PATCH_RESET/$VMEBASE/g" -e "s/$PATCH_START/$STARTADR/g" | \
+        download -r 2 $DEV -S $ETH
+	;;
+CPU30*)
+	echo ">>>>>>>>>CPU30<<<<<<<<<<"
+	LOADADR=`bc <<END
+obase=16
+ibase=16
+$VMEBASE+11C
+END
+`
+        echo S309"$LOADADR""$STARTADR"00 | download -r 2 $DEV $ETH
+        upload -a 0xFFFF"$NODE"01C -l 1 $DEV $ETH | download -r 2 $DEV $ETH
+	;;
+IPC*)
+	echo ">>>>>>>>>IPC Board started by Device Driver Vipc<<<<<<<<<<"
+	;;
+*)
+	echo Unknown CPU $BOARD
+	;;
+	esac
+    fi;
+}
+
+###############################################################################
+#
+# resetcpu ...
+#
+#     Der Teufel steckt im Detail ...
+#	Verschieden Zustaende des Targets sind zu beruscksichtigen:
+#
+#	* Target aus
+#		port kommt mit "EHOSTUNREACH" aus dem connect zurueck,
+#		upload mit timeout
+#	* Target eingeschaltet
+#		port kommt mit "EHOSTUNREACH" aus dem connect zurueck,
+#		upload sollte OK sein
+#	* Target gebootet
+#		port kommt mit OK zurueck
+#		(upload wird nicht gebraucht)
+#
+resetcpu() {
+    if [ "$NODE" = "1" ]                        # reset DATACOMM CPU
+    then
+        echo -en "\tReset Datacomm ... "
+
+	case $BOARD in
+LINUX*)
+	restart_linux_scsr $NODE $KBIN $TIP
+	;;
+*)
+	echo "" | netcat -w 2 $TIP 20005 1>/dev/null 2>/dev/null
+
+	# Target braucht Zeit zur Erholung.
+	    upload -t 3 -r 4 $DEV $ETH 1>/dev/null 2>/dev/null
+	    if [ $? -ne 0 ]; then
+		return 1
+	    fi
+	;;
+	esac
+	# sleep 3; # Target braucht Zeit zur Erholung
+
+	if [ "$TARGET" != "expcfc02" -a "$TARGET" != "expcfc02" ]
+	then
+	    case $BOARD in
+CPU30*)
+		echo -en "\tTrying VME SYSRESET ... "
+		echo "S306FFD00E00FF1E" | download $DEV $ETH 2>/dev/null
+		sleep 2; # Target braucht Zeit zur Erholung
+	    ;;
+E6*)
+		echo -en "\tTrying VME SYSRESET ... "
+
+                   upload -r 5 $DEV -l 1 -a 0xFEC010E3 $ETH 2>/dev/null | \
+                        sed -e 's/FF/F0/' | download -r 2 $DEV $ETH 2>/dev/null
+
+		# IGNORE exit status
+		sleep 2; # Target braucht Zeit zur Erholung
+	    ;;
+	    esac
+	fi
+    else
+	status=0
+	echo -en "\tReset Node $BOARD[$NODE] ... "
+	case $BOARD in
+IBAM*)  vmeStart | \
+	sed -e "s/$PATCH_START/00200008/" -e "s/$PATCH_RESET/$VMEBASE/g" | \
+	download -v -r 5 -S $DEV $ETH 1>$NULLDEV
+	;;
+E[56]*) vmeStart | \
+	sed -e "s/$PATCH_START/FE800008/" -e "s/$PATCH_RESET/$VMEBASE/g" | \
+	download -r 3 -S $DEV $ETH 1>$NULLDEV
+	;;
+IOPTO*) ioptoReset | \
+	sed -e "s/$PATCH_START/$VMEBASE/g" | download -r 2 -S $DEV $ETH 1>$NULLDEV
+	;;
+VMOD32*) LOADADR=`bc <<END
+obase=16
+ibase=16
+$VMEBASE+4
+END
+`
+        echo S309"$LOADADR""FF000008"00 | download -r 2 $DEV $ETH || status=$?
+	;;
+CPU30*) LOADADR=`bc <<END
+obase=16
+ibase=16
+$VMEBASE+11C
+END
+`
+        echo S309"$LOADADR""FF000008"00 | download -r 2 $DEV $ETH
+        upload -a 0xFFFF"$NODE"01C -l 1 $DEV $ETH | download -r 2 $DEV $ETH
+	;;
+SAC30*) sac30Reset | sed -e "s/MSNB/$SHORTBASE/g" | sed -e "s/$PATCH_START/$VMEBASE/" -e "s/$PATCH_RESET/00100000/g" | download -r 2 $DEV $ETH
+	;;
+	esac
+	#sleep 2
+	#echo 2 Sekunden geschlafen
+    fi
+
+    return 0;
+}
+###############################################################################
+###############################################################################
+# MAIN
+#
+
+# Hmmm!
+trap "rm -f $TMPFILE; echo trap 1>&2; exit 0" 2 3 15
+
+###############################################################################
+# get options
+#
+TEMP=`getopt -o bno:rs -n $PROGNAME -- "$@"`
+
+if [ $? != 0 ] ; then echo $USAGE >&2 ; exit 1 ; fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+while true ; do
+	case "$1" in
+		-b) doSTART=start; shift ;;
+		-n) ACTION=donot; shift ;;
+		-r) ACTION=donot
+		    doLOAD=
+		    doRESET=reset
+		    SORTKEY=
+		    shift ;;
+		-o) DEV=$2; shift 2;;
+		-s) doSTART=start
+		    doLOAD=
+		    shift ;;
+		--) shift ; break ;;
+		*) echo "Internal error!" ; exit 1 ;;
+	esac
+done
+
+###############################################################################
+# Check for correct parameter count
+#
+
+if [ "$PROGNAME" != "xtload" ]
+then
+    if [ $# -eq 0 ]
+    then
+	echo $USAGE
+	echo
+	exit 1
+    else
+	TARGETNAME=$1
+    fi
+fi
+
+
+$TINFO_CMD $TARGETNAME | sort $SORTKEY -d -b +6 -7 - >$TMPFILE
+if [ $? -ne 0 ]
+then
+    terminate 3
+else
+	grep -q "ist in den Datenbanken nicht vorhanden" $TMPFILE
+	if [ $? -eq 0 ]; then
+	    echo "$TARGETNAME ist in den Datenbanken nicht vorhanden"
+	    terminate 4
+	fi
+fi
+#
+# Now determine infos equals for all CPUs
+#
+    string=`head -1 $TMPFILE`
+    if [ "x$string" = "x" ]; then
+	terminate 234
+    fi
+    set $string
+    WKC=$4
+    # NETWORK=`echo $2 | cut -d. -f1-3`
+    NETWORK=$2
+    export NETWORK
+#
+#   Hier wird die Internet Adresse der Workcell in Abhaengigkeit von der
+#   Network Adresse des Targets ermittelt. Das geht nur dann, wenn die
+#   Workcell auch eine Verbindung (physikalich, ueber /dev/lanX) zum Network
+#   hat.
+#
+    # string=`tip $WKC $NETWORK.0`
+    string=`tip $WKC $NETWORK`
+    if [ $? -ne 0 ]
+    then echo "No such Interface [ LAN not physically attached to $WKC ]"
+	 terminate 14
+    fi
+    set $string
+    WIP=$1
+    DEV="-o $2"
+#    WIP=$WKC
+#    DEV="-o $DEV"
+    if [ "x$WIP" = "x" ]
+    then echo "No such Interface [ LAN not physically attached to $WKC ]"
+	 terminate 14
+    fi
+    export WIP DEV
+#
+#   loop over all CPUs
+#   extract node Id as /bin/sort key
+#
+# Hier wird eine Extra-Schleife spendiert, um die Konfigurations-Aerea
+# vor dem Start eines Targets auf allen(!!!) schon geladen zu haben !
+#
+while read TARGET TIP ETH WKC KBIN ABIN NODE VMEBASE BOARD; do
+#
+# Download Configuration area
+#
+       if [ "$NODE" = "1" ]			# DATCOMM
+       then 
+          VMEBASE=0
+       else 
+          VMEBASE=`echo $VMEBASE | cut -c3- | tr "[a-f]" "[A-F]"`
+       fi
+
+       if [ "$doLOAD" = "load" ] ; then
+	  k_confload || { echo config 1>&2 ; terminate 123; }
+       fi
+done < $TMPFILE
+
+retval=$?
+if [ $retval -ne 0 ]; then
+    terminate $retval
+fi
+
+while read TARGET TIP ETH WKC KBIN ABIN NODE VMEBASE BOARD; do
+#
+#   Mache alle MACROS auch den Funktionen und Programmen zugaenglich
+#
+    export TARGET TIP ETH WKC KBIN ABIN NODE VMEBASE BOARD
+#
+#   Die VMEbase der Target CPU muss ueberprueft und korrigiert werden.
+#   Unterschiede bestehen dabei zwischen Datacomm und FC/IO
+#
+    if [ "$NODE" = "1" ]			# DATCOMM
+	then VMEBASE=0
+	else
+	    VMEBASE=`echo $VMEBASE | cut -c3- | tr "[a-f]" "[A-F]"`
+	    SHORTBASE=`echo $VMEBASE | cut -c1-2 | tr "[a-f]" "[A-F]"`
+    fi
+
+
+#
+# Now all paramters are known and tested !?
+# Begin download binaries
+#
+
+    if [ "$doLOAD" = "load" ]  ; then
+	binload $KBIN "download kernel $KBIN ... " || terminate 10;
+	binload $ABIN "download application $ABIN ... " || terminate 11;
+	echo done
+    fi
+
+#
+# Download Configuration area
+#
+    if [ "$doLOAD" = "load" ] ; then
+        confload "download config area ... " || { echo config 1>&2; terminate 12; }
+        echo done
+    fi
+
+    if [ "$doSTART" = "start" ] ; then
+	cpustart "start Node $NODE " || { echo start 1>&2; terminate 13; }
+	echo done
+    fi
+
+
+    if [ "$doRESET" = "reset" ] ; then
+	resetcpu || { echo reset 1>&2; terminate 15; }
+	echo done
+    fi
+
+done < $TMPFILE
+
+retval=$?
+terminate $retval

@@ -1,0 +1,4 @@
+CPC=/mnt/cc-x/cc-x4/ccp/cpc3p0
+TMDB=/mnt/cc-x/cc-x4/ccp/cpc3p0/tgmt/adm
+PGHOST=dbserver
+PGUSER=operator

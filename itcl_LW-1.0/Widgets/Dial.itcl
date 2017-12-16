@@ -1,0 +1,365 @@
+# -*-TCL-*-  TCL mode for Emacs
+#
+# $Id: Dial.itcl,v 1.1.5.5 1994/06/14 09:58:32 mark Exp $
+#
+# itcl_class: Dial
+#---------------------------------------------------------------------
+# Description: "health meter" or "dial", Based on canvas drawing
+#
+# TCL/TK extensions required: itcl TkPixmap
+# INHERITS FROM             : Widget
+#
+# PUBLIC ATTRIBUTES:
+#	-font ........... font for all labels 
+#	-max_value ...... max. value , equal to 180 degrees
+#	-value .......... current value
+#	-label1 ......... 1st part of label (before value)
+#	-label2 ......... 2nd part of lable (after value)
+#	-green_zone ..... green zone in degrees
+#	-yellow_zone .... yellow zone in degrees
+#	-radius ......... radius of meter 
+#
+# METHODS:
+#	none
+#
+# TODO:
+#	1. yellow/green zones should be IN UNITS NOT IN DEGREES 
+#	2. font setting should move labels
+#	3. Resizing should change fonts
+#	4. Add active behavior to arrow - resetting value
+#	5. Add callback for value changing - to act like scale
+#
+#----------------------------------------------------------------------
+# Author        : Mark Sterin  ($Locker:  $)
+# Creation date : Mar 20, 1994
+#
+# Last check-in date: $Date: 1994/06/14 09:58:32 $
+#
+# (c) Lannet Ltd.  1994
+#--------------------------------------------------------------
+#
+
+# Force  auto-loading of base class(es)
+Widget 
+
+itcl_class Dial {
+    inherit Widget
+
+    #---------------------------------------------------------------
+    # CONSTRUCTOR - Creates new Dial
+    #---------------------------------------------------------------
+    constructor {config} {
+	Widget::constructor frame \
+	    -bd 2 -relief raised \
+	    -w $start_w -h $start_h
+	set canvas [canvas $this.c -w $start_w -h $start_h -bg gray]
+
+	::pack $canvas -fill both -expand yes
+
+	# I'm creating teh Dial  giving fixed sizes in pixels, and
+	# then rescaling it to the desired size
+	$canvas create rectangle 0 0 260 170 -width 2 -fill gray
+	$canvas create bitmap    250 160 -bitmap screw
+	$canvas create bitmap    250 10  -bitmap screw
+	$canvas create bitmap    10  160 -bitmap screw
+	$canvas create bitmap    10  10  -bitmap screw
+	
+	# build canvas items $canvas
+	$canvas create arc  30  30 230 230 \
+	    -style arc  -width 40 -fill green \
+	    -tags {gz arc}
+	
+	$canvas create arc  30  30 230 230 \
+	    -style arc  -width 40 -fill yellow  \
+	    -tags {yz arc}
+	
+	$canvas create arc  30  30 230 230 \
+	    -style arc  -width 40 -fill red  \
+	    -tags {rz arc}
+	
+	$canvas create line 130 130 130 45 \
+	    -arrow last  -arrowshape {15 18 5} \
+	    -fill $arrow_color -width 4 \
+	    -tags {arrow radius}
+	
+	_position_arcs
+	_set_value
+
+	$canvas create text 90 150 \
+	    -font $font \
+	    -justify center \
+	    -text $label1 \
+	    -tags { label1 text }
+	
+	$canvas create text 130 150 \
+	    -font $font \
+	    -justify left  \
+	    -fill $value_color \
+	    -text $value \
+	    -tags { value text}
+	
+	$canvas create text 160 150 \
+	    -justify left \
+	    -text $label2 \
+	    -tags { label2 text }
+
+	set curr_w $start_w
+	set curr_h $start_h
+
+	set_config $config
+	bind $this <Configure> "$this _configure"
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _configure - adjust scaling to current size
+    #---------------------------------------------------------------
+    method _configure {} {
+	set new_w [winfo w $this].0
+	set new_h [winfo h $this].0
+
+	if { $new_w != 1 && ($new_w!=$curr_w || $new_h!=$curr_h) } {
+	    set x_scale [expr $new_w/$curr_w]
+	    set y_scale [expr $new_h/$curr_h]
+	    if { $x_scale > $y_scale } {
+		set scale $y_scale
+	    } else { 
+		set scale $x_scale
+	    }
+	    _rescale $scale
+	}
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _rescale and move the dial in canvases
+    #---------------------------------------------------------------
+    method _rescale {scale} {
+	# move to (0,0)
+	$canvas move all -$x_offset -$y_offset
+	# rescale
+	$canvas scale all 0 0  $scale $scale
+	# save sizes
+	set curr_w [expr $curr_w*$scale]
+	set curr_h [expr $curr_h*$scale]
+	
+	# Now change widths
+	set arrow_w [lindex [$canvas itemconfig arrow -width] 4]
+	$canvas itemconfig arrow -width [expr $arrow_w*$scale]
+
+	set arc_w [lindex [$canvas itemconfig gz -width] 4]
+	$canvas itemconfig arc -width [expr $arc_w*$scale]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _position_arcs - sets args according to value
+    #---------------------------------------------------------------
+    method _position_arcs {} {
+	# build canvas items $canvas
+	$canvas itemconfig gz \
+	    -start 180.0 \
+	    -extent -$green_zone
+
+	$canvas itemconfig yz \
+	    -start  [expr 180.0 - $green_zone] \
+	    -extent -[expr $yellow_zone -$green_zone]
+	
+	$canvas itemconfig rz \
+	    -start [expr 180.0 - $yellow_zone ] \
+	    -extent -[expr 180.0 - $yellow_zone] 
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _adjust_to_bbox - changes width/height of canvases 
+    #	to match bbox for all elements
+    #---------------------------------------------------------------
+    method _adjust_to_bbox {} {
+	set coords [$canvas bbox all]
+	set x1 [lindex $coords 0]
+	set y1 [lindex $coords 1]
+	set x2 [lindex $coords 2]
+	set y2 [lindex $coords 3]
+	$canvas config -w [expr abs($x2-$x1)] -h [expr abs($y2-$y1)]
+    }
+
+    #---------------------------------------------------------------
+    # METHOD: _set_value - recalculates arrow according to value
+    #	Sets value text & colors as well
+    #---------------------------------------------------------------
+    method _set_value {} {
+	set coords [$canvas coords arrow]
+	set x1 [lindex $coords 0]
+	set y1 [lindex $coords 1]
+	set x2 [lindex $coords 2]
+	set y2 [lindex $coords 3]
+
+	# length of the arrow. We have to recalculate it
+	# because the canvases may be rescaled
+	set len [expr hypot(($x1-$x2),($y1-$y2))]
+
+	# angle in degrees
+	set angle [expr (180.0/$max_value)*$value]
+	
+	# angle in radians (3.14... is the PI number)
+	set rangle [expr 3.1416926*$angle/180.0]
+
+	set x2 [expr $x1 - $len*cos($rangle)]
+	set y2 [expr $y1 - $len*sin($rangle)]
+
+	$canvas coords arrow  $x1 $y1 $x2 $y2
+	$canvas itemconfigure value -text $value
+	
+	if { $angle > $yellow_zone } {
+	    #$canvas itemconfigure arrow -fill red
+	    $canvas itemconfigure value -fill red
+	}  else {
+	    #$canvas itemconfigure arrow -fill $arrow_color
+	    $canvas itemconfigure value -fill $value_color
+	}
+    }
+
+    #
+    # PUBLIC DATA
+    #
+    public font fixed  {
+	if { [exists] } {
+	    $canvas itemconfigure text -font $font
+	}
+    }
+    
+    public max_value 180 {
+	if { [exists] } {
+	    if { $max_value < $value } {
+		config -value $max_value
+	    }
+	    _set_value
+	}
+    }
+    
+    public value 50 {
+	if { $max_value < $value } {
+	    puts stderr "Warning: value ($value) must be <= max_value ($max_value)"
+	}
+
+	if { [exists] } {
+	    _set_value
+	}
+    }
+    
+    public label1 "Speed:" {
+	if { [exists] } {
+	    $canvas itemconfigure label1 -text $label1
+	}
+    }
+    
+    public label2 "km/sec" {
+	if { [exists] } {
+	    $canvas itemconfigure label2 -text $label2
+	}
+    }
+
+
+    public radius {} {
+	if {[exists]} {
+	    set coords [$canvas coords arrow]
+	    set x1 [lindex $coords 0]
+	    set y1 [lindex $coords 1]
+	    set x2 [lindex $coords 2]
+	    set y2 [lindex $coords 3]
+	    # current length of the arrow
+	    set len [expr hypot(($x1-$x2),($y1-$y2))]
+	    _rescale [expr $radius/$len]
+	    _adjust_to_bbox
+	}
+    }
+
+    public green_zone  120 {
+	if { [exists] } _position_arcs
+    }
+
+    public yellow_zone 150 {
+	if { [exists] } _position_arcs
+    }
+
+    #
+    # PROTECTED DATA
+    #	canvas ........... canvas widget for drawing
+    #
+    protected canvas {}
+    protected curr_w
+    protected curr_h
+    protected x_offset 0
+    protected y_offset 0
+    
+    #
+    # COMMON DATA
+    # 	value_color ...... original color for value
+    # 	arrow_color ...... original color for arrow
+    #	screw_data ....... pixmap for drawing screws
+    # 
+    common value_color white
+    common arrow_color blue
+    common start_w 260.0
+    common start_h 172.0
+    common screw_data {
+	{10 10 0 xpm3} 
+	{
+	    {10 10 16 1} 
+	    {  c #000000000000} 
+	    {.  c #4A4A4A4A4A4A} 
+	    {X  c #ADAD8C8C8C8C} 
+	    {o  c #BDBDBDBDBDBD} 
+	    {O  c #E7E7BDBDBDBD} 
+	    {+  c #8C8C8C8C8C8C} 
+	    {@  c #5A5A4A4A4A4A} 
+	    {#  c #636363636363} 
+	    {$  c #181818181818} 
+	    {%  c #313131313131} 
+	    {&  c #424242424242} 
+	    {*  c #FFFFFFFFFFFF} 
+	    {=  c #CECECECECECE} 
+	    {-  c #FFFFD6D6D6D6} 
+	    {;  c #A5A5A5A5A5A5} 
+	    {:  c #7B7B7B7B7B7B}
+	    {  .XoO+@  } 
+	    { .#$%$%#. } 
+	    {&#%**==%#&} 
+	    {#$**%%-=%#} 
+	    {;%*%$$%=%+} 
+	    {+$*$%$%=%+} 
+	    {:%**$%=-$:} 
+	    {.#%=-==%#.} 
+	    { ##%$%%## } 
+	    {  .+Oo+@  } 
+	}
+    }
+    
+    # define screw data on class definition time
+    if {[lsearch [pinfo names] screw] == -1 } {
+	pinfo define screw $screw_data
+    }
+}
+
+#
+#---------------------------------------------------------------
+#
+# Modification History:
+#
+# $Log: Dial.itcl,v $
+# Revision 1.1.5.5  1994/06/14  09:58:32  mark
+# Added radius support + main bug fixed.
+#
+# Revision 1.1.5.4  1994/06/07  16:43:06  mark
+# Added resize support
+#
+# Revision 1.1.5.3  1994/06/07  14:34:53  mark
+# A real thing written
+#
+# Revision 1.1.5.2  1994/06/07  12:39:07  mark
+# Added changing of zones feature.
+#
+# Revision 1.1.5.1  1994/06/05  17:31:06  mark
+# Automatic Branch Creation
+#
+# Revision 1.1  1994/06/05  17:31:05  mark
+# Initial revision
+#
+#
