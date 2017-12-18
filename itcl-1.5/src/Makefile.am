@@ -7,10 +7,10 @@ AM_CFLAGS = -I$(srcdir)/../../tk3.6 -I$(srcdir)/../../tcl7.3 -DITCL_LIBRARY=\"$(
 bin_PROGRAMS = itcl_sh itcl_wish
 itcl_wish_SOURCES = tkAppInit.c
 itcl_wish_LDFLAGS = -rpath '$(libdir)' -version-info 1:0:0
-itcl_wish_LDADD = libitcl.la ../../tk3.6/libtk.la ../../tcl7.3/libtcl.la -lXpm -lX11 -lm
+itcl_wish_LDADD = libitcl.la ../../tk3.6/libtk.la ../../tcl7.3/libtcl7.3.la -lXpm -lX11 -lm
 itcl_sh_SOURCES = tclAppInit.c
 itcl_sh_LDFLAGS = -rpath '$(libdir)'
-itcl_sh_LDADD = libitcl.la ../../tcl7.3/libtcl.la -lm
+itcl_sh_LDADD = libitcl.la ../../tcl7.3/libtcl7.3.la -lm
 
 lib_LTLIBRARIES = libitcl.la
 libitcl_la_SOURCES = itcl_class.c itcl_core.c itcl_methods.c itcl_objects.c \
