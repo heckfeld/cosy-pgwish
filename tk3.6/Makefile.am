@@ -1,4 +1,3 @@
-
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = library bitmaps pixmaps
@@ -12,7 +11,7 @@ bin_PROGRAMS = wish
 wish_SOURCES = tkAppInit.c
 wish_CFLAGS = -I$(TCL_DIR) $(USE_DEFS)
 wish_LDFLAGS = -rpath '$(libdir)'
-wish_LDADD = libtk.la $(top_builddir)/../tcl7.3/libtcl.la -lXpm -lX11 -lm
+wish_LDADD = libtk.la $(top_builddir)/../tcl7.3/libtcl7.3.la -lXpm -lX11 -lm
 
 lib_LTLIBRARIES = libtk.la
 libtk_la_SOURCES = tk3d.c tkArgv.c tkAtom.c tkBind.c tkPixmap.c  tkCmds.c \
