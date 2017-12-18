@@ -1,5 +1,4 @@
 
-
 ACLOCAL_AMFLAGS = -I m4
 TCLX_DIR = @srcdir@/../src
 TCL_DIR = @srcdir@/../../tcl7.3
@@ -9,7 +8,7 @@ bin_PROGRAMS = wishx
 wishx_SOURCES = tkXAppInit.c
 wishx_CFLAGS = -I$(TK_DIR) -I$(TCL_DIR) -I$(TCLX_DIR)
 wishx_LDFLAGS = -rpath '$(libdir)'
-wishx_LDADD = libtkx.la ../../tk3.6/libtk.la ../src/libtclx.la ../../tcl7.3/libtcl.la -lXpm -lX11 -lm
+wishx_LDADD = libtkx.la ../../tk3.6/libtk.la ../src/libtclx.la ../../tcl7.3/libtcl7.3.la -lXpm -lX11 -lm
 
 
 lib_LTLIBRARIES = libtkx.la
