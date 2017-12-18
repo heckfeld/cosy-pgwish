@@ -1,4 +1,3 @@
-
 ACLOCAL_AMFLAGS = -I m4
 
 itcllwlibdir = $(datadir)/itcl-LW
@@ -22,7 +21,7 @@ pgwish_LDADD = \
 		../tclX7.3b/tksrc/libtkx.la \
 		../tk3.6/libtk.la \
 		../tclX7.3b/src/libtclx.la \
-		../tcl7.3/libtcl.la \
+		../tcl7.3/libtcl7.3.la \
 		../postgres/src/interfaces/libpgtcl/libpgtcl.la \
 		../postgres/src/interfaces/libpq/libpq.la \
 		-lXpm -lX11 -lm -lcrypt
