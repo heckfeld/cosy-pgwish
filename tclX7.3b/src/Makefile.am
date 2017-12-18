@@ -9,7 +9,7 @@ bin_PROGRAMS = tclx
 tclx_SOURCES = tclXAppInit.c
 tclx_CFLAGS = -I$(TCL_DIR)
 tclx_LDFLAGS = -rpath '$(libdir)'
-tclx_LDADD = libtclx.la ../../tcl7.3/libtcl.la -lm
+tclx_LDADD = libtclx.la ../../tcl7.3/libtcl7.3.la -lm
 
 
 lib_LTLIBRARIES = libtclx.la
