@@ -54,7 +54,7 @@ extern int errno;
 #ifdef AIX
 #   define WAIT_STATUS_TYPE pid_t
 #else
-#ifndef NO_UNION_WAIT
+#ifndef _POSIX_SOURCE
 #   define WAIT_STATUS_TYPE union wait
 #else
 #   define WAIT_STATUS_TYPE int
