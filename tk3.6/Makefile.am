@@ -9,8 +9,8 @@ tklibdir = $(datadir)/tk
 
 bin_PROGRAMS = wish
 wish_SOURCES = tkAppInit.c
-wish_CFLAGS = -I$(TCL_DIR) $(USE_DEFS)
-wish_LDFLAGS = -rpath '$(libdir)'
+wish_CFLAGS = -I$(TCL_DIR) $(USE_DEFS) @X_CFLAGS@
+wish_LDFLAGS = -rpath '$(libdir)' @X_LIBS@
 wish_LDADD = libtk.la $(top_builddir)/../tcl7.3/libtcl7.3.la -lXpm -lX11 -lm
 
 lib_LTLIBRARIES = libtk.la
