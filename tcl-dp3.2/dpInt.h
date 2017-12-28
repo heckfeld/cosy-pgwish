@@ -19,8 +19,10 @@
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 
+#ifdef NOTDEF
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #endif
 
 #include "dp.h"
