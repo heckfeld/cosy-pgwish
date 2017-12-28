@@ -18,7 +18,7 @@ AC_PATH_XTRA
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h float.h limits.h malloc.h memory.h stdlib.h string.h sys/param.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([errno.h fcntl.h float.h limits.h malloc.h memory.h stdlib.h string.h sys/param.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
