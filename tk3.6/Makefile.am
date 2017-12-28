@@ -28,7 +28,7 @@ libtk_la_SOURCES = tk3d.c tkArgv.c tkAtom.c tkBind.c tkPixmap.c  tkCmds.c \
 	tkText.c tkTextBTree.c tkTextDisp.c tkTextIndex.c tkTextTag.c \
 	bitmap.c gif.c xpm3.c raw256.c dpsSupport.c uxpm.c \
 	tkDial.c tkBargraph.c tkStripchart.c tkPie.c
-libtk_la_LDFLAGS = -version-info 1:0:0
+libtk_la_LDFLAGS = -version-info 1:0:0 @X_LIBS@
 libtk_la_CFLAGS = -DTK_LIBRARY=\"$(tklibdir)\" -I$(TCL_DIR) $(USE_DEFS) @X_CFLAGS@
 
 include_HEADERS = default.h ks_names.h patchlevel.h tclRawTCP.h tkCanvas.h tkConfig.h tk.h tkInt.h tkPhoto.h tkText.h tkXAccess.h
