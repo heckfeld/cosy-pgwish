@@ -5,7 +5,7 @@ AC_PREREQ([2.60])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/tclExtdInt.h])
-AC_CONFIG_HEADERS([config.h])
+# AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
@@ -20,8 +20,8 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 
 # Checks for header files.
-AC_PATH_X
-AC_CHECK_HEADERS([arpa/inet.h limits.h malloc.h netdb.h netinet/in.h nl_types.h stddef.h stdlib.h string.h sys/param.h sys/socket.h values.h])
+AC_PATH_XTRA
+AC_CHECK_HEADERS([arpa/inet.h limits.h malloc.h netdb.h netinet/in.h nl_types.h stddef.h stdlib.h string.h sys/time.h sys/times.h sys/param.h sys/socket.h values.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_UID_T
