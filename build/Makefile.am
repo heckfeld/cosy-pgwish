@@ -7,8 +7,8 @@ bin_PROGRAMS = pgwish
 pgwish_SOURCES = tkXAppInit.c tcl_binary.c tclsyslog.c
 pgwish_CFLAGS = -I$(srcdir)/../tclX7.3b/src -I$(srcdir)/../tcl7.3 -I$(srcdir)/../tk3.6 \
 		-DITCL_LW_LIBRARY=\"$(itcllwlibdir)\" \
-		-DWIGWAM_LIBRARY=\"$(wigwamlibdir)\"
-pgwish_LDFLAGS = -rpath '$(libdir)'
+		-DWIGWAM_LIBRARY=\"$(wigwamlibdir)\" @X_CFLAGS@
+pgwish_LDFLAGS = -rpath '$(libdir)' @X_LIBS@
 #
 # Die Reihenfolge der Libs ist nicht ganz unwichtig.
 # Sowohl in der libtcl als auch det libtk steckt die Funktion main.
