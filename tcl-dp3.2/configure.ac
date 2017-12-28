@@ -22,7 +22,7 @@ AC_CHECK_HEADERS([malloc.h errno.h arpa/inet.h fcntl.h limits.h malloc.h netdb.h
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([gethostbyname gethostname gettimeofday tolower isascii memset select socket strchr strerror strncasecmp strrchr strspn ntohl])
+AC_CHECK_FUNCS([writev gethostbyname gethostname gettimeofday tolower isascii memset select socket strchr strerror strncasecmp strrchr strspn ntohl])
 
 AC_CONFIG_FILES([Makefile
                  library/Makefile])
