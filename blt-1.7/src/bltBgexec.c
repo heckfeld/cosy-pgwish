@@ -327,6 +327,13 @@ AppendOutputToBuffer(f, bufferPtr)
 	     * currently available to read.
 	     */
 #ifdef O_NONBLOCK
+#  ifndef EAGAIN
+#    ifdef EDEADLK
+#      define EAGAIN EDEADLK
+#    else
+#      define EAGAIN 11
+#    endif
+#  endif
 	    if (errno == EAGAIN) {
 #else
 	    if (errno == EWOULDBLOCK) {
