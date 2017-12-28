@@ -74,13 +74,13 @@
 #   endif
 #endif
 
-#ifdef NO_STRING_H
+#ifndef HAVE_STRING_H
 #   include <compat/string.h>
 #else
 #   include <string.h>
 #endif
 
-#ifndef NO_WRITEV
+#ifdef HAVE_WRITEV
 #   include <sys/uio.h>
 #endif
 
