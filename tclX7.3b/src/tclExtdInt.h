@@ -37,11 +37,13 @@
  * If tclUnix.h has already included time.h, don't include it again, some
  * systems don't #ifdef inside of the file.
  */
-#ifndef NO_SYS_TIME_H
-#    include <time.h>
+#ifdef HAVE_SYS_TIME_H
+#    include <sys/time.h>
 #endif
 
+#ifdef HAVE_SYS_TIMES_H
 #include <sys/times.h>
+#endif
 
 /*
  * Make sure CLK_TCK is defined.
@@ -56,7 +58,7 @@
 
 #include <math.h>
 
-#ifdef NO_VALUES_H
+#ifdef HAVE_LIMITS_H
 #    include <limits.h>
 #else
 #    include <values.h>
