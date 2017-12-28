@@ -39,14 +39,10 @@
 
 #if HAVE_STDLIB_H
 #    include <stdlib.h>
-#else
-#    include <compat/stdlib.h>
 #endif
 
 #if HAVE_MALLOC_H
 #   include <malloc.h>
-#else
-#    include <compat/malloc.h>
 #endif
 
 #if !HAVE_NTOHL
@@ -74,9 +70,7 @@
 #   endif
 #endif
 
-#ifndef HAVE_STRING_H
-#   include <compat/string.h>
-#else
+#ifdef HAVE_STRING_H
 #   include <string.h>
 #endif
 
