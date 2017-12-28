@@ -24,7 +24,9 @@
 #ifndef _BLT_H
 #define _BLT_H
 
+#ifdef NOTDEF
 #include "bltConfig.h"
+#endif
 
 #include <tcl.h>
 #include <tk.h>
