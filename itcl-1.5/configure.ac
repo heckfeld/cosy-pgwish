@@ -5,7 +5,7 @@ AC_PREREQ([2.60])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/itcl_class.c])
-AC_CONFIG_HEADERS([config.h])
+# AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
