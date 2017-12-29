@@ -16,12 +16,13 @@
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
 #include <net/if_arp.h>
+#include <net/if_packet.h>
 
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef PF_PACKET
-# include <linux/if_packet.h>
+#ifdef HAVE_NETPACKET_PACKET_H
+# include <netpacket/packet.h>
 
  /*
   * On at least some Linux distributions (for example, Red Hat 5.2),
