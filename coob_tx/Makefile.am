@@ -1,7 +1,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_LDFLAGS = -lcrypt
+# AM_LDFLAGS = -lcrypt
 
 bin_PROGRAMS = coob_tx
 coob_tx_SOURCES = coob_tx.c
