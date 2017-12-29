@@ -21,7 +21,7 @@ AC_PROG_LIBTOOL
 
 # Checks for header files.
 AC_PATH_XTRA
-AC_CHECK_HEADERS([arpa/inet.h limits.h malloc.h netdb.h netinet/in.h nl_types.h stddef.h stdlib.h string.h sys/time.h sys/times.h sys/param.h sys/socket.h values.h])
+AC_CHECK_HEADERS([arpa/inet.h limits.h malloc.h netdb.h netinet/in.h nl_types.h stddef.h stdlib.h string.h time.h sys/time.h sys/times.h sys/param.h sys/socket.h values.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_UID_T
