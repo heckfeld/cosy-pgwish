@@ -23,7 +23,7 @@
 
 #ifdef HAVE_NETPACKET_PACKET_H
 # include <netpacket/packet.h>
-# define SDL struct sockaddr_dl
+# define SDL struct sockaddr_ll
 # define SDL_FAMILY sll_family
 # define SDL_INDEX sll_ifindex
 
