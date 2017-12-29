@@ -25,10 +25,10 @@ bin_PROGRAMS = tclxversion tkxversion
 bin_SCRIPTS = instcopy bldmanhelp cpmanpages cphelpdir symlinkext
 
 tclxversion_SOURCES = getversion.c
-tclxversion_CFLAGS = -DTCL_GET_VERSION -I$(srcdir)/../src -I$(TCL_DIR)
+tclxversion_CFLAGS = -DTCL_GET_VERSION -I$(srcdir)/../src -I$(TCL_DIR) @X_CFLAGS@
 
 tkxversion_SOURCES = getversion.c
-tkxversion_CFLAGS = -DTK_GET_VERSION -I$(srcdir)/../src -I$(TCL_DIR) -I$(TK_DIR)
+tkxversion_CFLAGS = -DTK_GET_VERSION -I$(srcdir)/../src -I$(TCL_DIR) -I$(TK_DIR) @X_CFLAGS@
 
 # distribute source, so scripts can be rebuild
 EXTRA_DIST = instcopy.tcl buildutil.tcl bldmanhelp.tcl cpmanpages.tcl cphelpdir.sh symlinkext.sh
