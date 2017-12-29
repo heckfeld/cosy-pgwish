@@ -24,6 +24,9 @@
 #include "tclInt.h"
 
 #include <sys/param.h>
+#ifdef HAVE_TIME_H
+# incldue <time.h
+#endif
 
 /*
  * Use the real functions, not the Tcl interface that hides signals.
