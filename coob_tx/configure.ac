@@ -15,6 +15,7 @@ AC_PROG_LIBTOOL
 
 # Checks for libraries.
 AC_CHECK_LIB([pq],[PQsetdbLogin])
+AC_SEARCH_LIBS([crypt, crypt])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h strings.h])
