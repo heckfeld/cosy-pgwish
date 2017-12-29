@@ -25,7 +25,7 @@
 
 #include <sys/param.h>
 #ifdef HAVE_TIME_H
-# incldue <time.h
+# include <time.h
 #endif
 
 /*
