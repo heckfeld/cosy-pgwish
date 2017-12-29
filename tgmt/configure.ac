@@ -13,7 +13,7 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h])
+AC_CHECK_HEADERS([net/if_packet.h net/if_ether.h arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
