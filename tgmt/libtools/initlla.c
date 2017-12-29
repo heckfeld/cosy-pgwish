@@ -23,28 +23,25 @@
 
 #ifdef HAVE_NETPACKET_PACKET_H
 # include <netpacket/packet.h>
+# define SDL struct sockaddr_dl
+# define SDL_FAMILY sll_family
+# define SDL_INDEX sll_ifindex
 
- /*
-  * On at least some Linux distributions (for example, Red Hat 5.2),
-  * there's no <netpacket/packet.h> file, but PF_PACKET is defined if
-  * you include <sys/socket.h>, but <linux/if_packet.h> doesn't define
-  * any of the PF_PACKET stuff such as "struct sockaddr_ll" or any of
-  * the PACKET_xxx stuff.
-  *
-  * So we check whether PACKET_HOST is defined, and assume that we have
-  * PF_PACKET sockets only if it is defined.
-  */
-# ifdef PACKET_HOST
-#  define HAVE_PF_PACKET_SOCKETS
-# endif /* PACKET_HOST */
-#endif /* PF_PACKET */
+#endif /* HAVE_NETPACKET_PACKET_H */
 
+#ifdef HAVE_NET_IF_DL_H
+# include <net/if_dl.h>
+# define SDL struct sockaddr_dl
+# define SDL_FAMILY sdl_family
+# define SDL_INDEX sdl_index
+
+#endif /* HAVE_NET_IF_DL_H */
 
 int
 pcap_write( pcap_t * pd, int len)
 {
     int cc;
-    struct sockaddr_ll to;
+    SDL to;
     int tolen;
     int bto = len;
 
@@ -106,7 +103,7 @@ pcap_read(pcap_t *pd)
     int     cc;
     int     bufsize;
     u_char *bp;
-    struct sockaddr_ll  from;
+    SDL  from;
     int                 fromlen;
     struct sigaction act, oldact;
 
@@ -194,14 +191,14 @@ iface_get_id(int fd, const char *device, char *ebuf)
 static int
 iface_bind(int fd, int ifindex, char *ebuf)
 {
-        struct sockaddr_ll      sll;
+        SDL      sll;
         int                     err;
         socklen_t               errlen = sizeof(err);
 
         memset(&sll, 0, sizeof(sll));
-        sll.sll_family          = AF_PACKET;
-        sll.sll_ifindex         = ifindex;
-        sll.sll_protocol        = htons(ETH_P_802_2);
+        sll.SDL_FAMILY          = AF_PACKET;
+        sll.SDL_INDEX           = ifindex;
+        sll.SDL_PROTOCOL        = htons(ETH_P_802_2);
 
         if (bind(fd, (struct sockaddr *) &sll, sizeof(sll)) == -1) {
                 sprintf(ebuf, "bind: %s", strerror(errno));
