@@ -26,7 +26,7 @@
 # define SDL struct sockaddr_ll
 # define SDL_FAMILY sll_family
 # define SDL_INDEX sll_ifindex
-
+# define SDL_PROTOCOL sll_protocol
 #endif /* HAVE_NETPACKET_PACKET_H */
 
 #ifdef HAVE_NET_IF_DL_H
