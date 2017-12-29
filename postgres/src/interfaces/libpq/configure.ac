@@ -10,6 +10,8 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+AC_SEARCH_LIBS([crypt, crypt])
+
 AC_CONFIG_LINKS([pqcomprim.c:../../backend/libpq/pqcomprim.c
                  dllist.c:../../backend/lib/dllist.c])
 
