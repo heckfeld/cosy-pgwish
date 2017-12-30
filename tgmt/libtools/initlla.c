@@ -16,7 +16,9 @@
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
 #include <net/if_arp.h>
-#include <net/if_packet.h>
+#ifdef HAVE_NET_IF_PACKET_H
+# include <net/if_packet.h>
+#endif
 
 #include <signal.h>
 #include <setjmp.h>
